@@ -23,6 +23,10 @@
     ::-webkit-scrollbar-thumb{background:#374151;border-radius:3px}
     .modal-bg{background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)}
     .nav-active{color:#818cf8!important;background:rgba(99,102,241,0.12)!important}
+    .heatmap-cell{width:80px;height:60px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;cursor:default;transition:all 0.2s}
+    .heatmap-cell:hover .threat-tooltip{display:block}
+    .threat-dot{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;cursor:pointer;flex-shrink:0;z-index:2}
+    .threat-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1f2937;border:1px solid #374151;border-radius:8px;padding:8px 10px;width:200px;z-index:50;box-shadow:0 10px 25px rgba(0,0,0,0.5);pointer-events:none}
   </style>
 </head>
 <body class="bg-gray-950 text-gray-200">
@@ -100,6 +104,42 @@
       <div class="flex justify-between text-sm mb-2"><span class="text-gray-400">Assessment progress</span><span id="prog-text" class="text-gray-300 font-medium"></span></div>
       <div class="w-full bg-gray-800 rounded-full h-1.5"><div id="prog-bar" class="bg-indigo-600 rounded-full h-1.5 transition-all" style="width:0%"></div></div>
     </div>
+
+    <!-- Threat Heatmap -->
+    <div class="card p-5 mb-6" id="heatmap-section">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-semibold text-white">Threat Heatmap</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Threats plotted by Likelihood × Impact — hover for details</p>
+        </div>
+        <div class="flex gap-3 text-xs">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-green-800 inline-block"></span>Low</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-yellow-800 inline-block"></span>Medium</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-orange-800 inline-block"></span>High</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-900 inline-block"></span>Critical</span>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <!-- Y-axis label -->
+        <div class="flex flex-col items-center justify-center gap-0" style="width:24px">
+          <div style="writing-mode:vertical-rl;transform:rotate(180deg)" class="text-xs text-gray-500 font-medium">Impact ↑</div>
+        </div>
+        <div>
+          <!-- Grid -->
+          <div id="heatmap-grid"></div>
+          <!-- X-axis -->
+          <div class="flex mt-2 ml-0.5" style="gap:4px">
+            <div class="text-xs text-gray-600" style="width:80px;text-align:center">1</div>
+            <div class="text-xs text-gray-600" style="width:80px;text-align:center">2</div>
+            <div class="text-xs text-gray-600" style="width:80px;text-align:center">3</div>
+            <div class="text-xs text-gray-600" style="width:80px;text-align:center">4</div>
+            <div class="text-xs text-gray-600" style="width:80px;text-align:center">5</div>
+          </div>
+          <div class="text-xs text-gray-500 text-center mt-1">Likelihood →</div>
+        </div>
+      </div>
+    </div>
+
     <h3 class="font-medium text-gray-400 text-sm mb-3">System Components</h3>
     <div id="components-list" class="space-y-3"></div>
   </div>
@@ -287,6 +327,7 @@
     renderRiskSummary();
     renderComponents();
     renderProgress();
+    renderHeatmap();
   }
 
   function renderSidebar() {
@@ -366,7 +407,7 @@
     renderStrideCats(i);
   }
 
-  function backToModel() { showView('model'); renderComponents(); renderRiskSummary(); renderProgress(); }
+  function backToModel() { showView('model'); renderComponents(); renderRiskSummary(); renderProgress(); renderHeatmap(); }
 
   function renderStrideCats(ci) {
     const comp = M.components[ci];
@@ -551,6 +592,66 @@
     });
 
     doc.save(M.name.replace(/\s/g,'_') + '_threat_report.pdf');
+  }
+
+  function renderHeatmap() {
+    const grid = document.getElementById('heatmap-grid');
+    if (!grid) return;
+
+    // Collect all threats
+    const threats = M.components.flatMap(c => (c.threats||[]).map(t => ({...t, compName: c.name})));
+
+    // Build 5x5 matrix [impact][likelihood] — impact rows 5..1 (top to bottom), likelihood cols 1..5
+    const cells = {};
+    threats.forEach(t => {
+      const l = t.likelihood || 1;
+      const i = t.impact || 1;
+      const key = `${l}-${i}`;
+      if (!cells[key]) cells[key] = [];
+      cells[key].push(t);
+    });
+
+    const cellBg = (l,i) => {
+      const s = l*i;
+      if (s>=17) return 'background:#450a0a;border:1px solid #7f1d1d';
+      if (s>=10) return 'background:#431407;border:1px solid #7c2d12';
+      if (s>=5)  return 'background:#422006;border:1px solid #713f12';
+      return 'background:#052e16;border:1px solid #14532d';
+    };
+
+    const dotColor = (s) => s>=17?'#ef4444':s>=10?'#f97316':s>=5?'#eab308':'#22c55e';
+
+    let html = '<div style="display:flex;flex-direction:column;gap:4px">';
+    for (let impact=5; impact>=1; impact--) {
+      html += '<div style="display:flex;gap:4px;align-items:center">';
+      html += `<div style="width:24px;text-align:right;font-size:11px;color:#6b7280;flex-shrink:0">${impact}</div>`;
+      for (let like=1; like<=5; like++) {
+        const key = `${like}-${impact}`;
+        const cellThreats = cells[key] || [];
+        const score = like*impact;
+        const tooltipContent = cellThreats.map(t =>
+          `<div style="margin-bottom:4px"><span style="color:#9ca3af;font-size:10px">${t.compName} / ${t.category.split(' - ')[0]}</span><div style="font-size:11px;color:#e5e7eb">${t.desc.substring(0,50)}${t.desc.length>50?'…':''}</div></div>`
+        ).join('');
+        const dotsHtml = cellThreats.slice(0,4).map(t => {
+          const sc = riskScore(t.likelihood||1,t.impact||1);
+          return `<div class="threat-dot" style="background:${dotColor(sc)};" title="${t.desc}">${t.category.split(' - ')[0]}</div>`;
+        }).join('');
+        const moreHtml = cellThreats.length > 4 ? `<div style="font-size:9px;color:#9ca3af">+${cellThreats.length-4}</div>` : '';
+
+        html += `<div class="heatmap-cell" style="${cellBg(like,impact)};gap:3px;flex-wrap:wrap;padding:4px;">`;
+        if (cellThreats.length > 0) {
+          html += `<div class="threat-tooltip"><div style="font-size:10px;font-weight:600;color:#6366f1;margin-bottom:4px">L:${like} × I:${impact} = ${score}</div>${tooltipContent}</div>`;
+        }
+        html += dotsHtml + moreHtml;
+        if (cellThreats.length === 0) {
+          html += `<span style="font-size:9px;color:rgba(255,255,255,0.1)">${score}</span>`;
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+    grid.innerHTML = html;
   }
 
   // Init
