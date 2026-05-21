@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STRIDE Threat Modeler</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 border-r border-zinc-800 p-4">
+      <h1 class="text-xl font-semibold mb-6">STRIDE</h1>
+      <button onclick="createNewModel()" 
+              class="w-full bg-white text-black px-4 py-2 rounded font-medium">
+        New Model
+      </button>
+      <div class="mt-6">
+        <div class="text-sm text-zinc-400 mb-2">Models</div>
+        <div id="model-list" class="space-y-1 text-sm"></div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-1 p-6">
+      <div id="welcome" class="max-w-md">
+        <h2 class="text-2xl font-semibold mb-2">STRIDE Threat Modeler</h2>
+        <p class="text-zinc-400">Create and execute structured threat assessments.</p>
+      </div>
+
+      <div id="model-view" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 id="model-name" class="text-2xl font-semibold"></h2>
+            <p id="model-desc" class="text-sm text-zinc-400"></p>
+          </div>
+          <button onclick="addComponent()" 
+                  class="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded text-sm">
+            Add Component
+          </button>
+          <button onclick="exportModel()" 
+                  class="ml-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded text-sm">
+            Export
+          </button>
+        </div>
+
+        <div id="components" class="space-y-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentModel = null;
+    let models = JSON.parse(localStorage.getItem('stride-models') || '[]');
+
+    function saveModels() {
+      localStorage.setItem('stride-models', JSON.stringify(models));
+    }
+
+    function createNewModel() {
+      const name = prompt('Model name');
+      if (!name) return;
+
+      currentModel = {
+        id: Date.now(),
+        name: name,
+        description: '',
+        components: []
+      };
+      models.push(currentModel);
+      saveModels();
+      renderModelList();
+      showModel(currentModel);
+    }
+
+    function showModel(model) {
+      currentModel = model;
+      document.getElementById('welcome').classList.add('hidden');
+      document.getElementById('model-view').classList.remove('hidden');
+      document.getElementById('model-name').textContent = model.name;
+      document.getElementById('model-desc').textContent = model.description || '';
+      renderComponents();
+    }
+
+    function renderComponents() {
+      const container = document.getElementById('components');
+      container.innerHTML = '';
+
+      if (!currentModel.components.length) {
+        container.innerHTML = '<div class="text-zinc-400 text-sm">No components yet.</div>';
+        return;
+      }
+
+      currentModel.components.forEach((comp, index) => {
+        const el = document.createElement('div');
+        el.className = 'border border-zinc-800 rounded p-4';
+        el.innerHTML = `
+          <div class="flex justify-between">
+            <div>
+              <div class="font-medium">${comp.name}</div>
+              <div class="text-xs text-zinc-400">${comp.type}</div>
+            </div>
+            <button onclick="startStride(${index})" 
+                    class="text-xs px-3 py-1 bg-zinc-800 rounded">STRIDE</button>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function addComponent() {
+      const name = prompt('Component name');
+      if (!name || !currentModel) return;
+
+      currentModel.components.push({
+        id: Date.now(),
+        name: name,
+        type: 'Process',
+        threats: []
+      });
+      saveModels();
+      renderComponents();
+    }
+
+    function startStride(index) {
+      const comp = currentModel.components[index];
+      const container = document.getElementById('components');
+      container.innerHTML = '';
+
+      const header = document.createElement('div');
+      header.className = 'mb-4 flex justify-between';
+      header.innerHTML = `<div class="font-semibold">${comp.name} - STRIDE</div>`;
+      container.appendChild(header);
+
+      const categories = ['S - Spoofing','T - Tampering','R - Repudiation','I - Info Disclosure','D - DoS','E - Elevation'];
+
+      categories.forEach(cat => {
+        const row = document.createElement('div');
+        row.className = 'border border-zinc-800 rounded p-3 mb-2';
+        row.innerHTML = `
+          <div class="flex justify-between items-center mb-2">
+            <div class="text-sm">${cat}</div>
+            <button onclick="addThreat(${index}, '${cat}')" class="text-xs bg-zinc-800 px-2 py-1 rounded">+ Threat</button>
+          </div>
+          <div id="threats-${cat.replace(/\s/g,'')}-${index}"></div>
+        `;
+        container.appendChild(row);
+        renderThreats(index, cat, row);
+      });
+
+      const back = document.createElement('button');
+      back.className = 'mt-4 text-sm text-zinc-400';
+      back.textContent = '← Back';
+      back.onclick = () => { showModel(currentModel); };
+      container.appendChild(back);
+    }
+
+    function renderThreats(compIndex, category, row) {
+      const comp = currentModel.components[compIndex];
+      const container = row.querySelector(`#threats-${category.replace(/\s/g,'')}-${compIndex}`);
+      if (!container) return;
+      container.innerHTML = '';
+
+      const threats = comp.threats.filter(t => t.category === category);
+      threats.forEach((t, i) => {
+        const el = document.createElement('div');
+        el.className = 'text-xs bg-zinc-900 p-2 rounded mb-1';
+        el.innerHTML = `${t.desc} <span class="text-zinc-400">(${t.likelihood || '?'}/${t.impact || '?'})</span>`;
+        container.appendChild(el);
+      });
+    }
+
+    function addThreat(compIndex, category) {
+      const desc = prompt('Threat description');
+      if (!desc) return;
+      const likelihood = prompt('Likelihood (1-5)') || 3;
+      const impact = prompt('Impact (1-5)') || 3;
+      currentModel.components[compIndex].threats.push({ category, desc, likelihood: parseInt(likelihood), impact: parseInt(impact) });
+      saveModels();
+      startStride(compIndex);
+    }
+
+    function renderModelList() {
+      const container = document.getElementById('model-list');
+      container.innerHTML = '';
+      models.forEach(m => {
+        const el = document.createElement('div');
+        el.className = 'px-3 py-1.5 hover:bg-zinc-900 rounded cursor-pointer text-sm';
+        el.textContent = m.name;
+        el.onclick = () => showModel(m);
+        container.appendChild(el);
+      });
+    }
+
+    function exportModel() {
+      if (!currentModel) return;
+      const data = JSON.stringify(currentModel, null, 2);
+      const blob = new Blob([data], {type: 'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${currentModel.name}.json`;
+      a.click();
+    }
+
+    renderModelList();
+  </script>
+</body>
+</html>
