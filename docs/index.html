@@ -1,306 +1,367 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STRIDE Threat Modeler</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    * { font-family: 'Inter', sans-serif; }
-    .card { background:#111827; border:1px solid #1f2937; border-radius:12px; }
-    .badge-S{background:#4c1d95;color:#c4b5fd} .badge-T{background:#7f1d1d;color:#fca5a5}
-    .badge-R{background:#78350f;color:#fde68a} .badge-I{background:#0c4a6e;color:#7dd3fc}
-    .badge-D{background:#064e3b;color:#6ee7b7} .badge-E{background:#831843;color:#f9a8d4}
-    .risk-critical{color:#ef4444} .risk-high{color:#f97316} .risk-medium{color:#eab308} .risk-low{color:#22c55e}
-    .treat-mitigate{background:#1e3a5f;color:#93c5fd}
-    .treat-accept{background:#1f2a1a;color:#86efac}
-    .treat-transfer{background:#2d1f4e;color:#c4b5fd}
-    .treat-eliminate{background:#3b0764;color:#e9d5ff}
-    ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-track{background:#0d1117}
-    ::-webkit-scrollbar-thumb{background:#374151;border-radius:3px}
-    .modal-bg{background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)}
-    .nav-active{color:#818cf8!important;background:rgba(99,102,241,0.12)!important}
-    .heatmap-cell{width:80px;height:60px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;cursor:default;transition:all 0.2s}
-    .heatmap-cell:hover .threat-tooltip{display:block}
-    .threat-dot{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;cursor:pointer;flex-shrink:0;z-index:2}
-    .threat-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1f2937;border:1px solid #374151;border-radius:8px;padding:8px 10px;width:200px;z-index:50;box-shadow:0 10px 25px rgba(0,0,0,0.5);pointer-events:none}
-  </style>
-</head>
-<body class="bg-gray-950 text-gray-200">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STRIDE Threat Modeler</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  *, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+  body { background: #f5f5f7; color: #1d1d1f; }
 
-<!-- Top Nav -->
-<nav class="fixed top-0 left-0 right-0 z-40 bg-gray-900 border-b border-gray-800 h-14 flex items-center px-6 gap-4">
-  <div class="flex items-center gap-2.5 mr-6">
-    <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center">
-      <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-    </div>
-    <span class="font-semibold text-white">STRIDE Threat Modeler</span>
-    <span class="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">v1.0</span>
+  /* Apple-style components */
+  .sf-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04); }
+  .sf-btn-primary { background: #0071e3; color: #fff; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
+  .sf-btn-primary:hover { background: #0077ed; }
+  .sf-btn-secondary { background: rgba(0,0,0,0.06); color: #1d1d1f; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
+  .sf-btn-secondary:hover { background: rgba(0,0,0,0.1); }
+  .sf-input { background: #fff; border: 1px solid #d2d2d7; border-radius: 10px; padding: 10px 14px; font-size: 14px; color: #1d1d1f; width: 100%; outline: none; transition: border-color 0.15s; }
+  .sf-input:focus { border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+  .sf-label { font-size: 13px; font-weight: 500; color: #6e6e73; margin-bottom: 6px; display: block; }
+  .sf-nav { background: rgba(255,255,255,0.88); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,0.08); }
+  .sf-sidebar { background: #fff; border-right: 1px solid rgba(0,0,0,0.08); }
+  .sf-sidebar-item { padding: 8px 12px; border-radius: 8px; font-size: 14px; color: #3a3a3c; cursor: pointer; transition: background 0.1s; display: flex; justify-content: space-between; align-items: center; }
+  .sf-sidebar-item:hover { background: #f5f5f7; }
+  .sf-sidebar-item.active { background: #e8f0fe; color: #0071e3; font-weight: 500; }
+
+  /* Risk colors (Apple HIG compliant) */
+  .risk-critical { color: #ff3b30; } .risk-high { color: #ff9500; } .risk-medium { color: #ffcc00; } .risk-low { color: #34c759; }
+  .risk-badge-critical { background: #fff0ef; color: #ff3b30; border: 1px solid #ffd5d3; }
+  .risk-badge-high { background: #fff8ef; color: #c84700; border: 1px solid #ffd9b0; }
+  .risk-badge-medium { background: #fffaed; color: #7d5a00; border: 1px solid #ffe680; }
+  .risk-badge-low { background: #f0fbf4; color: #1a7f37; border: 1px solid #b7efc5; }
+
+  /* STRIDE badges */
+  .stride-S { background: #f0ebff; color: #6e3ff3; border: 1px solid #d9c8ff; }
+  .stride-T { background: #fff0f0; color: #c0392b; border: 1px solid #ffd5d5; }
+  .stride-R { background: #fff8ec; color: #c05621; border: 1px solid #fddcb0; }
+  .stride-I { background: #edf4ff; color: #0055b3; border: 1px solid #b0d0ff; }
+  .stride-D { background: #edfdf4; color: #1a7f37; border: 1px solid #b0efc5; }
+  .stride-E { background: #fdf0f7; color: #c0177a; border: 1px solid #f5c0e0; }
+
+  /* Treatment pills */
+  .treat-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 980px; }
+  .treat-Mitigate { background: #e8f0fe; color: #1558d6; }
+  .treat-Transfer { background: #f0ebff; color: #6e3ff3; }
+  .treat-Accept { background: #edfdf4; color: #1a7f37; }
+  .treat-Eliminate { background: #fff0f0; color: #c0392b; }
+
+  /* Heatmap */
+  .hm-cell { width: 72px; height: 56px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; position: relative; cursor: default; }
+  .hm-cell:hover .hm-tip { display: block; }
+  .hm-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1d1d1f; color: #fff; border-radius: 10px; padding: 10px 12px; width: 220px; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.3); pointer-events: none; font-size: 12px; }
+  .hm-dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; }
+  .hm-critical { background: #fff0ef; } .hm-high { background: #fff8ef; } .hm-medium { background: #fffaed; } .hm-low { background: #f0fbf4; }
+
+  /* Modal */
+  .modal-backdrop { background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); }
+  .score-btn { width: 36px; height: 36px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid #d2d2d7; background: #fff; color: #3a3a3c; cursor: pointer; transition: all 0.12s; }
+  .score-btn.active { background: #0071e3; color: #fff; border-color: #0071e3; }
+  .treatment-btn { flex: 1; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1.5px solid #d2d2d7; background: #fff; color: #3a3a3c; cursor: pointer; transition: all 0.12s; }
+  .treatment-btn.active { border-color: #0071e3; background: #edf4ff; color: #0055b3; }
+
+  ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="sf-nav fixed top-0 left-0 right-0 z-40 h-12 flex items-center px-5 gap-4">
+  <div class="flex items-center gap-2 mr-4">
+    <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span class="font-semibold text-sm text-gray-800">STRIDE Threat Modeler</span>
   </div>
-  <button onclick="setPage('dashboard')" id="nav-dashboard" class="nav-btn px-3 py-1.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition">Dashboard</button>
-  <button onclick="setPage('howto')" id="nav-howto" class="nav-btn px-3 py-1.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition">How to Use</button>
+  <button onclick="setPage('dashboard')" id="nav-dashboard" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">Dashboard</button>
+  <button onclick="setPage('howto')" id="nav-howto" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">How to Use</button>
 </nav>
 
-<div class="pt-14 flex" style="min-height:100vh">
+<div class="pt-12 flex" style="min-height:100vh">
 
 <!-- Sidebar -->
-<aside class="w-64 bg-gray-900 border-r border-gray-800 fixed top-14 bottom-0 flex flex-col z-30">
-  <div class="p-3 border-b border-gray-800">
-    <button onclick="openNewModel()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-      New Threat Model
-    </button>
+<aside class="sf-sidebar w-60 fixed top-12 bottom-0 flex flex-col z-30">
+  <div class="p-3 border-b border-black/5">
+    <button onclick="openNewModel()" class="sf-btn-primary w-full">+ New Model</button>
   </div>
-  <div class="px-3 pt-3 pb-1 text-xs font-medium text-gray-500 uppercase tracking-wider">Models</div>
+  <div class="px-3 pt-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Models</div>
   <div id="model-list" class="flex-1 overflow-y-auto px-2 pb-3 space-y-0.5"></div>
-  <div class="p-3 border-t border-gray-800 text-xs text-gray-600 text-center">Data stored locally in browser</div>
+  <div class="p-3 border-t border-black/5 text-xs text-gray-400 text-center">Stored locally in browser</div>
 </aside>
 
 <!-- Main -->
-<main class="ml-64 flex-1 overflow-y-auto">
+<main class="ml-60 flex-1">
 
-<!-- Dashboard Page -->
+<!-- Dashboard -->
 <div id="page-dashboard">
 
   <!-- Welcome -->
   <div id="view-welcome" class="p-8 max-w-4xl">
-    <h1 class="text-3xl font-bold text-white mb-2">Security Threat Modeling</h1>
-    <p class="text-gray-400 mb-8">Structured assessment using the STRIDE methodology. Identify, analyze, and mitigate threats across your systems.</p>
-    <div class="grid grid-cols-3 gap-4 mb-8">
-      <div class="card p-5"><div class="w-9 h-9 rounded-xl bg-indigo-900/60 flex items-center justify-center mb-3 text-indigo-400">🏗️</div><div class="font-semibold text-sm mb-1">Model Components</div><div class="text-xs text-gray-400">Define APIs, databases, services, trust boundaries</div></div>
-      <div class="card p-5"><div class="w-9 h-9 rounded-xl bg-red-900/60 flex items-center justify-center mb-3 text-red-400">⚠️</div><div class="font-semibold text-sm mb-1">Identify Threats</div><div class="text-xs text-gray-400">6 STRIDE categories per component with guided examples</div></div>
-      <div class="card p-5"><div class="w-9 h-9 rounded-xl bg-green-900/60 flex items-center justify-center mb-3 text-green-400">📊</div><div class="font-semibold text-sm mb-1">Export Reports</div><div class="text-xs text-gray-400">PDF, CSV or JSON for stakeholders</div></div>
+    <div class="mb-10">
+      <h1 class="text-3xl font-semibold text-gray-900 mb-2 tracking-tight">Threat Modeling</h1>
+      <p class="text-gray-500 text-base">Identify and analyze security threats using the STRIDE framework.</p>
     </div>
-    <button onclick="openNewModel()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition">Create your first model →</button>
+    <div class="grid grid-cols-3 gap-4 mb-10">
+      <div class="sf-card p-6">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-1">Define Architecture</h3>
+        <p class="text-sm text-gray-500">Add components like APIs, databases and trust boundaries</p>
+      </div>
+      <div class="sf-card p-6">
+        <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-1">Identify Threats</h3>
+        <p class="text-sm text-gray-500">Work through all 6 STRIDE categories per component</p>
+      </div>
+      <div class="sf-card p-6">
+        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-1">Export Report</h3>
+        <p class="text-sm text-gray-500">Generate PDF, CSV or JSON for stakeholders</p>
+      </div>
+    </div>
+    <button onclick="openNewModel()" class="sf-btn-primary">Create first model</button>
   </div>
 
-  <!-- Model View -->
+  <!-- Model view -->
   <div id="view-model" class="hidden p-8">
-    <div class="flex items-start justify-between mb-6">
+    <div class="flex items-start justify-between mb-8">
       <div>
-        <div class="flex items-center gap-3 mb-1">
-          <h2 id="mv-name" class="text-2xl font-bold text-white"></h2>
-        </div>
-        <p id="mv-desc" class="text-gray-400 text-sm"></p>
-        <p id="mv-meta" class="text-gray-600 text-xs mt-1"></p>
+        <h2 id="mv-name" class="text-2xl font-semibold text-gray-900 tracking-tight"></h2>
+        <p id="mv-desc" class="text-gray-500 text-sm mt-1"></p>
+        <p id="mv-meta" class="text-gray-400 text-xs mt-1"></p>
       </div>
-      <div class="flex gap-2">
-        <button onclick="addComponent()" class="border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-xl text-sm transition">+ Component</button>
+      <div class="flex items-center gap-2">
+        <button onclick="addComponent()" class="sf-btn-secondary">+ Component</button>
         <div class="relative group">
-          <button class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-sm transition flex items-center gap-1.5">Export <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button>
-          <div class="absolute right-0 mt-1 w-36 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl hidden group-hover:block z-50 overflow-hidden">
-            <button onclick="exportPDF()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-700">📄 PDF</button>
-            <button onclick="exportCSV()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-700">📊 CSV</button>
-            <button onclick="exportJSON()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-700">⚙️ JSON</button>
+          <button class="sf-btn-primary flex items-center gap-1.5">Export <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg></button>
+          <div class="absolute right-0 mt-2 w-36 bg-white border border-black/8 rounded-xl shadow-xl hidden group-hover:block z-50 overflow-hidden py-1">
+            <button onclick="exportPDF()" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">PDF Report</button>
+            <button onclick="exportCSV()" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">CSV Export</button>
+            <button onclick="exportJSON()" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">JSON Export</button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Risk summary -->
     <div class="grid grid-cols-4 gap-3 mb-6" id="risk-summary"></div>
-    <div class="card p-4 mb-6">
-      <div class="flex justify-between text-sm mb-2"><span class="text-gray-400">Assessment progress</span><span id="prog-text" class="text-gray-300 font-medium"></span></div>
-      <div class="w-full bg-gray-800 rounded-full h-1.5"><div id="prog-bar" class="bg-indigo-600 rounded-full h-1.5 transition-all" style="width:0%"></div></div>
+
+    <!-- Progress -->
+    <div class="sf-card p-4 mb-6">
+      <div class="flex justify-between text-sm mb-2.5">
+        <span class="text-gray-500 font-medium">Assessment progress</span>
+        <span id="prog-text" class="text-gray-700 font-semibold"></span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-1.5">
+        <div id="prog-bar" class="bg-blue-500 rounded-full h-1.5 transition-all duration-500" style="width:0%"></div>
+      </div>
     </div>
 
-    <!-- Threat Heatmap -->
-    <div class="card p-5 mb-6" id="heatmap-section">
-      <div class="flex items-center justify-between mb-4">
+    <!-- Heatmap -->
+    <div class="sf-card p-6 mb-6">
+      <div class="flex items-center justify-between mb-5">
         <div>
-          <h3 class="font-semibold text-white">Threat Heatmap</h3>
+          <h3 class="font-semibold text-gray-900">Risk Heatmap</h3>
           <p class="text-xs text-gray-400 mt-0.5">Threats plotted by Likelihood × Impact — hover for details</p>
         </div>
-        <div class="flex gap-3 text-xs">
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm inline-block" style="background:#14532d"></span>Low (1–4)</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm inline-block" style="background:#713f12"></span>Medium (5–9)</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm inline-block" style="background:#7c2d12"></span>High (10–16)</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm inline-block" style="background:#7f1d1d"></span>Critical (17–25)</span>
+        <div class="flex gap-4 text-xs text-gray-500">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-green-100 border border-green-300"></span>Low</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-yellow-100 border border-yellow-300"></span>Medium</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-orange-100 border border-orange-300"></span>High</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-red-100 border border-red-300"></span>Critical</span>
         </div>
       </div>
       <div class="flex gap-3">
-        <!-- Y-axis label -->
-        <div class="flex flex-col items-center justify-center gap-0" style="width:24px">
-          <div style="writing-mode:vertical-rl;transform:rotate(180deg)" class="text-xs text-gray-500 font-medium">Impact ↑</div>
+        <div class="flex flex-col items-center justify-center" style="width:20px">
+          <div style="writing-mode:vertical-rl;transform:rotate(180deg)" class="text-xs text-gray-400">Impact ↑</div>
         </div>
         <div>
-          <!-- Grid -->
           <div id="heatmap-grid"></div>
-          <!-- X-axis -->
-          <div class="flex mt-2 ml-0.5" style="gap:4px">
-            <div class="text-xs text-gray-600" style="width:80px;text-align:center">1</div>
-            <div class="text-xs text-gray-600" style="width:80px;text-align:center">2</div>
-            <div class="text-xs text-gray-600" style="width:80px;text-align:center">3</div>
-            <div class="text-xs text-gray-600" style="width:80px;text-align:center">4</div>
-            <div class="text-xs text-gray-600" style="width:80px;text-align:center">5</div>
+          <div class="flex mt-2" style="gap:4px;margin-left:24px">
+            <div class="text-xs text-gray-400 text-center" style="width:72px">1</div>
+            <div class="text-xs text-gray-400 text-center" style="width:72px">2</div>
+            <div class="text-xs text-gray-400 text-center" style="width:72px">3</div>
+            <div class="text-xs text-gray-400 text-center" style="width:72px">4</div>
+            <div class="text-xs text-gray-400 text-center" style="width:72px">5</div>
           </div>
-          <div class="text-xs text-gray-500 text-center mt-1">Likelihood →</div>
+          <div class="text-xs text-gray-400 text-center mt-1">Likelihood →</div>
         </div>
       </div>
     </div>
 
-    <h3 class="font-medium text-gray-400 text-sm mb-3">System Components</h3>
+    <!-- Components -->
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="font-semibold text-gray-700 text-sm">System Components</h3>
+    </div>
     <div id="components-list" class="space-y-3"></div>
   </div>
 
-  <!-- STRIDE Assessment -->
+  <!-- STRIDE view -->
   <div id="view-stride" class="hidden p-8">
-    <button onclick="backToModel()" class="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white mb-4 transition">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>Back
+    <button onclick="backToModel()" class="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium mb-5 transition">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>Back to model
     </button>
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h2 id="stride-title" class="text-xl font-bold text-white"></h2>
-        <p class="text-sm text-gray-400 mt-0.5">Work through each STRIDE category and record threats found</p>
-      </div>
-      <span id="stride-count" class="text-sm text-gray-400 bg-gray-800 px-3 py-1 rounded-full"></span>
+    <div class="flex items-center justify-between mb-2">
+      <h2 id="stride-title" class="text-xl font-semibold text-gray-900 tracking-tight"></h2>
+      <span id="stride-count" class="text-sm text-gray-400 bg-gray-100 px-3 py-1 rounded-full font-medium"></span>
     </div>
+    <p class="text-sm text-gray-400 mb-6">Work through each STRIDE category. Use example threats as starting points or add custom ones.</p>
     <div id="stride-cats" class="space-y-4"></div>
   </div>
 
 </div>
 
-<!-- How to Use Page -->
-<div id="page-howto" class="hidden p-8 max-w-3xl">
-  <h1 class="text-2xl font-bold text-white mb-1">How to Use</h1>
-  <p class="text-gray-400 text-sm mb-6">A practical guide to executing structured STRIDE threat assessments</p>
+<!-- How to Use -->
+<div id="page-howto" class="hidden p-8 max-w-2xl">
+  <h1 class="text-2xl font-semibold text-gray-900 tracking-tight mb-1">How to Use</h1>
+  <p class="text-gray-400 text-sm mb-7">A practical guide to executing structured STRIDE threat assessments</p>
   <div class="space-y-4">
-    <div class="card p-5">
-      <h2 class="font-semibold text-indigo-400 mb-3">What is STRIDE?</h2>
-      <p class="text-sm text-gray-300 mb-3">STRIDE is a systematic threat modeling framework to identify security threats by category:</p>
-      <div class="grid grid-cols-2 gap-2">
-        <div class="bg-gray-800 rounded-lg p-3 flex gap-2.5 text-sm"><span class="px-1.5 py-0.5 rounded badge-S text-xs font-bold">S</span><div><strong>Spoofing</strong> — Impersonating users or systems</div></div>
-        <div class="bg-gray-800 rounded-lg p-3 flex gap-2.5 text-sm"><span class="px-1.5 py-0.5 rounded badge-T text-xs font-bold">T</span><div><strong>Tampering</strong> — Unauthorized data modification</div></div>
-        <div class="bg-gray-800 rounded-lg p-3 flex gap-2.5 text-sm"><span class="px-1.5 py-0.5 rounded badge-R text-xs font-bold">R</span><div><strong>Repudiation</strong> — Denying performed actions</div></div>
-        <div class="bg-gray-800 rounded-lg p-3 flex gap-2.5 text-sm"><span class="px-1.5 py-0.5 rounded badge-I text-xs font-bold">I</span><div><strong>Info Disclosure</strong> — Unauthorized data exposure</div></div>
-        <div class="bg-gray-800 rounded-lg p-3 flex gap-2.5 text-sm"><span class="px-1.5 py-0.5 rounded badge-D text-xs font-bold">D</span><div><strong>Denial of Service</strong> — Disrupting availability</div></div>
-        <div class="bg-gray-800 rounded-lg p-3 flex gap-2.5 text-sm"><span class="px-1.5 py-0.5 rounded badge-E text-xs font-bold">E</span><div><strong>Elevation of Privilege</strong> — Gaining unauthorized access</div></div>
+
+    <div class="sf-card p-6">
+      <h2 class="font-semibold text-gray-900 mb-3">What is STRIDE?</h2>
+      <p class="text-sm text-gray-500 mb-4">STRIDE is a systematic threat modeling framework to identify security threats by category:</p>
+      <div class="space-y-2">
+        <div class="flex gap-3 items-start"><span class="stride-S px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">S</span><div class="text-sm"><strong class="text-gray-800">Spoofing</strong> <span class="text-gray-500">— Impersonating users, systems or identities</span></div></div>
+        <div class="flex gap-3 items-start"><span class="stride-T px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">T</span><div class="text-sm"><strong class="text-gray-800">Tampering</strong> <span class="text-gray-500">— Unauthorized modification of data or code</span></div></div>
+        <div class="flex gap-3 items-start"><span class="stride-R px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">R</span><div class="text-sm"><strong class="text-gray-800">Repudiation</strong> <span class="text-gray-500">— Denying performed actions, missing audit trail</span></div></div>
+        <div class="flex gap-3 items-start"><span class="stride-I px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">I</span><div class="text-sm"><strong class="text-gray-800">Info Disclosure</strong> <span class="text-gray-500">— Unauthorized access to sensitive data</span></div></div>
+        <div class="flex gap-3 items-start"><span class="stride-D px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">D</span><div class="text-sm"><strong class="text-gray-800">Denial of Service</strong> <span class="text-gray-500">— Disrupting system availability</span></div></div>
+        <div class="flex gap-3 items-start"><span class="stride-E px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">E</span><div class="text-sm"><strong class="text-gray-800">Elevation of Privilege</strong> <span class="text-gray-500">— Gaining unauthorized access level</span></div></div>
       </div>
     </div>
-    <div class="card p-5">
-      <h2 class="font-semibold text-indigo-400 mb-4">Step-by-Step Workflow</h2>
-      <div class="space-y-3">
-        <div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0">1</div><div class="text-sm"><strong>Create a Threat Model</strong> — Click "New Threat Model", define name, scope and assessor</div></div>
-        <div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0">2</div><div class="text-sm"><strong>Add Components</strong> — APIs, databases, UIs, services, external entities, trust boundaries</div></div>
-        <div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0">3</div><div class="text-sm"><strong>STRIDE Assessment</strong> — Click "Assess →" per component. Use examples or custom threats</div></div>
-        <div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0">4</div><div class="text-sm"><strong>Score Threats</strong> — Likelihood × Impact = Risk Score. Classify treatment: Mitigate / Transfer / Accept / Eliminate</div></div>
-        <div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0">5</div><div class="text-sm"><strong>Define Mitigations</strong> — Add concrete mitigation action, track status (Open → In Progress → Done)</div></div>
-        <div class="flex gap-3"><div class="w-7 h-7 rounded-full bg-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0">6</div><div class="text-sm"><strong>Export</strong> — PDF for management, CSV for ticket import, JSON for tools</div></div>
+
+    <div class="sf-card p-6">
+      <h2 class="font-semibold text-gray-900 mb-4">Workflow</h2>
+      <div class="space-y-4">
+        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">1</div><div class="text-sm"><strong class="text-gray-800">Create Model</strong> <span class="text-gray-500">— Name, scope and assessor</span></div></div>
+        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">2</div><div class="text-sm"><strong class="text-gray-800">Add Components</strong> <span class="text-gray-500">— APIs, databases, UIs, services, trust boundaries</span></div></div>
+        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">3</div><div class="text-sm"><strong class="text-gray-800">Assess per component</strong> <span class="text-gray-500">— Click "Assess →", go through all 6 categories</span></div></div>
+        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">4</div><div class="text-sm"><strong class="text-gray-800">Score threats</strong> <span class="text-gray-500">— Likelihood × Impact = Risk. Choose treatment: Mitigate / Transfer / Accept / Eliminate</span></div></div>
+        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">5</div><div class="text-sm"><strong class="text-gray-800">Export</strong> <span class="text-gray-500">— PDF for management, CSV for tickets, JSON for tools</span></div></div>
       </div>
     </div>
-    <div class="card p-5">
-      <h2 class="font-semibold text-indigo-400 mb-3">Risk Score Reference</h2>
-      <div class="grid grid-cols-4 gap-3 text-sm text-center">
-        <div class="bg-gray-800 rounded-lg p-3 border-t-2 border-green-500"><div class="text-green-400 font-bold text-lg">1–4</div><div class="text-green-400 font-medium text-xs">Low</div><div class="text-gray-500 text-xs mt-1">Monitor</div></div>
-        <div class="bg-gray-800 rounded-lg p-3 border-t-2 border-yellow-500"><div class="text-yellow-400 font-bold text-lg">5–9</div><div class="text-yellow-400 font-medium text-xs">Medium</div><div class="text-gray-500 text-xs mt-1">This cycle</div></div>
-        <div class="bg-gray-800 rounded-lg p-3 border-t-2 border-orange-500"><div class="text-orange-400 font-bold text-lg">10–16</div><div class="text-orange-400 font-medium text-xs">High</div><div class="text-gray-500 text-xs mt-1">Prioritize</div></div>
-        <div class="bg-gray-800 rounded-lg p-3 border-t-2 border-red-500"><div class="text-red-400 font-bold text-lg">17–25</div><div class="text-red-400 font-medium text-xs">Critical</div><div class="text-gray-500 text-xs mt-1">Fix now</div></div>
+
+    <div class="sf-card p-6">
+      <h2 class="font-semibold text-gray-900 mb-4">Risk Score Guide</h2>
+      <div class="grid grid-cols-4 gap-3">
+        <div class="text-center p-3 rounded-xl bg-green-50 border border-green-100"><div class="text-green-700 font-bold text-lg">1–4</div><div class="text-green-700 font-semibold text-xs">Low</div><div class="text-gray-400 text-xs mt-1">Monitor</div></div>
+        <div class="text-center p-3 rounded-xl bg-yellow-50 border border-yellow-100"><div class="text-yellow-700 font-bold text-lg">5–9</div><div class="text-yellow-700 font-semibold text-xs">Medium</div><div class="text-gray-400 text-xs mt-1">This cycle</div></div>
+        <div class="text-center p-3 rounded-xl bg-orange-50 border border-orange-100"><div class="text-orange-700 font-bold text-lg">10–16</div><div class="text-orange-700 font-semibold text-xs">High</div><div class="text-gray-400 text-xs mt-1">Prioritize</div></div>
+        <div class="text-center p-3 rounded-xl bg-red-50 border border-red-100"><div class="text-red-700 font-bold text-lg">17–25</div><div class="text-red-700 font-semibold text-xs">Critical</div><div class="text-gray-400 text-xs mt-1">Fix now</div></div>
       </div>
     </div>
-    <div class="card p-5">
-      <h2 class="font-semibold text-indigo-400 mb-3">Risk Treatment Options</h2>
-      <div class="grid grid-cols-2 gap-3 text-sm">
-        <div class="treat-mitigate rounded-lg p-3"><strong>Mitigate</strong> — Implement controls to reduce likelihood or impact</div>
-        <div class="treat-transfer rounded-lg p-3"><strong>Transfer</strong> — Shift risk (insurance, vendor SLA)</div>
-        <div class="treat-accept rounded-lg p-3"><strong>Accept</strong> — Acknowledge, no action (document rationale)</div>
-        <div class="treat-eliminate rounded-lg p-3"><strong>Eliminate</strong> — Remove the feature/component causing the risk</div>
+
+    <div class="sf-card p-6">
+      <h2 class="font-semibold text-gray-900 mb-3">Risk Treatment</h2>
+      <div class="space-y-2">
+        <div class="flex gap-3 items-center"><span class="treat-pill treat-Mitigate">Mitigate</span><span class="text-sm text-gray-500">Implement controls to reduce likelihood or impact</span></div>
+        <div class="flex gap-3 items-center"><span class="treat-pill treat-Transfer">Transfer</span><span class="text-sm text-gray-500">Shift risk to third party via insurance or vendor SLA</span></div>
+        <div class="flex gap-3 items-center"><span class="treat-pill treat-Accept">Accept</span><span class="text-sm text-gray-500">Acknowledge risk, no action needed — document rationale</span></div>
+        <div class="flex gap-3 items-center"><span class="treat-pill treat-Eliminate">Eliminate</span><span class="text-sm text-gray-500">Remove the feature or component causing the risk</span></div>
       </div>
     </div>
+
   </div>
 </div>
+
 </main>
 </div>
 
 <!-- Modal: New Model -->
-<div id="modal-model" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-bg">
-  <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-    <h3 class="text-lg font-semibold mb-4">New Threat Model</h3>
-    <div class="space-y-3">
-      <div><label class="text-xs text-gray-400 mb-1 block">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API Assessment" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 text-white"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Scope / description</label><textarea id="inp-desc" rows="2" placeholder="What system or feature are you assessing?" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 text-white resize-none"></textarea></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 text-white"></div>
+<div id="modal-model" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">New Threat Model</h3>
+    <div class="space-y-4">
+      <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API Assessment Q2 2026" class="sf-input"></div>
+      <div><label class="sf-label">Scope / description</label><textarea id="inp-desc" rows="2" placeholder="What system are you assessing?" class="sf-input resize-none"></textarea></div>
+      <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input"></div>
     </div>
     <div class="flex gap-3 mt-5">
-      <button onclick="closeModal('modal-model')" class="flex-1 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-xl text-sm transition">Cancel</button>
-      <button onclick="createModel()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition">Create</button>
+      <button onclick="closeModal('modal-model')" class="sf-btn-secondary flex-1">Cancel</button>
+      <button onclick="createModel()" class="sf-btn-primary flex-1">Create Model</button>
     </div>
   </div>
 </div>
 
-<!-- Modal: Threat -->
-<div id="modal-threat" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-bg">
-  <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-lg shadow-2xl" id="modal-threat-inner">
-    <h3 class="text-lg font-semibold mb-0.5">Add Threat</h3>
-    <p id="mt-cat" class="text-sm text-gray-400 mb-4"></p>
+<!-- Modal: Add Threat -->
+<div id="modal-threat" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+    <h3 class="text-lg font-semibold text-gray-900 mb-0.5">Add Threat</h3>
+    <p id="mt-cat" class="text-sm text-gray-400 mb-5"></p>
     <div class="space-y-4">
-      <div><label class="text-xs text-gray-400 mb-1 block">Threat description *</label><input id="mt-desc" type="text" placeholder="Describe the specific threat..." class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 text-white"></div>
+      <div><label class="sf-label">Threat description *</label><input id="mt-desc" type="text" placeholder="Describe the specific threat..." class="sf-input"></div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="text-xs text-gray-400 mb-2 block">Likelihood (1–5)</label>
+          <label class="sf-label">Likelihood (1–5)</label>
           <div class="flex gap-1.5" id="like-btns"></div>
+          <div class="text-xs text-gray-400 mt-1.5">1 = Rare · 5 = Certain</div>
         </div>
         <div>
-          <label class="text-xs text-gray-400 mb-2 block">Impact (1–5)</label>
+          <label class="sf-label">Impact (1–5)</label>
           <div class="flex gap-1.5" id="imp-btns"></div>
+          <div class="text-xs text-gray-400 mt-1.5">1 = Minimal · 5 = Catastrophic</div>
         </div>
       </div>
-      <div class="flex items-center justify-between bg-gray-800 rounded-xl p-3">
-        <span class="text-sm text-gray-400">Risk Score</span>
-        <span id="mt-score" class="text-lg font-bold">—</span>
+      <div class="bg-gray-50 rounded-xl p-3 flex items-center justify-between">
+        <span class="text-sm text-gray-500 font-medium">Risk Score</span>
+        <span id="mt-score" class="text-xl font-bold"></span>
       </div>
       <div>
-        <label class="text-xs text-gray-400 mb-1 block">Risk Treatment</label>
-        <div class="grid grid-cols-4 gap-2">
-          <button onclick="setTreatment('Mitigate')" id="treat-Mitigate" class="py-2 rounded-lg text-xs font-medium border border-gray-700 hover:border-blue-500 transition">Mitigate</button>
-          <button onclick="setTreatment('Transfer')" id="treat-Transfer" class="py-2 rounded-lg text-xs font-medium border border-gray-700 hover:border-purple-500 transition">Transfer</button>
-          <button onclick="setTreatment('Accept')" id="treat-Accept" class="py-2 rounded-lg text-xs font-medium border border-gray-700 hover:border-green-500 transition">Accept</button>
-          <button onclick="setTreatment('Eliminate')" id="treat-Eliminate" class="py-2 rounded-lg text-xs font-medium border border-gray-700 hover:border-pink-500 transition">Eliminate</button>
+        <label class="sf-label">Risk Treatment</label>
+        <div class="flex gap-2" id="treatment-btns">
+          <button onclick="setTreatment('Mitigate')" id="treat-Mitigate" class="treatment-btn active">Mitigate</button>
+          <button onclick="setTreatment('Transfer')" id="treat-Transfer" class="treatment-btn">Transfer</button>
+          <button onclick="setTreatment('Accept')" id="treat-Accept" class="treatment-btn">Accept</button>
+          <button onclick="setTreatment('Eliminate')" id="treat-Eliminate" class="treatment-btn">Eliminate</button>
         </div>
       </div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Mitigation / control</label><input id="mt-mitigation" type="text" placeholder="Describe control or action..." class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 text-white"></div>
+      <div><label class="sf-label">Mitigation / control</label><input id="mt-mitigation" type="text" placeholder="Describe the control or action..." class="sf-input"></div>
     </div>
     <div class="flex gap-3 mt-5">
-      <button onclick="closeModal('modal-threat')" class="flex-1 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-xl text-sm transition">Cancel</button>
-      <button onclick="saveThreat()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition">Add Threat</button>
+      <button onclick="closeModal('modal-threat')" class="sf-btn-secondary flex-1">Cancel</button>
+      <button onclick="saveThreat()" class="sf-btn-primary flex-1">Add Threat</button>
     </div>
   </div>
 </div>
 
 <script>
-  let models = JSON.parse(localStorage.getItem('stride-v2') || '[]');
+  let models = JSON.parse(localStorage.getItem('stride-v3') || '[]');
   let M = null, CI = null;
-  let threatL = 3, threatI = 3, threatTreatment = 'Mitigate', threatCat = '', threatCompIdx = 0;
+  let tL = 3, tI = 3, tTreatment = 'Mitigate', tCat = '', tCompIdx = 0;
 
   const EXAMPLES = {
-    'S - Spoofing':        ['Attacker spoofs user identity via stolen credentials','Fake login page harvests credentials','DNS spoofing redirects users to malicious server','API caller impersonates trusted service','Session token theft via XSS'],
-    'T - Tampering':       ['Attacker modifies request parameters (IDOR)','Config file tampered on disk','Database record altered without authorization','Log files modified to hide tracks','HTTP response tampering via MITM'],
-    'R - Repudiation':     ['User denies performing a transaction (no audit log)','Admin deletes audit trail entries','API calls made without non-repudiation mechanism','Missing timestamps on critical operations','No digital signatures on sensitive documents'],
-    'I - Info Disclosure': ['Sensitive data transmitted without encryption','Verbose error messages expose stack traces','API returns excessive data fields','Unmasked PII in application logs','Directory traversal exposes server files'],
-    'D - DoS':             ['Attacker floods API endpoint (no rate limiting)','Large file upload exhausts storage','Slow-loris attack consumes all connections','Recursive query causes CPU spike','Dependency failure cascades to full outage'],
-    'E - Elevation':       ['Horizontal privilege escalation (IDOR on user data)','JWT token manipulation to gain admin role','Insecure direct object reference bypasses authorization','Misconfigured IAM role grants excess permissions','Unpatched CVE allows local privilege escalation']
+    'S - Spoofing':        ['Attacker spoofs user identity via stolen credentials','Fake login page harvests credentials','DNS spoofing redirects to malicious server','API caller impersonates trusted service','Session token theft via XSS'],
+    'T - Tampering':       ['Attacker modifies request parameters (IDOR)','Config file tampered on disk','Database record altered without authorization','Log files modified to cover tracks','HTTP response tampering via MITM'],
+    'R - Repudiation':     ['User denies transaction — no audit log','Admin deletes audit trail entries','API calls without non-repudiation','Missing timestamps on critical operations','No digital signatures on documents'],
+    'I - Info Disclosure': ['Sensitive data transmitted unencrypted','Verbose error messages expose stack traces','API returns excessive data fields','PII unmasked in application logs','Directory traversal exposes server files'],
+    'D - DoS':             ['Attacker floods endpoint — no rate limiting','Large file upload exhausts storage','Slow-loris attack consumes connections','Recursive query causes CPU spike','Dependency failure cascades to full outage'],
+    'E - Elevation':       ['Horizontal privilege escalation (IDOR)','JWT token manipulation for admin role','Insecure direct object reference bypasses auth','Misconfigured IAM grants excess permissions','Unpatched CVE allows local privilege escalation']
   };
 
-  const BADGES = {'S - Spoofing':'badge-S','T - Tampering':'badge-T','R - Repudiation':'badge-R','I - Info Disclosure':'badge-I','D - DoS':'badge-D','E - Elevation':'badge-E'};
-
-  function save() { localStorage.setItem('stride-v2', JSON.stringify(models)); }
+  const STRIDE_KEYS = ['S','T','R','I','D','E'];
 
   function riskScore(l,i) { return l*i; }
   function riskLevel(s) { return s>=17?'Critical':s>=10?'High':s>=5?'Medium':'Low'; }
   function riskCls(s) { return s>=17?'risk-critical':s>=10?'risk-high':s>=5?'risk-medium':'risk-low'; }
+  function riskBadgeCls(s) { return `risk-badge-${riskLevel(s).toLowerCase()}`; }
 
+  function save() { localStorage.setItem('stride-v3', JSON.stringify(models)); }
   function setPage(p) {
-    document.getElementById('page-dashboard').classList.toggle('hidden', p!=='dashboard');
-    document.getElementById('page-howto').classList.toggle('hidden', p!=='howto');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-    document.getElementById('nav-'+p).classList.add('nav-active');
+    ['dashboard','howto'].forEach(n => document.getElementById('page-'+n).classList.toggle('hidden', n!==p));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('text-blue-600','font-semibold'));
+    const btn = document.getElementById('nav-'+p);
+    btn.classList.add('text-blue-600','font-semibold');
   }
-
   function showView(v) {
     ['welcome','model','stride'].forEach(n => document.getElementById('view-'+n).classList.add('hidden'));
     document.getElementById('view-'+v).classList.remove('hidden');
   }
-
   function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
   function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
@@ -309,55 +370,47 @@
   function createModel() {
     const name = document.getElementById('inp-name').value.trim();
     if (!name) return;
-    M = { id: Date.now(), name, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), created: new Date().toLocaleDateString(), components: [] };
-    models.push(M);
-    save();
-    renderSidebar();
-    loadModel(M);
-    closeModal('modal-model');
-    ['inp-name','inp-desc','inp-assessor'].forEach(id => document.getElementById(id).value = '');
+    M = { id: Date.now(), name, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), created: new Date().toLocaleDateString('nl-NL'), components: [] };
+    models.push(M); save(); renderSidebar(); loadModel(M); closeModal('modal-model');
+    ['inp-name','inp-desc','inp-assessor'].forEach(id => document.getElementById(id).value='');
   }
 
   function loadModel(m) {
-    M = m;
-    showView('model');
+    M = m; showView('model');
     document.getElementById('mv-name').textContent = m.name;
     document.getElementById('mv-desc').textContent = m.desc || '';
-    document.getElementById('mv-meta').textContent = (m.assessor ? 'Assessor: '+m.assessor+' · ' : '') + 'Created: '+m.created;
-    renderRiskSummary();
-    renderComponents();
-    renderProgress();
-    renderHeatmap();
+    document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created;
+    renderRiskSummary(); renderComponents(); renderProgress(); renderHeatmap();
   }
 
   function renderSidebar() {
     const c = document.getElementById('model-list');
     c.innerHTML = '';
     models.forEach(m => {
-      const total = m.components.flatMap(c => c.threats||[]).length;
+      const total = m.components.flatMap(c=>c.threats||[]).length;
       const el = document.createElement('div');
-      el.className = 'group px-3 py-2.5 rounded-xl hover:bg-gray-800 cursor-pointer flex items-center justify-between transition';
-      el.innerHTML = `<span class="text-sm truncate">${m.name}</span><span class="text-xs text-gray-600 ml-2 shrink-0">${total}</span>`;
+      el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
+      el.innerHTML = `<span class="truncate text-sm">${m.name}</span><span class="text-xs text-gray-400 flex-shrink-0 ml-2">${total}</span>`;
       el.onclick = () => loadModel(m);
       c.appendChild(el);
     });
   }
 
   function renderRiskSummary() {
-    const threats = M.components.flatMap(c => c.threats||[]);
+    const threats = M.components.flatMap(c=>c.threats||[]);
     const counts = {Critical:0,High:0,Medium:0,Low:0};
-    threats.forEach(t => counts[riskLevel(riskScore(t.likelihood||1, t.impact||1))]++);
-    const cfg = {Critical:{bg:'bg-red-950',border:'border-red-800',txt:'text-red-400'},High:{bg:'bg-orange-950',border:'border-orange-800',txt:'text-orange-400'},Medium:{bg:'bg-yellow-950',border:'border-yellow-800',txt:'text-yellow-400'},Low:{bg:'bg-green-950',border:'border-green-800',txt:'text-green-400'}};
+    threats.forEach(t => counts[riskLevel(riskScore(t.likelihood||1,t.impact||1))]++);
+    const cfg = {Critical:{icon:'🔴',cls:'risk-badge-critical'},High:{icon:'🟠',cls:'risk-badge-high'},Medium:{icon:'🟡',cls:'risk-badge-medium'},Low:{icon:'🟢',cls:'risk-badge-low'}};
     document.getElementById('risk-summary').innerHTML = Object.entries(counts).map(([k,v]) =>
-      `<div class="rounded-xl p-4 border ${cfg[k].bg} ${cfg[k].border}"><div class="text-2xl font-bold ${cfg[k].txt}">${v}</div><div class="text-xs text-gray-400 mt-0.5">${k}</div></div>`
+      `<div class="sf-card p-4"><div class="text-2xl font-bold text-gray-900">${v}</div><div class="flex items-center gap-1.5 mt-1"><span class="text-xs px-2 py-0.5 rounded-full font-semibold ${cfg[k].cls}">${k}</span></div></div>`
     ).join('');
   }
 
   function renderProgress() {
     const comps = M.components;
-    const assessed = comps.filter(c => (c.threats||[]).length > 0).length;
+    const assessed = comps.filter(c=>(c.threats||[]).length>0).length;
     const pct = comps.length ? Math.round(assessed/comps.length*100) : 0;
-    document.getElementById('prog-text').textContent = `${assessed}/${comps.length} components assessed`;
+    document.getElementById('prog-text').textContent = `${assessed} of ${comps.length} assessed`;
     document.getElementById('prog-bar').style.width = pct+'%';
   }
 
@@ -365,27 +418,27 @@
     const c = document.getElementById('components-list');
     c.innerHTML = '';
     if (!M.components.length) {
-      c.innerHTML = '<div class="card p-8 text-center text-gray-500 text-sm">No components yet. Click "+ Component" to add your first system component.</div>';
+      c.innerHTML = '<div class="sf-card p-8 text-center text-gray-400 text-sm">No components yet. Click "+ Component" to add your first system component.</div>';
       return;
     }
     M.components.forEach((comp, i) => {
       const threats = comp.threats||[];
-      const scores = threats.map(t => riskScore(t.likelihood||1, t.impact||1));
+      const scores = threats.map(t=>riskScore(t.likelihood||1,t.impact||1));
       const maxScore = scores.length ? Math.max(...scores) : 0;
       const el = document.createElement('div');
-      el.className = 'card p-4 hover:border-gray-700 transition';
+      el.className = 'sf-card p-4 hover:shadow-md transition-shadow';
       el.innerHTML = `
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-base">⚙️</div>
+            <div class="w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-base">⚙️</div>
             <div>
-              <div class="font-medium">${comp.name}</div>
-              <div class="text-xs text-gray-400">${comp.type}${threats.length ? ` · ${threats.length} threats` : ' · Not assessed'}${maxScore ? ` · <span class="${riskCls(maxScore)}">${riskLevel(maxScore)} risk</span>` : ''}</div>
+              <div class="font-semibold text-gray-900 text-sm">${comp.name}</div>
+              <div class="text-xs text-gray-400 mt-0.5">${comp.type}${threats.length ? ` · ${threats.length} threat${threats.length>1?'s':''}` : ' · Not assessed'}${maxScore ? ` · <span class="${riskCls(maxScore)} font-semibold">${riskLevel(maxScore)}</span>` : ''}</div>
             </div>
           </div>
-          <button onclick="startStride(${i})" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition">Assess →</button>
+          <button onclick="startStride(${i})" class="sf-btn-primary text-xs px-4 py-1.5">Assess →</button>
         </div>
-        ${threats.length ? `<div class="mt-3 flex flex-wrap gap-1.5">${threats.slice(0,4).map(t => `<span class="text-xs px-2 py-0.5 rounded-full ${BADGES[t.category]||'bg-gray-700'}">${t.desc.substring(0,28)}${t.desc.length>28?'…':''}</span>`).join('')}${threats.length>4?`<span class="text-xs text-gray-500 py-0.5">+${threats.length-4} more</span>`:''}</div>` : ''}
+        ${threats.length ? `<div class="mt-3 flex flex-wrap gap-1.5">${threats.slice(0,4).map(t=>`<span class="text-xs px-2 py-0.5 rounded-full ${riskBadgeCls(riskScore(t.likelihood||1,t.impact||1))}">${t.desc.substring(0,32)}${t.desc.length>32?'…':''}</span>`).join('')}${threats.length>4?`<span class="text-xs text-gray-400 py-0.5">+${threats.length-4} more</span>`:''}</div>` : ''}
       `;
       c.appendChild(el);
     });
@@ -395,48 +448,49 @@
     const name = prompt('Component name (e.g. Auth API, User Database)');
     if (!name||!M) return;
     const type = prompt('Type: Process / DataStore / ExternalEntity / TrustBoundary') || 'Process';
-    M.components.push({id:Date.now(), name, type, threats:[], addedAt: new Date().toISOString()});
-    save(); renderComponents(); renderProgress(); renderSidebar();
+    M.components.push({id:Date.now(), name, type, threats:[], addedAt:new Date().toISOString()});
+    save(); renderComponents(); renderProgress(); renderHeatmap(); renderSidebar();
   }
 
   function startStride(i) {
-    CI = i;
+    CI=i;
     const comp = M.components[i];
     document.getElementById('stride-title').textContent = comp.name;
     showView('stride');
     renderStrideCats(i);
   }
 
-  function backToModel() { showView('model'); renderComponents(); renderRiskSummary(); renderProgress(); renderHeatmap(); }
+  function backToModel() { showView('model'); renderComponents(); renderRiskSummary(); renderProgress(); renderHeatmap(); renderSidebar(); }
 
   function renderStrideCats(ci) {
     const comp = M.components[ci];
     const threats = comp.threats||[];
-    document.getElementById('stride-count').textContent = threats.length + ' threats recorded';
+    document.getElementById('stride-count').textContent = threats.length + ' threat'+(threats.length!==1?'s':'')+' recorded';
     const c = document.getElementById('stride-cats');
     c.innerHTML = '';
     Object.entries(EXAMPLES).forEach(([cat, examples]) => {
-      const catThreats = threats.filter(t => t.category===cat);
+      const key = cat.split(' - ')[0];
+      const catThreats = threats.filter(t=>t.category===cat);
       const div = document.createElement('div');
-      div.className = 'card overflow-hidden';
+      div.className = 'sf-card overflow-hidden';
       div.innerHTML = `
-        <div class="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+        <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div class="flex items-center gap-2.5">
-            <span class="px-2 py-0.5 rounded text-xs font-bold ${BADGES[cat]}">${cat.split(' - ')[0]}</span>
-            <span class="font-medium text-sm">${cat}</span>
-            ${catThreats.length ? `<span class="text-xs bg-gray-800 px-2 py-0.5 rounded-full text-gray-400">${catThreats.length}</span>` : ''}
+            <span class="stride-${key} px-2.5 py-0.5 rounded-lg text-xs font-bold">${key}</span>
+            <span class="font-semibold text-gray-900 text-sm">${cat.split(' - ')[1]}</span>
+            ${catThreats.length ? `<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">${catThreats.length}</span>` : ''}
           </div>
           <div class="flex gap-2 items-center">
-            <select id="ex-${ci}-${cat.replace(/[\s-]/g,'')}" class="bg-gray-800 border border-gray-700 text-xs rounded-lg px-2 py-1.5 text-gray-300 max-w-xs">
-              <option value="">— select example threat —</option>
-              ${examples.map(e => `<option value="${e}">${e}</option>`).join('')}
+            <select id="ex-${ci}-${cat.replace(/[\s-]/g,'')}" class="sf-input text-xs py-1.5 w-56">
+              <option value="">— Select example threat —</option>
+              ${examples.map(e=>`<option value="${e}">${e}</option>`).join('')}
             </select>
-            <button onclick="addFromExample(${ci},'${cat}')" class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg transition">Add</button>
-            <button onclick="openThreatModal(${ci},'${cat}','')" class="bg-gray-700 hover:bg-gray-600 text-xs px-3 py-1.5 rounded-lg transition">+ Custom</button>
+            <button onclick="addFromExample(${ci},'${cat}')" class="sf-btn-primary text-xs px-3 py-1.5">Add</button>
+            <button onclick="openThreatModal(${ci},'${cat}','')" class="sf-btn-secondary text-xs px-3 py-1.5">Custom</button>
           </div>
         </div>
         <div id="tlist-${ci}-${cat.replace(/[\s-]/g,'')}">
-          ${catThreats.length===0 ? '<div class="px-4 py-3 text-xs text-gray-600 italic">No threats recorded for this category.</div>' : catThreats.map((t,ti) => renderThreatRow(t,ci,ti)).join('')}
+          ${catThreats.length===0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map((t,ti)=>renderThreatRow(t,ci,ti)).join('')}
         </div>`;
       c.appendChild(div);
     });
@@ -444,19 +498,19 @@
 
   function renderThreatRow(t, ci, ti) {
     const score = riskScore(t.likelihood||1, t.impact||1);
-    const treatCls = {Mitigate:'treat-mitigate',Transfer:'treat-transfer',Accept:'treat-accept',Eliminate:'treat-eliminate'};
-    const statCls = {Open:'text-red-400','In Progress':'text-yellow-400',Done:'text-green-400'};
-    return `<div class="px-4 py-3 border-t border-gray-800 text-sm">
+    const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
+    const statCls = {Open:'text-red-500','In Progress':'text-orange-500',Done:'text-green-600'};
+    return `<div class="px-5 py-4 border-t border-gray-100">
       <div class="flex items-start justify-between gap-3">
         <div class="flex-1">
-          <div class="font-medium text-white mb-1">${t.desc}</div>
-          <div class="flex flex-wrap gap-2 text-xs">
-            <span class="bg-gray-800 px-2 py-0.5 rounded-full">L:${t.likelihood} × I:${t.impact} = <span class="${riskCls(score)} font-semibold">${score} ${riskLevel(score)}</span></span>
-            ${t.treatment ? `<span class="px-2 py-0.5 rounded-full ${treatCls[t.treatment]||''}">${t.treatment}</span>` : ''}
-            ${t.mitigation ? `<span class="text-gray-400">🛡 ${t.mitigation}</span>` : ''}
+          <div class="font-medium text-gray-900 text-sm mb-2">${t.desc}</div>
+          <div class="flex flex-wrap gap-2 items-center">
+            <span class="text-xs ${riskBadgeCls(score)} px-2 py-0.5 rounded-full font-semibold">L${t.likelihood} × I${t.impact} = ${score} ${riskLevel(score)}</span>
+            ${t.treatment ? `<span class="treat-pill ${treatCls[t.treatment]||''}">${t.treatment}</span>` : ''}
+            ${t.mitigation ? `<span class="text-xs text-gray-400">🛡 ${t.mitigation}</span>` : ''}
           </div>
         </div>
-        <span class="text-xs ${statCls[t.status]||'text-gray-500'} whitespace-nowrap">${t.status||'Open'}</span>
+        <span class="text-xs font-medium ${statCls[t.status]||'text-gray-400'} whitespace-nowrap">${t.status||'Open'}</span>
       </div>
     </div>`;
   }
@@ -466,192 +520,144 @@
     const sel = document.getElementById(key);
     if (!sel||!sel.value) { alert('Select an example first'); return; }
     openThreatModal(ci, cat, sel.value);
-    sel.value = '';
+    sel.value='';
   }
 
   function openThreatModal(ci, cat, prefill) {
-    threatCat = cat; threatCompIdx = ci; threatL = 3; threatI = 3; threatTreatment = 'Mitigate';
+    tCat=cat; tCompIdx=ci; tL=3; tI=3; tTreatment='Mitigate';
     document.getElementById('mt-cat').textContent = cat;
-    document.getElementById('mt-desc').value = prefill || '';
+    document.getElementById('mt-desc').value = prefill||'';
     document.getElementById('mt-mitigation').value = '';
-    renderScoreBtns();
-    updateScore();
+    renderScoreBtns(); updateScore();
     ['Mitigate','Transfer','Accept','Eliminate'].forEach(t => {
       const b = document.getElementById('treat-'+t);
-      b.className = b.className.replace(/bg-\S+/g,'') + (t===threatTreatment ? ' bg-indigo-700 border-indigo-500' : '');
+      b.className = 'treatment-btn' + (t===tTreatment?' active':'');
     });
     openModal('modal-threat');
   }
 
   function renderScoreBtns() {
-    ['like','imp'].forEach((type,ti) => {
+    ['like','imp'].forEach(type => {
       const c = document.getElementById(type+'-btns');
-      c.innerHTML = '';
+      c.innerHTML='';
       for (let n=1;n<=5;n++) {
         const isL = type==='like';
-        const active = (isL ? threatL : threatI) === n;
+        const active = (isL?tL:tI)===n;
         const btn = document.createElement('button');
-        btn.className = `w-9 h-9 rounded-lg text-sm font-medium border transition ${active ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'}`;
+        btn.className = 'score-btn'+(active?' active':'');
         btn.textContent = n;
-        btn.onclick = () => { if(isL) threatL=n; else threatI=n; renderScoreBtns(); updateScore(); };
+        btn.onclick = ()=>{ if(isL)tL=n; else tI=n; renderScoreBtns(); updateScore(); };
         c.appendChild(btn);
       }
     });
   }
 
   function updateScore() {
-    const s = riskScore(threatL, threatI);
+    const s = riskScore(tL,tI);
     const el = document.getElementById('mt-score');
-    el.textContent = s + ' — ' + riskLevel(s);
-    el.className = 'text-lg font-bold '+riskCls(s);
+    el.textContent = s+' — '+riskLevel(s);
+    el.className = 'text-xl font-bold '+riskCls(s);
   }
 
   function setTreatment(t) {
-    threatTreatment = t;
+    tTreatment=t;
     ['Mitigate','Transfer','Accept','Eliminate'].forEach(tr => {
       const b = document.getElementById('treat-'+tr);
-      if (b) b.style.background = tr===t ? '#3730a3' : '';
+      if(b) b.className = 'treatment-btn'+(tr===t?' active':'');
     });
   }
 
   function saveThreat() {
     const desc = document.getElementById('mt-desc').value.trim();
     if (!desc) { alert('Describe the threat'); return; }
-    M.components[threatCompIdx].threats.push({
-      id: Date.now(), category: threatCat, desc,
-      likelihood: threatL, impact: threatI,
-      treatment: threatTreatment,
-      mitigation: document.getElementById('mt-mitigation').value.trim(),
-      status: 'Open', createdAt: new Date().toISOString()
-    });
-    save();
-    closeModal('modal-threat');
-    renderStrideCats(threatCompIdx);
-    document.getElementById('stride-count').textContent = M.components[threatCompIdx].threats.length + ' threats recorded';
-  }
-
-  function exportJSON() {
-    if (!M) return;
-    const blob = new Blob([JSON.stringify(M,null,2)],{type:'application/json'});
-    const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download=M.name.replace(/\s/g,'_')+'.json'; a.click();
-  }
-
-  function exportCSV() {
-    if (!M) return;
-    const rows = [['Component','Type','STRIDE Category','Threat','Likelihood','Impact','Risk Score','Risk Level','Treatment','Mitigation','Status','Date']];
-    M.components.forEach(c => (c.threats||[]).forEach(t => {
-      const s = riskScore(t.likelihood||1,t.impact||1);
-      rows.push([c.name,c.type,t.category,t.desc,t.likelihood,t.impact,s,riskLevel(s),t.treatment||'',t.mitigation||'',t.status||'Open',t.createdAt?t.createdAt.split('T')[0]:'']);
-    }));
-    const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv],{type:'text/csv'});
-    const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download=M.name.replace(/\s/g,'_')+'.csv'; a.click();
-  }
-
-  function exportPDF() {
-    if (!M) { alert('No model loaded'); return; }
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(18); doc.setFont('helvetica','bold');
-    doc.text('STRIDE Threat Assessment Report', 14, 20);
-    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(120);
-    doc.text(`Model: ${M.name}`, 14, 28);
-    doc.text(`Assessor: ${M.assessor||'N/A'} · Created: ${M.created}`, 14, 33);
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 38);
-    doc.setTextColor(0);
-
-    const allThreats = M.components.flatMap(c => (c.threats||[]).map(t => ({ ...t, compName: c.name })));
-    const counts = {Critical:0,High:0,Medium:0,Low:0};
-    allThreats.forEach(t => counts[riskLevel(riskScore(t.likelihood||1,t.impact||1))]++);
-
-    doc.setFontSize(12); doc.setFont('helvetica','bold');
-    doc.text('Risk Summary', 14, 48);
-    doc.autoTable({
-      startY: 52,
-      head: [['Critical','High','Medium','Low','Total']],
-      body: [[counts.Critical,counts.High,counts.Medium,counts.Low,allThreats.length]],
-      styles: { fontSize: 9 }, headStyles: { fillColor: [63,63,70] }, margin: { left: 14 }
-    });
-
-    let y = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(12); doc.setFont('helvetica','bold');
-    doc.text('Threat Register', 14, y);
-    doc.autoTable({
-      startY: y + 4,
-      head: [['Component','Category','Threat','L','I','Score','Level','Treatment','Mitigation','Status']],
-      body: allThreats.map(t => {
-        const s = riskScore(t.likelihood||1,t.impact||1);
-        return [t.compName, t.category.split(' - ')[0], t.desc.substring(0,40), t.likelihood, t.impact, s, riskLevel(s), t.treatment||'', (t.mitigation||'').substring(0,30), t.status||'Open'];
-      }),
-      styles: { fontSize: 7, cellPadding: 2 },
-      headStyles: { fillColor: [63,63,70] },
-      columnStyles: { 2: { cellWidth: 40 }, 8: { cellWidth: 35 } },
-      margin: { left: 14 }
-    });
-
-    doc.save(M.name.replace(/\s/g,'_') + '_threat_report.pdf');
+    M.components[tCompIdx].threats.push({ id:Date.now(), category:tCat, desc, likelihood:tL, impact:tI, treatment:tTreatment, mitigation:document.getElementById('mt-mitigation').value.trim(), status:'Open', createdAt:new Date().toISOString() });
+    save(); closeModal('modal-threat');
+    renderStrideCats(tCompIdx);
   }
 
   function renderHeatmap() {
     const grid = document.getElementById('heatmap-grid');
     if (!grid) return;
-
-    // Collect all threats
-    const threats = M.components.flatMap(c => (c.threats||[]).map(t => ({...t, compName: c.name})));
-
-    // Build 5x5 matrix [impact][likelihood] — impact rows 5..1 (top to bottom), likelihood cols 1..5
+    const threats = M.components.flatMap(c=>(c.threats||[]).map(t=>({...t,compName:c.name})));
     const cells = {};
     threats.forEach(t => {
-      const l = t.likelihood || 1;
-      const i = t.impact || 1;
-      const key = `${l}-${i}`;
-      if (!cells[key]) cells[key] = [];
+      const key = `${t.likelihood||1}-${t.impact||1}`;
+      if (!cells[key]) cells[key]=[];
       cells[key].push(t);
     });
 
     const cellBg = (l,i) => {
-      const s = l*i;
-      if (s>=17) return 'background:#7f1d1d;border:1px solid #ef4444';
-      if (s>=10) return 'background:#7c2d12;border:1px solid #f97316';
-      if (s>=5)  return 'background:#713f12;border:1px solid #eab308';
-      return 'background:#14532d;border:1px solid #22c55e';
+      const s=l*i;
+      if(s>=17) return 'background:#fff0ef;border:1.5px solid #ffc9c6';
+      if(s>=10) return 'background:#fff8ef;border:1.5px solid #ffd9a0';
+      if(s>=5)  return 'background:#fffaed;border:1.5px solid #ffe066';
+      return 'background:#f0fbf4;border:1.5px solid #b7efc5';
     };
 
-    const dotColor = (s) => s>=17?'#fca5a5':s>=10?'#fed7aa':s>=5?'#fef08a':'#bbf7d0';
+    const dotBg = (s) => s>=17?'#ff3b30':s>=10?'#ff9500':s>=5?'#ffcc00':'#34c759';
 
     let html = '<div style="display:flex;flex-direction:column;gap:4px">';
-    for (let impact=5; impact>=1; impact--) {
-      html += '<div style="display:flex;gap:4px;align-items:center">';
-      html += `<div style="width:24px;text-align:right;font-size:11px;color:#6b7280;flex-shrink:0">${impact}</div>`;
-      for (let like=1; like<=5; like++) {
-        const key = `${like}-${impact}`;
-        const cellThreats = cells[key] || [];
-        const score = like*impact;
-        const tooltipContent = cellThreats.map(t =>
-          `<div style="margin-bottom:4px"><span style="color:#9ca3af;font-size:10px">${t.compName} / ${t.category.split(' - ')[0]}</span><div style="font-size:11px;color:#e5e7eb">${t.desc.substring(0,50)}${t.desc.length>50?'…':''}</div></div>`
-        ).join('');
-        const dotsHtml = cellThreats.slice(0,4).map(t => {
-          const sc = riskScore(t.likelihood||1,t.impact||1);
-          return `<div class="threat-dot" style="background:${dotColor(sc)};color:#1a1a1a;border-color:rgba(0,0,0,0.2);" title="${t.desc}">${t.category.split(' - ')[0]}</div>`;
+    for (let impact=5;impact>=1;impact--) {
+      html += `<div style="display:flex;gap:4px;align-items:center"><div style="width:20px;text-align:right;font-size:11px;color:#86868b;font-weight:600">${impact}</div>`;
+      for (let like=1;like<=5;like++) {
+        const key=`${like}-${impact}`;
+        const cellThreats=cells[key]||[];
+        const score=like*impact;
+        const tipContent = cellThreats.map(t=>`<div style="margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.15)"><div style="font-size:10px;color:rgba(255,255,255,0.5)">${t.compName} · ${t.category.split(' - ')[0]}</div><div style="font-size:11px">${t.desc.substring(0,50)}${t.desc.length>50?'…':''}</div></div>`).join('');
+        const dotsHtml = cellThreats.slice(0,4).map(t=>{
+          const sc=riskScore(t.likelihood||1,t.impact||1);
+          return `<div class="hm-dot" style="background:${dotBg(sc)};color:white;font-size:8px;font-weight:700">${t.category.split(' - ')[0]}</div>`;
         }).join('');
-        const moreHtml = cellThreats.length > 4 ? `<div style="font-size:9px;color:#9ca3af">+${cellThreats.length-4}</div>` : '';
+        const moreHtml = cellThreats.length>4?`<div style="font-size:9px;color:#86868b;font-weight:600">+${cellThreats.length-4}</div>`:'';
 
-        html += `<div class="heatmap-cell" style="${cellBg(like,impact)};gap:3px;flex-wrap:wrap;padding:4px;">`;
-        if (cellThreats.length > 0) {
-          html += `<div class="threat-tooltip"><div style="font-size:10px;font-weight:600;color:#6366f1;margin-bottom:4px">L:${like} × I:${impact} = ${score}</div>${tooltipContent}</div>`;
-        }
-        html += dotsHtml + moreHtml;
-        if (cellThreats.length === 0) {
-          html += `<span style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:600">${score}</span>`;
-        }
+        html += `<div class="hm-cell" style="${cellBg(like,impact)}">`;
+        if (cellThreats.length>0) html += `<div class="hm-tip"><div style="font-size:10px;font-weight:700;color:#6366f1;margin-bottom:6px">L:${like} × I:${impact} = ${score} ${riskLevel(score)}</div>${tipContent}</div>`;
+        html += dotsHtml+moreHtml;
+        if (!cellThreats.length) html += `<span style="font-size:10px;color:rgba(0,0,0,0.2);font-weight:600">${score}</span>`;
         html += '</div>';
       }
       html += '</div>';
     }
     html += '</div>';
     grid.innerHTML = html;
+  }
+
+  function exportJSON() {
+    if (!M) return;
+    const blob = new Blob([JSON.stringify(M,null,2)],{type:'application/json'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=M.name.replace(/\s/g,'_')+'.json'; a.click();
+  }
+
+  function exportCSV() {
+    if (!M) return;
+    const rows=[['Component','Type','STRIDE Category','Threat','Likelihood','Impact','Risk Score','Risk Level','Treatment','Mitigation','Status','Date']];
+    M.components.forEach(c=>(c.threats||[]).forEach(t=>{
+      const s=riskScore(t.likelihood||1,t.impact||1);
+      rows.push([c.name,c.type,t.category,t.desc,t.likelihood,t.impact,s,riskLevel(s),t.treatment||'',t.mitigation||'',t.status||'Open',t.createdAt?t.createdAt.split('T')[0]:'']);
+    }));
+    const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=M.name.replace(/\s/g,'_')+'.csv'; a.click();
+  }
+
+  function exportPDF() {
+    if (!M) return;
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.setTextColor(29,29,31);
+    doc.text('STRIDE Threat Assessment', 14, 22);
+    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(110,110,115);
+    doc.text(`${M.name}`, 14, 30);
+    doc.text(`Assessor: ${M.assessor||'N/A'} · Created: ${M.created} · Generated: ${new Date().toLocaleDateString()}`, 14, 35);
+    doc.setTextColor(29,29,31);
+    const allThreats = M.components.flatMap(c=>(c.threats||[]).map(t=>({...t,compName:c.name})));
+    const counts={Critical:0,High:0,Medium:0,Low:0};
+    allThreats.forEach(t=>counts[riskLevel(riskScore(t.likelihood||1,t.impact||1))]++);
+    doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.text('Risk Summary', 14, 45);
+    doc.autoTable({ startY:49, head:[['Critical','High','Medium','Low','Total']], body:[[counts.Critical,counts.High,counts.Medium,counts.Low,allThreats.length]], styles:{fontSize:9}, headStyles:{fillColor:[0,113,227]}, margin:{left:14} });
+    let y=doc.lastAutoTable.finalY+10;
+    doc.setFont('helvetica','bold'); doc.text('Threat Register', 14, y);
+    doc.autoTable({ startY:y+4, head:[['Component','Category','Threat','L','I','Score','Level','Treatment','Status']], body:allThreats.map(t=>{const s=riskScore(t.likelihood||1,t.impact||1);return[t.compName,t.category.split(' - ')[0],t.desc.substring(0,40),t.likelihood,t.impact,s,riskLevel(s),t.treatment||'',t.status||'Open'];}), styles:{fontSize:7,cellPadding:2}, headStyles:{fillColor:[0,113,227]}, margin:{left:14} });
+    doc.save(M.name.replace(/\s/g,'_')+'_report.pdf');
   }
 
   // Init
