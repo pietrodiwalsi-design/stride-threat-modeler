@@ -5,204 +5,389 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>STRIDE Threat Modeler</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tab-active { border-bottom: 2px solid #6366f1; color: #6366f1; }
+    .badge-s { background:#7c3aed; } .badge-t { background:#b91c1c; }
+    .badge-r { background:#b45309; } .badge-i { background:#0369a1; }
+    .badge-d { background:#065f46; } .badge-e { background:#be185d; }
+    .risk-critical { color:#ef4444; } .risk-high { color:#f97316; }
+    .risk-medium { color:#eab308; } .risk-low { color:#22c55e; }
+  </style>
 </head>
-<body class="bg-zinc-950 text-zinc-200">
-  <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-64 border-r border-zinc-800 p-4">
-      <h1 class="text-xl font-semibold mb-6">STRIDE</h1>
-      <button onclick="createNewModel()" 
-              class="w-full bg-white text-black px-4 py-2 rounded font-medium">
-        New Model
+<body class="bg-gray-950 text-gray-200 font-sans">
+
+<!-- Header -->
+<header class="bg-gray-900 border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center font-bold text-white text-sm">S</div>
+    <span class="font-semibold text-lg">STRIDE Threat Modeler</span>
+  </div>
+  <div class="flex gap-1">
+    <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn tab-active px-4 py-2 text-sm rounded-t">Dashboard</button>
+    <button onclick="showTab('howto')" id="tab-howto" class="tab-btn px-4 py-2 text-sm text-gray-400 hover:text-white">How to Use</button>
+  </div>
+</header>
+
+<!-- Dashboard Tab -->
+<div id="page-dashboard" class="flex h-[calc(100vh-57px)]">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <div class="p-4">
+      <button onclick="createNewModel()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+        + New Model
       </button>
-      <div class="mt-6">
-        <div class="text-sm text-zinc-400 mb-2">Models</div>
-        <div id="model-list" class="space-y-1 text-sm"></div>
+    </div>
+    <div class="px-4 pb-2 text-xs text-gray-500 uppercase tracking-wider">Models</div>
+    <div id="model-list" class="flex-1 overflow-y-auto px-2 space-y-1 pb-4 text-sm"></div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto p-6">
+
+    <!-- Welcome -->
+    <div id="view-welcome">
+      <div class="max-w-2xl">
+        <h1 class="text-3xl font-bold mb-2">Welcome to STRIDE Threat Modeler</h1>
+        <p class="text-gray-400 mb-8">Structure, record and analyze threat assessments using the STRIDE methodology.</p>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
+            <div class="text-2xl mb-2">🏗️</div>
+            <div class="font-semibold text-sm mb-1">1. Create Model</div>
+            <div class="text-xs text-gray-400">Define scope and system components</div>
+          </div>
+          <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
+            <div class="text-2xl mb-2">🔍</div>
+            <div class="font-semibold text-sm mb-1">2. Assess Threats</div>
+            <div class="text-xs text-gray-400">Go through each STRIDE category</div>
+          </div>
+          <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
+            <div class="text-2xl mb-2">📊</div>
+            <div class="font-semibold text-sm mb-1">3. Export Results</div>
+            <div class="text-xs text-gray-400">Generate report for stakeholders</div>
+          </div>
+        </div>
+        <button onclick="createNewModel()" class="mt-6 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg text-sm font-medium">
+          Create first model →
+        </button>
       </div>
     </div>
 
-    <!-- Main -->
-    <div class="flex-1 p-6">
-      <div id="welcome" class="max-w-md">
-        <h2 class="text-2xl font-semibold mb-2">STRIDE Threat Modeler</h2>
-        <p class="text-zinc-400">Create and execute structured threat assessments.</p>
+    <!-- Model View -->
+    <div id="view-model" class="hidden">
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <h2 id="model-title" class="text-2xl font-bold"></h2>
+          <p id="model-subtitle" class="text-gray-400 text-sm mt-1"></p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="addComponent()" class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm">+ Component</button>
+          <button onclick="exportCSV()" class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm">Export CSV</button>
+          <button onclick="exportJSON()" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm">Export JSON</button>
+        </div>
       </div>
 
-      <div id="model-view" class="hidden">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 id="model-name" class="text-2xl font-semibold"></h2>
-            <p id="model-desc" class="text-sm text-zinc-400"></p>
-          </div>
-          <button onclick="addComponent()" 
-                  class="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded text-sm">
-            Add Component
-          </button>
-          <button onclick="exportModel()" 
-                  class="ml-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded text-sm">
-            Export
-          </button>
-        </div>
+      <!-- Risk Summary -->
+      <div id="risk-summary" class="grid grid-cols-4 gap-3 mb-6"></div>
 
-        <div id="components" class="space-y-3"></div>
+      <!-- Components -->
+      <div id="components-list" class="space-y-3"></div>
+    </div>
+
+    <!-- STRIDE Assessment View -->
+    <div id="view-stride" class="hidden">
+      <div class="flex items-center gap-3 mb-6">
+        <button onclick="backToModel()" class="text-gray-400 hover:text-white">← Back</button>
+        <h2 id="stride-title" class="text-xl font-bold"></h2>
+      </div>
+      <div id="stride-categories" class="space-y-4"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- How to Use Tab -->
+<div id="page-howto" class="hidden max-w-3xl mx-auto p-8">
+  <h1 class="text-3xl font-bold mb-6">How to Use STRIDE Threat Modeler</h1>
+
+  <div class="space-y-6">
+    <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+      <h2 class="font-semibold text-indigo-400 mb-2">What is STRIDE?</h2>
+      <p class="text-sm text-gray-300">STRIDE is a threat modeling framework used to identify security threats by category:</p>
+      <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+        <div class="bg-gray-800 rounded p-2"><span class="text-purple-400 font-bold">S</span> – Spoofing: impersonating users or systems</div>
+        <div class="bg-gray-800 rounded p-2"><span class="text-red-400 font-bold">T</span> – Tampering: modifying data without authorization</div>
+        <div class="bg-gray-800 rounded p-2"><span class="text-yellow-400 font-bold">R</span> – Repudiation: denying performed actions</div>
+        <div class="bg-gray-800 rounded p-2"><span class="text-blue-400 font-bold">I</span> – Info Disclosure: exposing sensitive data</div>
+        <div class="bg-gray-800 rounded p-2"><span class="text-green-400 font-bold">D</span> – Denial of Service: disrupting availability</div>
+        <div class="bg-gray-800 rounded p-2"><span class="text-pink-400 font-bold">E</span> – Elevation of Privilege: gaining unauthorized access</div>
+      </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+      <h2 class="font-semibold text-indigo-400 mb-3">Step-by-Step Guide</h2>
+      <ol class="space-y-3 text-sm text-gray-300">
+        <li class="flex gap-3"><span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span><div><strong class="text-white">Create a Model</strong> – Click "+ New Model" and give it a name (e.g. "Payment API Assessment")</div></li>
+        <li class="flex gap-3"><span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span><div><strong class="text-white">Add Components</strong> – Click "+ Component" to add system parts: APIs, databases, user interfaces, services, trust boundaries</div></li>
+        <li class="flex gap-3"><span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span><div><strong class="text-white">Assess Each Component</strong> – Click "STRIDE" on any component to start the structured assessment</div></li>
+        <li class="flex gap-3"><span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span><div><strong class="text-white">Record Threats</strong> – Use dropdown examples or custom input. Rate each threat: Likelihood (1–5) × Impact (1–5) = Risk Score</div></li>
+        <li class="flex gap-3"><span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">5</span><div><strong class="text-white">Add Mitigation</strong> – For each threat define the mitigation action and status (Open / In Progress / Done)</div></li>
+        <li class="flex gap-3"><span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">6</span><div><strong class="text-white">Export</strong> – Use Export CSV or Export JSON to share results with stakeholders or import into other tools</div></li>
+      </ol>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+      <h2 class="font-semibold text-indigo-400 mb-2">Risk Score Guide</h2>
+      <div class="grid grid-cols-4 gap-2 text-sm">
+        <div class="bg-gray-800 rounded p-2 text-center"><div class="text-green-400 font-bold text-lg">1–4</div><div class="text-xs text-gray-400">Low</div></div>
+        <div class="bg-gray-800 rounded p-2 text-center"><div class="text-yellow-400 font-bold text-lg">5–9</div><div class="text-xs text-gray-400">Medium</div></div>
+        <div class="bg-gray-800 rounded p-2 text-center"><div class="text-orange-400 font-bold text-lg">10–16</div><div class="text-xs text-gray-400">High</div></div>
+        <div class="bg-gray-800 rounded p-2 text-center"><div class="text-red-400 font-bold text-lg">17–25</div><div class="text-xs text-gray-400">Critical</div></div>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    let currentModel = null;
-    let models = JSON.parse(localStorage.getItem('stride-models') || '[]');
+<script>
+  let models = JSON.parse(localStorage.getItem('stride-models') || '[]');
+  let currentModel = null;
+  let currentCompIndex = null;
 
-    function saveModels() {
-      localStorage.setItem('stride-models', JSON.stringify(models));
+  const EXAMPLES = {
+    'S - Spoofing':        ['Fake login page', 'Spoofed email sender', 'Impersonated API call', 'DNS spoofing', 'Session token theft'],
+    'T - Tampering':       ['Modified config file', 'Tampered DB record', 'Altered HTTP request body', 'Parameter manipulation', 'Log tampering'],
+    'R - Repudiation':     ['No audit logs', 'Unsigned transaction', 'Deleted log entry', 'Missing timestamps', 'No non-repudiation mechanism'],
+    'I - Info Disclosure': ['Unencrypted data in transit', 'Verbose error messages', 'Exposed API keys', 'Directory traversal', 'Unmasked PII in logs'],
+    'D - DoS':             ['Flood login endpoint', 'Large file upload', 'Resource exhaustion', 'Slowloris attack', 'DB query timeout loop'],
+    'E - Elevation':       ['Privilege escalation via misconfig', 'Broken access control', 'JWT manipulation', 'IDOR vulnerability', 'Insecure direct object ref']
+  };
+
+  const BADGE = {
+    'S - Spoofing':'badge-s','T - Tampering':'badge-t','R - Repudiation':'badge-r',
+    'I - Info Disclosure':'badge-i','D - DoS':'badge-d','E - Elevation':'badge-e'
+  };
+
+  function save() { localStorage.setItem('stride-models', JSON.stringify(models)); }
+
+  function riskClass(score) {
+    if (score >= 17) return 'risk-critical';
+    if (score >= 10) return 'risk-high';
+    if (score >= 5)  return 'risk-medium';
+    return 'risk-low';
+  }
+  function riskLabel(score) {
+    if (score >= 17) return 'Critical';
+    if (score >= 10) return 'High';
+    if (score >= 5)  return 'Medium';
+    return 'Low';
+  }
+
+  function showTab(tab) {
+    document.getElementById('page-dashboard').classList.toggle('hidden', tab !== 'dashboard');
+    document.getElementById('page-howto').classList.toggle('hidden', tab !== 'howto');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active','text-indigo-400'));
+    const btn = document.getElementById('tab-' + tab);
+    btn.classList.add('tab-active');
+  }
+
+  function showView(name) {
+    ['welcome','model','stride'].forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
+    document.getElementById('view-' + name).classList.remove('hidden');
+  }
+
+  function createNewModel() {
+    const name = prompt('Model name (e.g. Payment API Assessment)');
+    if (!name) return;
+    const desc = prompt('Scope / description (optional)') || '';
+    currentModel = { id: Date.now(), name, desc, components: [] };
+    models.push(currentModel);
+    save();
+    renderSidebar();
+    openModel(currentModel);
+  }
+
+  function openModel(m) {
+    currentModel = m;
+    showView('model');
+    document.getElementById('model-title').textContent = m.name;
+    document.getElementById('model-subtitle').textContent = m.desc || 'No description';
+    renderComponents();
+    renderRiskSummary();
+  }
+
+  function renderSidebar() {
+    const c = document.getElementById('model-list');
+    c.innerHTML = '';
+    models.forEach(m => {
+      const el = document.createElement('div');
+      el.className = 'px-3 py-2 rounded-lg hover:bg-gray-800 cursor-pointer text-sm flex justify-between items-center group';
+      const allThreats = m.components.flatMap(c => c.threats || []);
+      el.innerHTML = `<span>${m.name}</span><span class="text-xs text-gray-500">${allThreats.length} threats</span>`;
+      el.onclick = () => openModel(m);
+      c.appendChild(el);
+    });
+  }
+
+  function renderRiskSummary() {
+    const threats = currentModel.components.flatMap(c => c.threats || []);
+    const counts = {Critical:0, High:0, Medium:0, Low:0};
+    threats.forEach(t => { counts[riskLabel((t.likelihood||1)*(t.impact||1))]++; });
+    const colors = {Critical:'text-red-400 bg-red-950', High:'text-orange-400 bg-orange-950', Medium:'text-yellow-400 bg-yellow-950', Low:'text-green-400 bg-green-950'};
+    document.getElementById('risk-summary').innerHTML = Object.entries(counts).map(([k,v]) =>
+      `<div class="rounded-xl p-3 border border-gray-800 ${colors[k].split(' ')[1]}">
+        <div class="text-2xl font-bold ${colors[k].split(' ')[0]}">${v}</div>
+        <div class="text-xs text-gray-400">${k}</div>
+      </div>`
+    ).join('');
+  }
+
+  function renderComponents() {
+    const c = document.getElementById('components-list');
+    c.innerHTML = '';
+    if (!currentModel.components.length) {
+      c.innerHTML = '<div class="text-gray-500 text-sm bg-gray-900 rounded-xl p-6 border border-gray-800 text-center">No components yet. Click "+ Component" to add one.</div>';
+      return;
     }
-
-    function createNewModel() {
-      const name = prompt('Model name');
-      if (!name) return;
-
-      currentModel = {
-        id: Date.now(),
-        name: name,
-        description: '',
-        components: []
-      };
-      models.push(currentModel);
-      saveModels();
-      renderModelList();
-      showModel(currentModel);
-    }
-
-    function showModel(model) {
-      currentModel = model;
-      document.getElementById('welcome').classList.add('hidden');
-      document.getElementById('model-view').classList.remove('hidden');
-      document.getElementById('model-name').textContent = model.name;
-      document.getElementById('model-desc').textContent = model.description || '';
-      renderComponents();
-    }
-
-    function renderComponents() {
-      const container = document.getElementById('components');
-      container.innerHTML = '';
-
-      if (!currentModel.components.length) {
-        container.innerHTML = '<div class="text-zinc-400 text-sm">No components yet.</div>';
-        return;
-      }
-
-      currentModel.components.forEach((comp, index) => {
-        const el = document.createElement('div');
-        el.className = 'border border-zinc-800 rounded p-4';
-        el.innerHTML = `
-          <div class="flex justify-between">
+    currentModel.components.forEach((comp, i) => {
+      const threats = comp.threats || [];
+      const maxRisk = threats.length ? Math.max(...threats.map(t => (t.likelihood||1)*(t.impact||1))) : 0;
+      const el = document.createElement('div');
+      el.className = 'bg-gray-900 rounded-xl p-4 border border-gray-800 hover:border-gray-700 transition';
+      el.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-sm">⚙️</div>
             <div>
               <div class="font-medium">${comp.name}</div>
-              <div class="text-xs text-zinc-400">${comp.type}</div>
+              <div class="text-xs text-gray-400">${comp.type} · ${threats.length} threats${maxRisk ? ` · <span class="${riskClass(maxRisk)}">${riskLabel(maxRisk)} risk</span>` : ''}</div>
             </div>
-            <button onclick="startStride(${index})" 
-                    class="text-xs px-3 py-1 bg-zinc-800 rounded">STRIDE</button>
           </div>
-        `;
-        container.appendChild(el);
-      });
-    }
+          <button onclick="startStride(${i})" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg text-xs font-medium">STRIDE →</button>
+        </div>
+        ${threats.length ? `<div class="mt-3 flex flex-wrap gap-1">${threats.slice(0,5).map(t => `<span class="text-xs px-2 py-0.5 rounded-full ${BADGE[t.category]||'bg-gray-700'} text-white">${t.desc.substring(0,30)}${t.desc.length>30?'...':''}</span>`).join('')}${threats.length>5?`<span class="text-xs text-gray-500">+${threats.length-5} more</span>`:''}</div>` : ''}
+      `;
+      c.appendChild(el);
+    });
+  }
 
-    function addComponent() {
-      const name = prompt('Component name');
-      if (!name || !currentModel) return;
+  function addComponent() {
+    if (!currentModel) return;
+    const name = prompt('Component name (e.g. Login API, Auth Database)');
+    if (!name) return;
+    const type = prompt('Type (Process / DataStore / ExternalEntity / TrustBoundary)') || 'Process';
+    currentModel.components.push({ id: Date.now(), name, type, threats: [] });
+    save();
+    renderComponents();
+    renderRiskSummary();
+    renderSidebar();
+  }
 
-      currentModel.components.push({
-        id: Date.now(),
-        name: name,
-        type: 'Process',
-        threats: []
-      });
-      saveModels();
-      renderComponents();
-    }
+  function startStride(i) {
+    currentCompIndex = i;
+    const comp = currentModel.components[i];
+    document.getElementById('stride-title').textContent = comp.name + ' — STRIDE Assessment';
+    showView('stride');
+    renderStrideCategories(i);
+  }
 
-    function startStride(index) {
-      const comp = currentModel.components[index];
-      const container = document.getElementById('components');
-      container.innerHTML = '';
+  function backToModel() {
+    showView('model');
+    renderComponents();
+    renderRiskSummary();
+    renderSidebar();
+  }
 
-      const header = document.createElement('div');
-      header.className = 'mb-4 flex justify-between';
-      header.innerHTML = `<div class="font-semibold">${comp.name} - STRIDE</div>`;
-      container.appendChild(header);
+  function renderStrideCategories(compIndex) {
+    const comp = currentModel.components[compIndex];
+    const c = document.getElementById('stride-categories');
+    c.innerHTML = '';
 
-      const categories = ['S - Spoofing','T - Tampering','R - Repudiation','I - Info Disclosure','D - DoS','E - Elevation'];
-
-      categories.forEach(cat => {
-        const row = document.createElement('div');
-        row.className = 'border border-zinc-800 rounded p-3 mb-2';
-        row.innerHTML = `
-          <div class="flex justify-between items-center mb-2">
-            <div class="text-sm">${cat}</div>
-            <button onclick="addThreat(${index}, '${cat}')" class="text-xs bg-zinc-800 px-2 py-1 rounded">+ Threat</button>
+    Object.entries(EXAMPLES).forEach(([cat, examples]) => {
+      const catThreats = (comp.threats || []).filter(t => t.category === cat);
+      const div = document.createElement('div');
+      div.className = 'bg-gray-900 rounded-xl border border-gray-800 overflow-hidden';
+      div.innerHTML = `
+        <div class="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+          <span class="font-medium text-sm">${cat}</span>
+          <div class="flex gap-2 items-center">
+            <select id="ex-${compIndex}-${cat.replace(/\s/g,'')}" class="bg-gray-800 border border-gray-700 text-xs rounded px-2 py-1 text-gray-300 max-w-52">
+              <option value="">— select example —</option>
+              ${examples.map(e => `<option value="${e}">${e}</option>`).join('')}
+            </select>
+            <button onclick="addExampleThreat(${compIndex},'${cat}')" class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs px-3 py-1 rounded">Add</button>
+            <button onclick="addCustomThreat(${compIndex},'${cat}')" class="bg-gray-700 hover:bg-gray-600 text-xs px-3 py-1 rounded">Custom</button>
           </div>
-          <div id="threats-${cat.replace(/\s/g,'')}-${index}"></div>
-        `;
-        container.appendChild(row);
-        renderThreats(index, cat, row);
+        </div>
+        <div id="tlist-${compIndex}-${cat.replace(/\s/g,'')}" class="divide-y divide-gray-800">
+          ${catThreats.length === 0 ? '<div class="px-4 py-3 text-xs text-gray-500">No threats recorded.</div>' :
+            catThreats.map((t,ti) => threatRow(t, compIndex, cat, ti)).join('')}
+        </div>
+      `;
+      c.appendChild(div);
+    });
+  }
+
+  function threatRow(t, compIndex, cat, ti) {
+    const score = (t.likelihood||1) * (t.impact||1);
+    const statColors = {Open:'text-red-400',InProgress:'text-yellow-400',Done:'text-green-400'};
+    return `<div class="px-4 py-3 text-sm">
+      <div class="flex justify-between items-start">
+        <div class="flex-1">
+          <div class="font-medium">${t.desc}</div>
+          <div class="text-xs text-gray-400 mt-1">L:${t.likelihood||'?'} × I:${t.impact||'?'} = <span class="${riskClass(score)} font-semibold">${score} ${riskLabel(score)}</span></div>
+          ${t.mitigation ? `<div class="text-xs text-gray-400 mt-1">🛡 ${t.mitigation}</div>` : ''}
+        </div>
+        <span class="text-xs ${statColors[t.status]||'text-gray-400'} ml-3">${t.status||'Open'}</span>
+      </div>
+    </div>`;
+  }
+
+  function addExampleThreat(compIndex, cat) {
+    const sel = document.getElementById(`ex-${compIndex}-${cat.replace(/\s/g,'')}`);
+    const desc = sel.value;
+    if (!desc) { alert('Select example first'); return; }
+    pushThreat(compIndex, cat, desc);
+    sel.value = '';
+  }
+
+  function addCustomThreat(compIndex, cat) {
+    const desc = prompt('Describe the threat');
+    if (!desc) return;
+    pushThreat(compIndex, cat, desc);
+  }
+
+  function pushThreat(compIndex, cat, desc) {
+    const likelihood = parseInt(prompt('Likelihood 1–5 (1=rare, 5=certain)') || '3');
+    const impact = parseInt(prompt('Impact 1–5 (1=minimal, 5=catastrophic)') || '3');
+    const mitigation = prompt('Mitigation / control (optional)') || '';
+    currentModel.components[compIndex].threats.push({ category: cat, desc, likelihood, impact, mitigation, status:'Open' });
+    save();
+    renderStrideCategories(compIndex);
+  }
+
+  function exportJSON() {
+    if (!currentModel) return;
+    const blob = new Blob([JSON.stringify(currentModel, null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = currentModel.name.replace(/\s/g,'_') + '.json'; a.click();
+  }
+
+  function exportCSV() {
+    if (!currentModel) return;
+    const rows = [['Component','Category','Threat','Likelihood','Impact','Risk Score','Risk Level','Mitigation','Status']];
+    currentModel.components.forEach(comp => {
+      (comp.threats||[]).forEach(t => {
+        const score = (t.likelihood||1)*(t.impact||1);
+        rows.push([comp.name, t.category, t.desc, t.likelihood||'', t.impact||'', score, riskLabel(score), t.mitigation||'', t.status||'Open']);
       });
+    });
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = currentModel.name.replace(/\s/g,'_') + '.csv'; a.click();
+  }
 
-      const back = document.createElement('button');
-      back.className = 'mt-4 text-sm text-zinc-400';
-      back.textContent = '← Back';
-      back.onclick = () => { showModel(currentModel); };
-      container.appendChild(back);
-    }
-
-    function renderThreats(compIndex, category, row) {
-      const comp = currentModel.components[compIndex];
-      const container = row.querySelector(`#threats-${category.replace(/\s/g,'')}-${compIndex}`);
-      if (!container) return;
-      container.innerHTML = '';
-
-      const threats = comp.threats.filter(t => t.category === category);
-      threats.forEach((t, i) => {
-        const el = document.createElement('div');
-        el.className = 'text-xs bg-zinc-900 p-2 rounded mb-1';
-        el.innerHTML = `${t.desc} <span class="text-zinc-400">(${t.likelihood || '?'}/${t.impact || '?'})</span>`;
-        container.appendChild(el);
-      });
-    }
-
-    function addThreat(compIndex, category) {
-      const desc = prompt('Threat description');
-      if (!desc) return;
-      const likelihood = prompt('Likelihood (1-5)') || 3;
-      const impact = prompt('Impact (1-5)') || 3;
-      currentModel.components[compIndex].threats.push({ category, desc, likelihood: parseInt(likelihood), impact: parseInt(impact) });
-      saveModels();
-      startStride(compIndex);
-    }
-
-    function renderModelList() {
-      const container = document.getElementById('model-list');
-      container.innerHTML = '';
-      models.forEach(m => {
-        const el = document.createElement('div');
-        el.className = 'px-3 py-1.5 hover:bg-zinc-900 rounded cursor-pointer text-sm';
-        el.textContent = m.name;
-        el.onclick = () => showModel(m);
-        container.appendChild(el);
-      });
-    }
-
-    function exportModel() {
-      if (!currentModel) return;
-      const data = JSON.stringify(currentModel, null, 2);
-      const blob = new Blob([data], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `${currentModel.name}.json`;
-      a.click();
-    }
-
-    renderModelList();
-  </script>
+  renderSidebar();
+</script>
 </body>
 </html>
