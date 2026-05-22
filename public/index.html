@@ -92,6 +92,21 @@
   .w-60 { width: 15rem; }
   .h-12 { height: 3rem; }
   .pt-12 { padding-top: 3rem; }
+  .top-0 { top: 0; }
+  .top-12 { top: 3rem; }
+  .bottom-0 { bottom: 0; }
+  .left-0 { left: 0; }
+  .right-0 { right: 0; }
+  .overflow-y-auto { overflow-y: auto; }
+  .overflow-hidden { overflow: hidden; }
+  .flex-col { flex-direction: column; }
+  .flex-1 { flex: 1 1 0%; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .justify-center { justify-content: center; }
+  .w-full { width: 100%; }
+  .h-full { height: 100%; }
+  .min-h-screen { min-height: 100vh; }
   /* Chrome autofill fix */
   input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 40px #fff inset !important;
@@ -119,7 +134,7 @@
 <div class="pt-12 flex" style="min-height:100vh">
 
 <!-- Sidebar -->
-<aside class="sf-sidebar w-60 fixed top-12 bottom-0 flex flex-col z-30">
+<aside class="sf-sidebar w-60 fixed top-12 bottom-0 flex flex-col z-30" style="position:fixed;top:3rem;bottom:0;left:0;width:15rem;display:flex;flex-direction:column;z-index:30">
   <div class="p-3 border-b border-black/5">
     <button onclick="openNewModel()" class="sf-btn-primary w-full">+ New Model</button>
   </div>
@@ -130,7 +145,7 @@
 </aside>
 
 <!-- Main -->
-<main class="ml-60 flex-1">
+<main class="ml-60 flex-1" style="margin-left:15rem;flex:1">
 
 <!-- Dashboard -->
 <div id="page-dashboard">
