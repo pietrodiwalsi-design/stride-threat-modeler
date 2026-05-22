@@ -20,7 +20,7 @@
   .sf-btn-primary:hover { background: #0077ed; }
   .sf-btn-secondary { background: rgba(0,0,0,0.06); color: #1d1d1f; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
   .sf-btn-secondary:hover { background: rgba(0,0,0,0.1); }
-  .sf-input { background: #fff; border: 1px solid #d2d2d7; border-radius: 10px; padding: 10px 14px; font-size: 14px; color: #1d1d1f; width: 100%; outline: none; transition: border-color 0.15s; }
+  .sf-input { background: #fff; border: 1px solid #d2d2d7; border-radius: 10px; padding: 8px 12px; font-size: 13px; color: #1d1d1f; width: 100%; outline: none; transition: border-color 0.15s; text-align: left; }
   .sf-input:focus { border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
   .sf-label { font-size: 13px; font-weight: 500; color: #6e6e73; margin-bottom: 6px; display: block; }
   .sf-nav { background: rgba(255,255,255,0.88); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,0.08); }
@@ -769,23 +769,26 @@
     sel.value = '';
   }
 
+  function deleteThreat(ci, ti) {
+    if (!confirm('Delete this threat?')) return;
+    M.components[ci].threats.splice(ti, 1);
+    save(); renderStrideCats(ci); renderRiskSummary(); renderProgress(); renderHeatmap(); renderSidebar();
+  }
+
   function renderThreatRow(t, ci, ti) {
     const score = riskScore(t.likelihood||1, t.impact||1);
     const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
-    const statCls = {Open:'text-red-500','In Progress':'text-orange-500',Done:'text-green-600'};
-    return `<div class="px-5 py-4 border-t border-gray-100">
-      <div class="flex items-start justify-between gap-3">
-        <div class="flex-1">
-          <div class="font-medium text-gray-900 text-sm mb-2">${t.desc}</div>
-          <div class="flex flex-wrap gap-2 items-center">
-            <span class="text-xs ${riskBadgeCls(score)} px-2 py-0.5 rounded-full font-semibold">L${t.likelihood} × I${t.impact} = ${score} ${riskLevel(score)}</span>
-            ${t.treatment ? `<span class="treat-pill ${treatCls[t.treatment]||''}">${t.treatment}</span>` : ''}
-            ${t.mitigation ? '<span class="text-xs text-gray-400 italic">' + t.mitigation + '</span>' : ''}
-          </div>
-        </div>
-        <span class="text-xs font-medium ${statCls[t.status]||'text-gray-400'} whitespace-nowrap">${t.status||'Open'}</span>
-      </div>
-    </div>`;
+    return '<div class="px-5 py-3 border-t border-gray-100">'
+      + '<div class="flex items-start justify-between gap-3">'
+      + '<div class="flex-1">'
+      + '<div class="font-medium text-gray-900 text-sm mb-1.5">' + t.desc + '</div>'
+      + '<div class="flex flex-wrap gap-2 items-center">'
+      + '<span class="text-xs ' + riskBadgeCls(score) + ' px-2 py-0.5 rounded-full font-semibold">L' + (t.likelihood||1) + ' × I' + (t.impact||1) + ' = ' + score + ' ' + riskLevel(score) + '</span>'
+      + (t.treatment ? '<span class="treat-pill ' + (treatCls[t.treatment]||'') + '">' + t.treatment + '</span>' : '')
+      + (t.mitigation ? '<span class="text-xs text-gray-400 italic">' + t.mitigation + '</span>' : '')
+      + '</div></div>'
+      + '<button onclick="deleteThreat(' + ci + ',' + ti + ')" title="Delete threat" style="flex-shrink:0;padding:4px 8px;border-radius:8px;border:none;background:transparent;color:#d1d1d6;cursor:pointer;font-size:13px;line-height:1" onmouseover="this.style.color=\'#ff3b30\'" onmouseout="this.style.color=\'#d1d1d6\'">×</button>'
+      + '</div></div>';
   }
 
   function addFromExample(ci, cat) {
