@@ -109,7 +109,7 @@
   <div id="view-welcome" class="p-8 max-w-4xl">
     <div class="mb-10">
       <h1 class="text-3xl font-semibold text-gray-900 mb-2 tracking-tight">Threat Modeling</h1>
-      <p class="text-gray-500 text-base">Identify and analyze security threats using the STRIDE framework.</p>
+      <p class="text-gray-500 text-base">Choose your methodology. Map your system. Identify and mitigate threats.</p>
     </div>
     <div class="grid grid-cols-3 gap-4 mb-10">
       <div class="sf-card p-6">
@@ -124,7 +124,7 @@
           <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
         </div>
         <h3 class="font-semibold text-gray-900 mb-1">Identify Threats</h3>
-        <p class="text-sm text-gray-500">Work through all 6 STRIDE categories per component</p>
+        <p class="text-sm text-gray-500">Run STRIDE, LINDDUN, DREAD, PASTA or hybrid assessments per component</p>
       </div>
       <div class="sf-card p-6">
         <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-4">
@@ -176,7 +176,7 @@
     <div class="sf-card p-6 mb-6">
       <div class="flex items-center justify-between mb-5">
         <div>
-          <h3 class="font-semibold text-gray-900">Risk Heatmap</h3>
+          <h3 class="font-semibold text-gray-900">Risk Heatmap <span id="heatmap-method-badge" class="text-xs font-medium text-gray-400 ml-1"></span></h3>
           <p class="text-xs text-gray-400 mt-0.5">Threats plotted by Likelihood × Impact — hover for details</p>
         </div>
         <div class="flex gap-4 text-xs text-gray-500">
@@ -305,13 +305,14 @@
       <div>
         <label class="sf-label">Methodology</label>
         <select id="inp-method" class="sf-input">
-          <option value="STRIDE">STRIDE — Security (Spoofing, Tampering, Repudiation, DoS, Info Disclosure, Elevation)</option>
-          <option value="LINDDUN">LINDDUN — Privacy (Linkability, Identifiability, Non-repudiation...)</option>
-          <option value="DREAD">DREAD — Quantitative Risk Rating</option>
-          <option value="PASTA">PASTA — 7-Step Risk-Centric Analysis</option>
-          <option value="RaD-TM">RaD-TM — Rapid Developer-Driven</option>
-          <option value="Hybrid">Hybrid — STRIDE + LINDDUN Combined</option>
+          <option value="STRIDE">STRIDE — Security</option>
+          <option value="LINDDUN">LINDDUN — Privacy</option>
+          <option value="DREAD">DREAD — Quantitative</option>
+          <option value="PASTA">PASTA — 7-Step Risk-Centric</option>
+          <option value="RaD-TM">RaD-TM — Developer-Driven</option>
+          <option value="Hybrid">Hybrid — STRIDE + LINDDUN</option>
         </select>
+        <p class="text-xs text-gray-400 mt-1.5">STRIDE for security · LINDDUN for privacy · Hybrid for both</p>
       </div>
     </div>
     <div class="flex gap-3 mt-5">
@@ -512,7 +513,10 @@
       const total = m.components.flatMap(c=>c.threats||[]).length;
       const el = document.createElement('div');
       el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
-      el.innerHTML = `<span class="truncate text-sm">${m.name}</span><span class="text-xs text-gray-400 flex-shrink-0 ml-2">${total}</span>`;
+      const methodColors = {LINDDUN:'bg-teal-50 text-teal-700',DREAD:'bg-orange-50 text-orange-700',PASTA:'bg-purple-50 text-purple-700','RaD-TM':'bg-green-50 text-green-700',Hybrid:'bg-indigo-50 text-indigo-700'};
+      const mc = m.methodology && methodColors[m.methodology] ? methodColors[m.methodology] : null;
+      const methodBadge = mc ? '<span class="text-xs font-semibold px-1.5 py-0.5 rounded-md '+mc+' flex-shrink-0 ml-1">'+m.methodology+'</span>' : '';
+      el.innerHTML = `<span class="truncate text-sm">${m.name}</span><div class="flex items-center gap-1 flex-shrink-0">${methodBadge}<span class="text-xs text-gray-400 ml-1">${total}</span></div>`;
       el.onclick = () => loadModel(m);
       c.appendChild(el);
     });
@@ -540,7 +544,7 @@
     const c = document.getElementById('components-list');
     c.innerHTML = '';
     if (!M.components.length) {
-      c.innerHTML = '<div class="sf-card p-8 text-center text-gray-400 text-sm">No components yet. Click "+ Component" to add your first system component.</div>';
+      c.innerHTML = '<div class="sf-card p-10 flex flex-col items-center justify-center text-center"><div class="w-14 h-14 rounded-full bg-gray-50 flex items-center justify-center mb-4"><svg class="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div><p class="text-sm font-semibold text-gray-500 mb-1">No components yet</p><p class="text-xs text-gray-400">Click + Component to define your system architecture</p></div>';
       return;
     }
     M.components.forEach((comp, i) => {
@@ -577,7 +581,11 @@
   function startStride(i) {
     CI=i;
     const comp = M.components[i];
-    document.getElementById('stride-title').textContent = comp.name;
+    const methodColors2 = {LINDDUN:'bg-teal-50 text-teal-700',DREAD:'bg-orange-50 text-orange-700',PASTA:'bg-purple-50 text-purple-700','RaD-TM':'bg-green-50 text-green-700',Hybrid:'bg-indigo-50 text-indigo-700'};
+    const strideMethod = M.methodology || 'STRIDE';
+    const strideMc = methodColors2[strideMethod];
+    const strideBadge = strideMc ? ' <span class="text-xs font-semibold px-2 py-0.5 rounded-lg '+strideMc+' ml-2">'+strideMethod+'</span>' : '';
+    document.getElementById('stride-title').innerHTML = comp.name + strideBadge;
     showView('stride');
     renderStrideCats(i);
   }
@@ -705,6 +713,10 @@
   function renderHeatmap() {
     const grid = document.getElementById('heatmap-grid');
     if (!grid) return;
+    const allThreats = M.components.flatMap(c=>(c.threats||[]));
+    const badge = document.getElementById('heatmap-method-badge');
+    if (badge && M) { const total = allThreats.length; badge.textContent = (M.methodology || 'STRIDE') + (total ? ' · '+total+' threat'+(total!==1?'s':'') : ''); }
+    if (allThreats.length === 0) { grid.innerHTML = '<div class="flex flex-col items-center justify-center py-10 text-center"><div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3"><svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><p class="text-sm text-gray-400 font-medium">No threats recorded yet</p><p class="text-xs text-gray-300 mt-1">Add threats to see them plotted here</p></div>'; return; }
     const threats = M.components.flatMap(c=>(c.threats||[]).map(t=>({...t,compName:c.name})));
     const cells = {};
     threats.forEach(t => {
