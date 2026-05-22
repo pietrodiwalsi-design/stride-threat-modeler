@@ -14,8 +14,8 @@
   *, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
   body { background: #f5f5f7; color: #1d1d1f; }
 
-  /* Apple-style components */
-  .sf-card { background: #fff; border-radius: 16px; border: 1px solid #e5e5ea; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04); }
+  /* Apple-style components — lighter, calmer */
+  .sf-card { background: #fff; border-radius: 12px; border: 1px solid #f0f0f3; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
   .sf-btn-primary { background: #0071e3; color: #fff; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
   .sf-btn-primary:hover { background: #0077ed; }
   .sf-btn-secondary { background: rgba(0,0,0,0.06); color: #1d1d1f; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
@@ -153,7 +153,7 @@
   <div class="px-3 pt-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Models</div>
   <div id="model-list" class="flex-1 overflow-y-auto px-2 pb-3 space-y-0.5"></div>
   <div class="p-3 border-t border-black/5 text-xs text-gray-400 text-center">Stored locally in browser</div>
-  <div class="px-3 pb-2 text-center" style="font-size:10px;color:#aaa">v3.0 — Multi-model</div>
+  <div class="px-3 pb-2 text-center" style="font-size:10px;color:#aaa">v8 — Minimal Apple design</div>
 </aside>
 
 <!-- Main -->
@@ -742,18 +742,19 @@
       var div = document.createElement('div');
             var catName = cat.split(' - ').slice(1).join(' - ');
       div.className = 'sf-card overflow-hidden';
-      div.innerHTML = '<div style="padding:16px 20px;background:#fafafa;border-bottom:1px solid #efefef">'
+      // v8 — minimal Apple-style row (no gray band, tight spacing)
+      div.innerHTML = '<div style="padding:13px 18px;border-bottom:1px solid #f5f5f7">'
         + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
         + '<div style="display:flex;align-items:center;gap:10px">'
         + '<span class="' + badgeCls + '" style="padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700;flex-shrink:0">' + key + '</span>'
         + '<span style="font-weight:600;color:#1d1d1f;font-size:14px">' + catName + '</span>'
         + (catThreats.length ? '<span style="font-size:11px;background:#e8e8ed;color:#6e6e73;padding:2px 8px;border-radius:980px;font-weight:600">' + catThreats.length + '</span>' : '')
         + '</div>'
-        + '<button onclick="openThreatModal(' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\',\'\');" style="padding:6px 16px;background:#fff;border:1.5px solid #d2d2d7;border-radius:980px;font-size:12px;font-weight:500;color:#1d1d1f;cursor:pointer">+ Custom</button>'
+        + '<button onclick="openThreatModal(' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\',\'\');" style="padding:5px 11px;background:#fff;border:1px solid #d2d2d7;border-radius:8px;font-size:12px;font-weight:500;color:#3a3a3c;cursor:pointer">+ Custom</button>'
         + '</div>'
         + '<div style="display:flex;gap:8px;align-items:center">'
-        + '<select id="' + safeId + '" style="flex:1;background:#fff;border:1px solid #d2d2d7;border-radius:10px;padding:8px 12px;font-size:13px;color:#1d1d1f;outline:none;font-family:inherit;min-width:0">' + optionsHtml + '</select>'
-        + '<button onclick="addExDyn(\'' + safeId + '\',' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\');" style="padding:8px 18px;background:#0071e3;color:#fff;border:none;border-radius:980px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0">Add threat</button>'
+        + '<select id="' + safeId + '" style="background:#fff;border:1px solid #e5e5ea;border-radius:8px;padding:5px 9px;font-size:12px;color:#3a3a3c;outline:none;font-family:inherit;max-width:200px">' + optionsHtml + '</select>'
+        + '<button onclick="addExDyn(\'' + safeId + '\',' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\');" style="padding:5px 12px;background:#0071e3;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Add threat</button>'
         + '</div>'
         + '</div>'
         + '<div id="tlist-' + safeId + '">' + threatRowsHtml + '</div>';
