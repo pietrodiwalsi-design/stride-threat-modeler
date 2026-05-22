@@ -15,7 +15,7 @@
   body { background: #f5f5f7; color: #1d1d1f; }
 
   /* Apple-style components */
-  .sf-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04); }
+  .sf-card { background: #fff; border-radius: 16px; border: 1px solid #e5e5ea; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04); }
   .sf-btn-primary { background: #0071e3; color: #fff; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
   .sf-btn-primary:hover { background: #0077ed; }
   .sf-btn-secondary { background: rgba(0,0,0,0.06); color: #1d1d1f; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
@@ -71,6 +71,18 @@
   .modal-backdrop { background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); }
   .score-btn { width: 36px; height: 36px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid #d2d2d7; background: #fff; color: #3a3a3c; cursor: pointer; transition: all 0.12s; }
   .score-btn.active { background: #0071e3; color: #fff; border-color: #0071e3; }
+  .score-btn[data-v="1"].active { background: #34c759; border-color: #34c759; color: #fff; }
+  .score-btn[data-v="2"].active { background: #30d158; border-color: #30d158; color: #fff; }
+  .score-btn[data-v="3"].active { background: #ffcc00; border-color: #f0b800; color: #1d1d1f; }
+  .score-btn[data-v="4"].active { background: #ff9500; border-color: #ff9500; color: #fff; }
+  .score-btn[data-v="5"].active { background: #ff3b30; border-color: #ff3b30; color: #fff; }
+  /* Method badges for sidebar */
+  .mb-STRIDE  { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .mb-LINDDUN { background: #f0fdfa; color: #0d9488; border: 1px solid #99f6e4; }
+  .mb-DREAD   { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+  .mb-PASTA   { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+  .mb-RaD-TM  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  .mb-Hybrid  { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
   .treatment-btn { flex: 1; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1.5px solid #d2d2d7; background: #fff; color: #3a3a3c; cursor: pointer; transition: all 0.12s; }
   .treatment-btn.active { border-color: #0071e3; background: #edf4ff; color: #0055b3; }
 
@@ -263,9 +275,12 @@
     </button>
     <div class="flex items-center justify-between mb-2">
       <h2 id="stride-title" class="text-xl font-semibold text-gray-900 tracking-tight"></h2>
-      <span id="stride-count" class="text-sm text-gray-400 bg-gray-100 px-3 py-1 rounded-full font-medium"></span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="stride-count" class="text-sm text-gray-400 bg-gray-100 px-3 py-1 rounded-full font-medium"></span>
+        <button onclick="addComponent()" style="padding:6px 14px;background:#fff;border:1.5px solid #d2d2d7;border-radius:980px;font-size:12px;font-weight:500;color:#3a3a3c;cursor:pointer">+ Add area</button>
+      </div>
     </div>
-    <p class="text-sm text-gray-400 mb-6">Work through each STRIDE category. Use example threats as starting points or add custom ones.</p>
+    <p class="text-sm text-gray-400 mb-6" id="stride-method-desc"></p>
     <div id="stride-cats" class="space-y-4"></div>
   </div>
 
@@ -332,21 +347,21 @@
   <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
     <h3 class="text-lg font-semibold text-gray-900 mb-4">New Threat Model</h3>
     <div class="space-y-4">
-      <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API Assessment Q2 2026" class="sf-input"></div>
-      <div><label class="sf-label">Scope / description</label><textarea id="inp-desc" rows="2" placeholder="What system are you assessing?" class="sf-input resize-none"></textarea></div>
+      <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API, Customer Portal, Auth Service" class="sf-input" autocomplete="off"></div>
       <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input" autocomplete="off"></div>
       <div>
         <label class="sf-label">Methodology</label>
-        <div class="flex flex-wrap gap-2" id="method-btns">
-          <button type="button" onclick="selectMethod('STRIDE')" id="mb-STRIDE" class="method-btn active px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700">STRIDE</button>
-          <button type="button" onclick="selectMethod('LINDDUN')" id="mb-LINDDUN" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">LINDDUN</button>
-          <button type="button" onclick="selectMethod('DREAD')" id="mb-DREAD" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">DREAD</button>
-          <button type="button" onclick="selectMethod('PASTA')" id="mb-PASTA" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">PASTA</button>
-          <button type="button" onclick="selectMethod('RaD-TM')" id="mb-RaD-TM" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">RaD-TM</button>
-          <button type="button" onclick="selectMethod('Hybrid')" id="mb-Hybrid" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">Hybrid</button>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button type="button" onclick="selectMethod('STRIDE')" id="mb-STRIDE" class="method-btn active" style="flex:1;padding:10px 0;border-radius:12px;font-size:13px;font-weight:600;border:2px solid #0071e3;background:#eff6ff;color:#0071e3;cursor:pointer">
+            <div style="font-size:15px;font-weight:700">STRIDE</div>
+            <div style="font-size:11px;font-weight:400;opacity:0.7;margin-top:2px">Security threats</div>
+          </button>
+          <button type="button" onclick="selectMethod('LINDDUN')" id="mb-LINDDUN" class="method-btn" style="flex:1;padding:10px 0;border-radius:12px;font-size:13px;font-weight:600;border:2px solid #e5e5ea;background:#fff;color:#6e6e73;cursor:pointer">
+            <div style="font-size:15px;font-weight:700">LINDDUN</div>
+            <div style="font-size:11px;font-weight:400;opacity:0.7;margin-top:2px">Privacy threats</div>
+          </button>
         </div>
         <input type="hidden" id="inp-method" value="STRIDE">
-        <p class="text-xs text-gray-400 mt-2">STRIDE = security &middot; LINDDUN = privacy &middot; Hybrid = both</p>
       </div>
     </div>
     <div class="flex gap-3 mt-5">
@@ -440,11 +455,19 @@
   function selectMethod(m) {
     selectedMethod = m;
     document.getElementById('inp-method').value = m;
-    document.querySelectorAll('.method-btn').forEach(function(b) {
-      b.className = 'method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600';
+    ['STRIDE','LINDDUN'].forEach(function(id) {
+      var btn = document.getElementById('mb-'+id);
+      if (!btn) return;
+      if (id === m) {
+        btn.style.border = '2px solid #0071e3';
+        btn.style.background = '#eff6ff';
+        btn.style.color = '#0071e3';
+      } else {
+        btn.style.border = '2px solid #e5e5ea';
+        btn.style.background = '#fff';
+        btn.style.color = '#6e6e73';
+      }
     });
-    var active = document.getElementById('mb-' + m);
-    if (active) active.className = 'method-btn active px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700';
   }
 
   const METHODS = {
@@ -544,32 +567,66 @@
   function openNewModel() { openModal('modal-model'); }
 
   function createModel() {
-    const name = document.getElementById('inp-name').value.trim();
-    if (!name) return;
+    var name = document.getElementById('inp-name').value.trim();
+    if (!name) { document.getElementById('inp-name').focus(); return; }
     var methodology = document.getElementById('inp-method').value || 'STRIDE';
-    M = { id: Date.now(), name, methodology, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), created: new Date().toLocaleDateString('nl-NL'), components: [] };
+    var assessor = document.getElementById('inp-assessor').value.trim();
+    // Auto-create first component named after the model so user goes straight to assessment
+    var firstComp = { id: Date.now(), name: name, type: 'Process', threats: [], addedAt: new Date().toISOString() };
+    M = { id: Date.now()+1, name: name, methodology: methodology, desc: '', assessor: assessor, created: new Date().toLocaleDateString('nl-NL'), components: [firstComp] };
     selectMethod('STRIDE');
-    models.push(M); save(); renderSidebar(); loadModel(M); closeModal('modal-model');
-    ['inp-name','inp-desc','inp-assessor'].forEach(id => document.getElementById(id).value='');
+    models.push(M); save(); renderSidebar(); closeModal('modal-model');
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-assessor').value = '';
+    // Go straight to assessment — skip the component list step
+    CI = 0;
+    document.getElementById('stride-title').textContent = name;
+    showView('stride');
+    renderStrideCats(0);
+    renderRiskSummary(); renderProgress(); renderHeatmap();
   }
 
   function loadModel(m) {
-    M = m; showView('model');
-    document.getElementById('mv-name').textContent = m.name;
-    document.getElementById('mv-desc').textContent = m.desc || '';
-    document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created+' · Method: '+(m.methodology||'STRIDE');
-    renderRiskSummary(); renderComponents(); renderProgress(); renderHeatmap();
+    M = m;
+    renderSidebar();
+    renderRiskSummary(); renderProgress(); renderHeatmap();
+    // If model has exactly 1 component (simple case), go straight to assessment
+    if (m.components.length === 1) {
+      CI = 0;
+      document.getElementById('stride-title').textContent = m.components[0].name;
+      showView('stride');
+      renderStrideCats(0);
+    } else {
+      // Multi-component models show overview first
+      showView('model');
+      document.getElementById('mv-name').textContent = m.name;
+      document.getElementById('mv-desc').textContent = m.desc || '';
+      document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created+' · Method: '+(m.methodology||'STRIDE');
+      renderComponents();
+    }
   }
 
   function renderSidebar() {
-    const c = document.getElementById('model-list');
+    var c = document.getElementById('model-list');
     c.innerHTML = '';
-    models.forEach(m => {
-      const total = m.components.flatMap(c=>c.threats||[]).length;
-      const el = document.createElement('div');
+    if (!models.length) {
+      c.innerHTML = '<div style="padding:12px 8px;color:#aeaeb2;font-size:12px;text-align:center">No models yet</div>';
+      return;
+    }
+    models.forEach(function(m) {
+      var total = m.components.reduce(function(sum,comp){ return sum+(comp.threats||[]).length; },0);
+      var method = m.methodology || 'STRIDE';
+      var el = document.createElement('div');
       el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
-      el.innerHTML = `<span class="truncate text-sm">${m.name}</span><span class="text-xs text-gray-400 flex-shrink-0 ml-2">${total}</span>`;
-      el.onclick = () => loadModel(m);
+      el.style.cssText = 'padding:10px 12px;border-radius:10px;margin-bottom:2px;display:flex;flex-direction:column;gap:4px;cursor:pointer';
+      el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">'
+        + '<span style="font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">' + m.name + '</span>'
+        + '<span style="font-size:11px;color:#86868b;flex-shrink:0;margin-left:6px">' + total + ' threat' + (total!==1?'s':'') + '</span>'
+        + '</div>'
+        + '<div>'
+        + '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:980px" class="mb-' + method + '">' + method + '</span>'
+        + '</div>';
+      el.onclick = function() { loadModel(m); };
       c.appendChild(el);
     });
   }
@@ -648,6 +705,16 @@
 
   function renderStrideCats(ci) {
     var comp = M.components[ci];
+    // Update subtitle with methodology context
+    var methodDesc = document.getElementById('stride-method-desc');
+    if (methodDesc) {
+      var method = M.methodology || 'STRIDE';
+      var descs = {
+        'STRIDE': 'Security assessment — work through each category, add threats, set likelihood and impact.',
+        'LINDDUN': 'Privacy assessment — identify how personal data could be misused or exposed.'
+      };
+      methodDesc.textContent = descs[method] || 'Work through each category and record threats.';
+    }
     var threats = comp.threats||[];
     var method = M.methodology || 'STRIDE';
     var cats = METHODS[method] || METHODS['STRIDE'];
@@ -673,18 +740,22 @@
       var threatRowsHtml = catThreats.length === 0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map(function(t,ti) { return renderThreatRow(t,ci,ti); }).join('');
       var countBadge = catThreats.length ? '<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">' + catThreats.length + '</span>' : '';
       var div = document.createElement('div');
+            var catName = cat.split(' - ').slice(1).join(' - ');
       div.className = 'sf-card overflow-hidden';
-      div.innerHTML = '<div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">'
-        + '<div class="flex items-center gap-2.5">'
-        + '<span class="' + badgeCls + ' px-2.5 py-0.5 rounded-lg text-xs font-bold">' + key + '</span>'
-        + '<span class="font-semibold text-gray-900 text-sm">' + cat.split(' - ').slice(1).join(' - ') + '</span>'
-        + countBadge
+      div.innerHTML = '<div style="padding:16px 20px;background:#fafafa;border-bottom:1px solid #efefef">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        + '<span class="' + badgeCls + '" style="padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700;flex-shrink:0">' + key + '</span>'
+        + '<span style="font-weight:600;color:#1d1d1f;font-size:14px">' + catName + '</span>'
+        + (catThreats.length ? '<span style="font-size:11px;background:#e8e8ed;color:#6e6e73;padding:2px 8px;border-radius:980px;font-weight:600">' + catThreats.length + '</span>' : '')
         + '</div>'
-        + '<div class="flex gap-2 items-center">'
-        + '<select id="' + safeId + '" class="sf-input text-xs py-1.5 w-56">' + optionsHtml + '</select>'
-        + '<button onclick="addExDyn(\'' + safeId + '\',' + ci + ',\'' + cat.replace(/'/g,"\\'" ) + '\')" class="sf-btn-primary text-xs px-3 py-1.5">Add</button>'
-        + '<button onclick="openThreatModal(' + ci + ',\'' + cat.replace(/'/g,"\\'" ) + '\',\'\')" class="sf-btn-secondary text-xs px-3 py-1.5">Custom</button>'
-        + '</div></div>'
+        + '<button onclick="openThreatModal(' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\',\'\');" style="padding:6px 16px;background:#fff;border:1.5px solid #d2d2d7;border-radius:980px;font-size:12px;font-weight:500;color:#1d1d1f;cursor:pointer">+ Custom</button>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;align-items:center">'
+        + '<select id="' + safeId + '" style="flex:1;background:#fff;border:1px solid #d2d2d7;border-radius:10px;padding:8px 12px;font-size:13px;color:#1d1d1f;outline:none;font-family:inherit;min-width:0">' + optionsHtml + '</select>'
+        + '<button onclick="addExDyn(\'' + safeId + '\',' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\');" style="padding:8px 18px;background:#0071e3;color:#fff;border:none;border-radius:980px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0">Add threat</button>'
+        + '</div>'
+        + '</div>'
         + '<div id="tlist-' + safeId + '">' + threatRowsHtml + '</div>';
       c.appendChild(div);
     });
@@ -738,16 +809,19 @@
   }
 
   function renderScoreBtns() {
-    ['like','imp'].forEach(type => {
-      const c = document.getElementById(type+'-btns');
+    ['like','imp'].forEach(function(type) {
+      var c = document.getElementById(type+'-btns');
       c.innerHTML='';
-      for (let n=1;n<=5;n++) {
-        const isL = type==='like';
-        const active = (isL?tL:tI)===n;
-        const btn = document.createElement('button');
+      for (var n=1;n<=5;n++) {
+        var isL = type==='like';
+        var active = (isL?tL:tI)===n;
+        var btn = document.createElement('button');
         btn.className = 'score-btn'+(active?' active':'');
+        btn.dataset.v = n;
         btn.textContent = n;
-        btn.onclick = ()=>{ if(isL)tL=n; else tI=n; renderScoreBtns(); updateScore(); };
+        (function(num, isLike) {
+          btn.onclick = function() { if(isLike)tL=num; else tI=num; renderScoreBtns(); updateScore(); };
+        })(n, isL);
         c.appendChild(btn);
       }
     });
