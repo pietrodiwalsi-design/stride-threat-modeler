@@ -619,9 +619,13 @@
       var el = document.createElement('div');
       el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
       el.style.cssText = 'padding:10px 12px;border-radius:10px;margin-bottom:2px;display:flex;flex-direction:column;gap:4px;cursor:pointer';
+      var mid = m.id;
       el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">'
-        + '<span style="font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">' + m.name + '</span>'
-        + '<span style="font-size:11px;color:#86868b;flex-shrink:0;margin-left:6px">' + total + ' threat' + (total!==1?'s':'') + '</span>'
+        + '<span style="font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">' + m.name + '</span>'
+        + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;margin-left:6px">'
+        + '<span style="font-size:11px;color:#86868b">' + total + ' threat' + (total!==1?'s':'') + '</span>'
+        + '<button onclick="event.stopPropagation();deleteModel(' + mid + ')" title="Delete model" style="border:none;background:transparent;color:#d1d1d6;cursor:pointer;font-size:15px;line-height:1;padding:0 2px" onmouseover="this.style.color=\'#ff3b30\'" onmouseout="this.style.color=\'#d1d1d6\'">×</button>'
+        + '</div>'
         + '</div>'
         + '<div>'
         + '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:980px" class="mb-' + method + '">' + method + '</span>'
@@ -629,6 +633,18 @@
       el.onclick = function() { loadModel(m); };
       c.appendChild(el);
     });
+  }
+
+  function deleteModel(id) {
+    if (!confirm('Delete this model? This cannot be undone.')) return;
+    models = models.filter(function(m){ return m.id !== id; });
+    save();
+    if (M && M.id === id) {
+      M = models.length ? models[0] : null;
+      if (M) { loadModel(M); } else { showView('home'); renderSidebar(); }
+    } else {
+      renderSidebar();
+    }
   }
 
   function renderRiskSummary() {
