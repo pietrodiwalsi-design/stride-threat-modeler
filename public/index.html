@@ -183,7 +183,7 @@
   </div>
 
   <!-- Model view -->
-  <div id="view-model" class="hidden p-8">
+  <div id="view-model" class="hidden p-8" style="display:none">
     <div class="flex items-start justify-between mb-8">
       <div>
         <h2 id="mv-name" class="text-2xl font-semibold text-gray-900 tracking-tight"></h2>
@@ -257,7 +257,7 @@
   </div>
 
   <!-- STRIDE view -->
-  <div id="view-stride" class="hidden p-8">
+  <div id="view-stride" class="hidden p-8" style="display:none">
     <button onclick="backToModel()" class="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium mb-5 transition">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>Back to model
     </button>
@@ -272,7 +272,7 @@
 </div>
 
 <!-- How to Use -->
-<div id="page-howto" class="hidden p-8 max-w-2xl">
+<div id="page-howto" class="hidden p-8 max-w-2xl" style="display:none">
   <h1 class="text-2xl font-semibold text-gray-900 tracking-tight mb-1">How to Use</h1>
   <p class="text-gray-400 text-sm mb-7">A practical guide to executing structured STRIDE threat assessments</p>
   <div class="space-y-4">
@@ -352,6 +352,29 @@
     <div class="flex gap-3 mt-5">
       <button onclick="closeModal('modal-model')" class="sf-btn-secondary flex-1">Cancel</button>
       <button onclick="createModel()" class="sf-btn-primary flex-1">Create Model</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Component -->
+<div id="modal-comp" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop" style="display:none">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Add Component</h3>
+    <div class="space-y-4">
+      <div><label class="sf-label">Component name *</label><input id="comp-name" type="text" placeholder="e.g. Auth API, User Database, Payment Service" class="sf-input" autocomplete="off"></div>
+      <div>
+        <label class="sf-label">Type</label>
+        <select id="comp-type" class="sf-input">
+          <option value="Process">Process (API, service, application)</option>
+          <option value="DataStore">Data Store (database, file system, cache)</option>
+          <option value="ExternalEntity">External Entity (user, third-party service)</option>
+          <option value="TrustBoundary">Trust Boundary (network boundary, DMZ)</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="closeModal('modal-comp')" class="sf-btn-secondary flex-1">Cancel</button>
+      <button onclick="saveComponent()" class="sf-btn-primary flex-1">Add Component</button>
     </div>
   </div>
 </div>
@@ -488,17 +511,35 @@
 
   function save() { localStorage.setItem('stride-v3', JSON.stringify(models)); }
   function setPage(p) {
-    ['dashboard','howto'].forEach(n => document.getElementById('page-'+n).classList.toggle('hidden', n!==p));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('text-blue-600','font-semibold'));
-    const btn = document.getElementById('nav-'+p);
-    btn.classList.add('text-blue-600','font-semibold');
+    ['dashboard','howto'].forEach(function(n) {
+      var el = document.getElementById('page-'+n);
+      if (n === p) { el.classList.remove('hidden'); el.style.display = ''; }
+      else { el.classList.add('hidden'); el.style.display = 'none'; }
+    });
+    document.querySelectorAll('.nav-btn').forEach(function(b) { b.style.color=''; b.style.fontWeight=''; });
+    var btn = document.getElementById('nav-'+p);
+    if (btn) { btn.style.color='#0071e3'; btn.style.fontWeight='600'; }
   }
   function showView(v) {
-    ['welcome','model','stride'].forEach(n => document.getElementById('view-'+n).classList.add('hidden'));
-    document.getElementById('view-'+v).classList.remove('hidden');
+    ['welcome','model','stride'].forEach(function(n) {
+      var el = document.getElementById('view-'+n);
+      el.classList.add('hidden');
+      el.style.display = 'none';
+    });
+    var show = document.getElementById('view-'+v);
+    show.classList.remove('hidden');
+    show.style.display = '';
   }
-  function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  function openModal(id) {
+    var el = document.getElementById(id);
+    el.style.display = '';           // clear the inline style="display:none"
+    el.classList.remove('hidden');
+  }
+  function closeModal(id) {
+    var el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.style.display = 'none';       // belt-and-suspenders
+  }
 
   function openNewModel() { openModal('modal-model'); }
 
@@ -537,10 +578,11 @@
     const threats = M.components.flatMap(c=>c.threats||[]);
     const counts = {Critical:0,High:0,Medium:0,Low:0};
     threats.forEach(t => counts[riskLevel(riskScore(t.likelihood||1,t.impact||1))]++);
-    const cfg = {Critical:{icon:'🔴',cls:'risk-badge-critical'},High:{icon:'🟠',cls:'risk-badge-high'},Medium:{icon:'🟡',cls:'risk-badge-medium'},Low:{icon:'🟢',cls:'risk-badge-low'}};
-    document.getElementById('risk-summary').innerHTML = Object.entries(counts).map(([k,v]) =>
-      `<div class="sf-card p-4"><div class="text-2xl font-bold text-gray-900">${v}</div><div class="flex items-center gap-1.5 mt-1"><span class="text-xs px-2 py-0.5 rounded-full font-semibold ${cfg[k].cls}">${k}</span></div></div>`
-    ).join('');
+    var cfgMap = {Critical:{cls:'risk-badge-critical'},High:{cls:'risk-badge-high'},Medium:{cls:'risk-badge-medium'},Low:{cls:'risk-badge-low'}};
+    document.getElementById('risk-summary').innerHTML = Object.entries(counts).map(function(pair) {
+      var k=pair[0], v=pair[1], cfg=cfgMap[k];
+      return '<div class="sf-card p-4"><div style="font-size:26px;font-weight:700;color:#1d1d1f">'+v+'</div><div style="margin-top:4px"><span class="text-xs px-2 py-0.5 rounded-full font-semibold '+cfg.cls+'">'+k+'</span></div></div>';
+    }).join('');
   }
 
   function renderProgress() {
@@ -567,7 +609,7 @@
       el.innerHTML = `
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-base">⚙️</div>
+            <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center" style="width:36px;height:36px;border-radius:10px;background:#eff6ff;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg style="width:16px;height:16px;color:#2563eb" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
             <div>
               <div class="font-semibold text-gray-900 text-sm">${comp.name}</div>
               <div class="text-xs text-gray-400 mt-0.5">${comp.type}${threats.length ? ` · ${threats.length} threat${threats.length>1?'s':''}` : ' · Not assessed'}${maxScore ? ` · <span class="${riskCls(maxScore)} font-semibold">${riskLevel(maxScore)}</span>` : ''}</div>
@@ -582,11 +624,16 @@
   }
 
   function addComponent() {
-    const name = prompt('Component name (e.g. Auth API, User Database)');
-    if (!name||!M) return;
-    const type = prompt('Type: Process / DataStore / ExternalEntity / TrustBoundary') || 'Process';
+    openModal('modal-comp');
+  }
+  function saveComponent() {
+    var name = document.getElementById('comp-name').value.trim();
+    if (!name || !M) return;
+    var type = document.getElementById('comp-type').value || 'Process';
     M.components.push({id:Date.now(), name, type, threats:[], addedAt:new Date().toISOString()});
     save(); renderComponents(); renderProgress(); renderHeatmap(); renderSidebar();
+    closeModal('modal-comp');
+    document.getElementById('comp-name').value = '';
   }
 
   function startStride(i) {
@@ -661,7 +708,7 @@
           <div class="flex flex-wrap gap-2 items-center">
             <span class="text-xs ${riskBadgeCls(score)} px-2 py-0.5 rounded-full font-semibold">L${t.likelihood} × I${t.impact} = ${score} ${riskLevel(score)}</span>
             ${t.treatment ? `<span class="treat-pill ${treatCls[t.treatment]||''}">${t.treatment}</span>` : ''}
-            ${t.mitigation ? `<span class="text-xs text-gray-400">🛡 ${t.mitigation}</span>` : ''}
+            ${t.mitigation ? '<span class="text-xs text-gray-400 italic">' + t.mitigation + '</span>' : ''}
           </div>
         </div>
         <span class="text-xs font-medium ${statCls[t.status]||'text-gray-400'} whitespace-nowrap">${t.status||'Open'}</span>
