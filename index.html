@@ -14,12 +14,46 @@
   *, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
   body { background: #f1f5f9; color: #0f172a; }
 
-  /* Modern Enterprise SaaS style */
-  .sf-card { background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05); }
-  .sf-btn-primary { background: #2563eb; color: #fff; border-radius: 14px; font-weight: 700; font-size: 15px; padding: 12px 26px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgb(37 99 235 / 0.25); }
-  .sf-btn-primary:hover { background: #1e40af; transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgb(37 99 235 / 0.3); }
-  .sf-btn-secondary { background: #fff; color: #334155; border-radius: 14px; font-weight: 600; font-size: 15px; padding: 12px 26px; border: 2px solid #e2e8f0; cursor: pointer; transition: all 0.2s; }
-  .sf-btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
+  /* === MODERN ENTERPRISE SAAS DESIGN === */
+  .sf-card { 
+    background: #fff; 
+    border-radius: 20px; 
+    border: 1px solid #e2e8f0; 
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+  }
+  .sf-btn-primary { 
+    background: #2563eb; 
+    color: #fff; 
+    border-radius: 14px; 
+    font-weight: 700; 
+    font-size: 15px; 
+    padding: 14px 28px; 
+    border: none; 
+    cursor: pointer; 
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 15px -3px rgb(37 99 235 / 0.3), 0 4px 6px -4px rgb(37 99 235 / 0.3);
+    letter-spacing: -0.01em;
+  }
+  .sf-btn-primary:hover { 
+    background: #1e40af; 
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgb(37 99 235 / 0.35), 0 10px 10px -5px rgb(37 99 235 / 0.3);
+  }
+  .sf-btn-secondary { 
+    background: #fff; 
+    color: #334155; 
+    border-radius: 14px; 
+    font-weight: 600; 
+    font-size: 15px; 
+    padding: 14px 28px; 
+    border: 2px solid #e2e8f0; 
+    cursor: pointer; 
+    transition: all 0.2s;
+  }
+  .sf-btn-secondary:hover { 
+    background: #f8fafc; 
+    border-color: #94a3b8;
+  }
   .sf-input { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 14px; font-size: 14px; color: #0f172a; width: 100%; outline: none; transition: all 0.15s; text-align: left; }
   .sf-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgb(37 99 235 / 0.1); }
   .sf-label { font-size: 13px; font-weight: 500; color: #6e6e73; margin-bottom: 6px; display: block; }
