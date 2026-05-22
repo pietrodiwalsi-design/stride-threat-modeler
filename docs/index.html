@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>STRIDE Threat Modeler</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -12,8 +14,8 @@
   *, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
   body { background: #f5f5f7; color: #1d1d1f; }
 
-  /* Apple-style components */
-  .sf-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04); }
+  /* Apple-style components — lighter, calmer */
+  .sf-card { background: #fff; border-radius: 12px; border: 1px solid #f0f0f3; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
   .sf-btn-primary { background: #0071e3; color: #fff; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
   .sf-btn-primary:hover { background: #0077ed; }
   .sf-btn-secondary { background: rgba(0,0,0,0.06); color: #1d1d1f; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
@@ -33,6 +35,15 @@
   .risk-badge-high { background: #fff8ef; color: #c84700; border: 1px solid #ffd9b0; }
   .risk-badge-medium { background: #fffaed; color: #7d5a00; border: 1px solid #ffe680; }
   .risk-badge-low { background: #f0fbf4; color: #1a7f37; border: 1px solid #b7efc5; }
+
+  /* LINDDUN badges */
+  .linddun-L  { background: #e6faf8; color: #0d7a72; border: 1px solid #9de8e0; }
+  .linddun-I  { background: #f0eaff; color: #5b21b6; border: 1px solid #c4b5fd; }
+  .linddun-N  { background: #fff0f8; color: #9d174d; border: 1px solid #fbcfe8; }
+  .linddun-D2 { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .linddun-Di { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+  .linddun-U  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .linddun-Nc { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
   /* STRIDE badges */
   .stride-S { background: #f0ebff; color: #6e3ff3; border: 1px solid #d9c8ff; }
@@ -60,10 +71,64 @@
   .modal-backdrop { background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); }
   .score-btn { width: 36px; height: 36px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid #d2d2d7; background: #fff; color: #3a3a3c; cursor: pointer; transition: all 0.12s; }
   .score-btn.active { background: #0071e3; color: #fff; border-color: #0071e3; }
+  .score-btn[data-v="1"].active { background: #34c759; border-color: #34c759; color: #fff; }
+  .score-btn[data-v="2"].active { background: #30d158; border-color: #30d158; color: #fff; }
+  .score-btn[data-v="3"].active { background: #ffcc00; border-color: #f0b800; color: #1d1d1f; }
+  .score-btn[data-v="4"].active { background: #ff9500; border-color: #ff9500; color: #fff; }
+  .score-btn[data-v="5"].active { background: #ff3b30; border-color: #ff3b30; color: #fff; }
+  /* Method badges for sidebar */
+  .mb-STRIDE  { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .mb-LINDDUN { background: #f0fdfa; color: #0d9488; border: 1px solid #99f6e4; }
+  .mb-DREAD   { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+  .mb-PASTA   { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+  .mb-RaD-TM  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  .mb-Hybrid  { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
   .treatment-btn { flex: 1; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1.5px solid #d2d2d7; background: #fff; color: #3a3a3c; cursor: pointer; transition: all 0.12s; }
   .treatment-btn.active { border-color: #0071e3; background: #edf4ff; color: #0055b3; }
 
   ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 3px; }
+  /* Critical utilities — load before Tailwind CDN */
+  .hidden { display: none !important; }
+  .flex { display: flex; }
+  .grid { display: grid; }
+  .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .gap-3 { gap: 0.75rem; }
+  .gap-4 { gap: 1rem; }
+  .fixed { position: fixed; }
+  .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+  .z-50 { z-index: 50; }
+  .z-40 { z-index: 40; }
+  .z-30 { z-index: 30; }
+  .ml-60 { margin-left: 15rem; }
+  .w-60 { width: 15rem; }
+  .h-12 { height: 3rem; }
+  .pt-12 { padding-top: 3rem; }
+  .top-0 { top: 0; }
+  .top-12 { top: 3rem; }
+  .bottom-0 { bottom: 0; }
+  .left-0 { left: 0; }
+  .right-0 { right: 0; }
+  .overflow-y-auto { overflow-y: auto; }
+  .overflow-hidden { overflow: hidden; }
+  .flex-col { flex-direction: column; }
+  .flex-1 { flex: 1 1 0%; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .justify-center { justify-content: center; }
+  .w-full { width: 100%; }
+  .h-full { height: 100%; }
+  .min-h-screen { min-height: 100vh; }
+  /* Chrome autofill fix */
+  input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 40px #fff inset !important;
+    -webkit-text-fill-color: #1d1d1f !important;
+    background-color: #fff !important;
+  }
+  /* SVG safety — prevent unbounded rendering */
+  svg { overflow: hidden; }
+  .icon-wrap svg { width: 20px !important; height: 20px !important; display: block; flex-shrink: 0; }
+  .nav-icon svg { width: 20px !important; height: 20px !important; }
 </style>
 </head>
 <body>
@@ -71,7 +136,7 @@
 <!-- Nav -->
 <nav class="sf-nav fixed top-0 left-0 right-0 z-40 h-12 flex items-center px-5 gap-4">
   <div class="flex items-center gap-2 mr-4">
-    <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <svg style="width:20px;height:20px;color:#2563eb;display:block;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
     <span class="font-semibold text-sm text-gray-800">STRIDE Threat Modeler</span>
   </div>
   <button onclick="setPage('dashboard')" id="nav-dashboard" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">Dashboard</button>
@@ -81,17 +146,18 @@
 <div class="pt-12 flex" style="min-height:100vh">
 
 <!-- Sidebar -->
-<aside class="sf-sidebar w-60 fixed top-12 bottom-0 flex flex-col z-30">
+<aside class="sf-sidebar w-60 fixed top-12 bottom-0 flex flex-col z-30" style="position:fixed;top:3rem;bottom:0;left:0;width:15rem;display:flex;flex-direction:column;z-index:30">
   <div class="p-3 border-b border-black/5">
     <button onclick="openNewModel()" class="sf-btn-primary w-full">+ New Model</button>
   </div>
   <div class="px-3 pt-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Models</div>
   <div id="model-list" class="flex-1 overflow-y-auto px-2 pb-3 space-y-0.5"></div>
   <div class="p-3 border-t border-black/5 text-xs text-gray-400 text-center">Stored locally in browser</div>
+  <div class="px-3 pb-2 text-center" style="font-size:10px;color:#aaa">v8 — Minimal Apple design</div>
 </aside>
 
 <!-- Main -->
-<main class="ml-60 flex-1">
+<main class="ml-60 flex-1" style="margin-left:15rem;flex:1">
 
 <!-- Dashboard -->
 <div id="page-dashboard">
@@ -102,24 +168,24 @@
       <h1 class="text-3xl font-semibold text-gray-900 mb-2 tracking-tight">Threat Modeling</h1>
       <p class="text-gray-500 text-base">Identify and analyze security threats using the STRIDE framework.</p>
     </div>
-    <div class="grid grid-cols-3 gap-4 mb-10">
+    <div class="grid grid-cols-3 gap-4 mb-10" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem">
       <div class="sf-card p-6">
-        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
-          <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        <div class="icon-wrap w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4" style="width:40px;height:40px;flex-shrink:0">
+          <svg style="width:20px;height:20px;color:#2563eb;display:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
         </div>
         <h3 class="font-semibold text-gray-900 mb-1">Define Architecture</h3>
         <p class="text-sm text-gray-500">Add components like APIs, databases and trust boundaries</p>
       </div>
       <div class="sf-card p-6">
-        <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-4">
-          <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <div class="icon-wrap w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-4" style="width:40px;height:40px;flex-shrink:0">
+          <svg style="width:20px;height:20px;color:#f97316;display:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
         </div>
         <h3 class="font-semibold text-gray-900 mb-1">Identify Threats</h3>
         <p class="text-sm text-gray-500">Work through all 6 STRIDE categories per component</p>
       </div>
       <div class="sf-card p-6">
-        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-4">
-          <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <div class="icon-wrap w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-4" style="width:40px;height:40px;flex-shrink:0">
+          <svg style="width:20px;height:20px;color:#16a34a;display:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         </div>
         <h3 class="font-semibold text-gray-900 mb-1">Export Report</h3>
         <p class="text-sm text-gray-500">Generate PDF, CSV or JSON for stakeholders</p>
@@ -129,7 +195,7 @@
   </div>
 
   <!-- Model view -->
-  <div id="view-model" class="hidden p-8">
+  <div id="view-model" class="hidden p-8" style="display:none">
     <div class="flex items-start justify-between mb-8">
       <div>
         <h2 id="mv-name" class="text-2xl font-semibold text-gray-900 tracking-tight"></h2>
@@ -203,22 +269,25 @@
   </div>
 
   <!-- STRIDE view -->
-  <div id="view-stride" class="hidden p-8">
+  <div id="view-stride" class="hidden p-8" style="display:none">
     <button onclick="backToModel()" class="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium mb-5 transition">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>Back to model
     </button>
     <div class="flex items-center justify-between mb-2">
       <h2 id="stride-title" class="text-xl font-semibold text-gray-900 tracking-tight"></h2>
-      <span id="stride-count" class="text-sm text-gray-400 bg-gray-100 px-3 py-1 rounded-full font-medium"></span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="stride-count" class="text-sm text-gray-400 bg-gray-100 px-3 py-1 rounded-full font-medium"></span>
+        <button onclick="addComponent()" style="padding:6px 14px;background:#fff;border:1.5px solid #d2d2d7;border-radius:980px;font-size:12px;font-weight:500;color:#3a3a3c;cursor:pointer">+ Add area</button>
+      </div>
     </div>
-    <p class="text-sm text-gray-400 mb-6">Work through each STRIDE category. Use example threats as starting points or add custom ones.</p>
+    <p class="text-sm text-gray-400 mb-6" id="stride-method-desc"></p>
     <div id="stride-cats" class="space-y-4"></div>
   </div>
 
 </div>
 
 <!-- How to Use -->
-<div id="page-howto" class="hidden p-8 max-w-2xl">
+<div id="page-howto" class="hidden p-8 max-w-2xl" style="display:none">
   <h1 class="text-2xl font-semibold text-gray-900 tracking-tight mb-1">How to Use</h1>
   <p class="text-gray-400 text-sm mb-7">A practical guide to executing structured STRIDE threat assessments</p>
   <div class="space-y-4">
@@ -274,13 +343,26 @@
 </div>
 
 <!-- Modal: New Model -->
-<div id="modal-model" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
+<div id="modal-model" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop" style="display:none">
   <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
     <h3 class="text-lg font-semibold text-gray-900 mb-4">New Threat Model</h3>
     <div class="space-y-4">
-      <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API Assessment Q2 2026" class="sf-input"></div>
-      <div><label class="sf-label">Scope / description</label><textarea id="inp-desc" rows="2" placeholder="What system are you assessing?" class="sf-input resize-none"></textarea></div>
-      <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input"></div>
+      <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API, Customer Portal, Auth Service" class="sf-input" autocomplete="off"></div>
+      <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input" autocomplete="off"></div>
+      <div>
+        <label class="sf-label">Methodology</label>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button type="button" onclick="selectMethod('STRIDE')" id="mb-STRIDE" class="method-btn active" style="flex:1;padding:10px 0;border-radius:12px;font-size:13px;font-weight:600;border:2px solid #0071e3;background:#eff6ff;color:#0071e3;cursor:pointer">
+            <div style="font-size:15px;font-weight:700">STRIDE</div>
+            <div style="font-size:11px;font-weight:400;opacity:0.7;margin-top:2px">Security threats</div>
+          </button>
+          <button type="button" onclick="selectMethod('LINDDUN')" id="mb-LINDDUN" class="method-btn" style="flex:1;padding:10px 0;border-radius:12px;font-size:13px;font-weight:600;border:2px solid #e5e5ea;background:#fff;color:#6e6e73;cursor:pointer">
+            <div style="font-size:15px;font-weight:700">LINDDUN</div>
+            <div style="font-size:11px;font-weight:400;opacity:0.7;margin-top:2px">Privacy threats</div>
+          </button>
+        </div>
+        <input type="hidden" id="inp-method" value="STRIDE">
+      </div>
     </div>
     <div class="flex gap-3 mt-5">
       <button onclick="closeModal('modal-model')" class="sf-btn-secondary flex-1">Cancel</button>
@@ -289,8 +371,31 @@
   </div>
 </div>
 
+<!-- Modal: Add Component -->
+<div id="modal-comp" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop" style="display:none">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Add Component</h3>
+    <div class="space-y-4">
+      <div><label class="sf-label">Component name *</label><input id="comp-name" type="text" placeholder="e.g. Auth API, User Database, Payment Service" class="sf-input" autocomplete="off"></div>
+      <div>
+        <label class="sf-label">Type</label>
+        <select id="comp-type" class="sf-input">
+          <option value="Process">Process (API, service, application)</option>
+          <option value="DataStore">Data Store (database, file system, cache)</option>
+          <option value="ExternalEntity">External Entity (user, third-party service)</option>
+          <option value="TrustBoundary">Trust Boundary (network boundary, DMZ)</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="closeModal('modal-comp')" class="sf-btn-secondary flex-1">Cancel</button>
+      <button onclick="saveComponent()" class="sf-btn-primary flex-1">Add Component</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Add Threat -->
-<div id="modal-threat" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
+<div id="modal-threat" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop" style="display:none">
   <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
     <h3 class="text-lg font-semibold text-gray-900 mb-0.5">Add Threat</h3>
     <p id="mt-cat" class="text-sm text-gray-400 mb-5"></p>
@@ -346,6 +451,82 @@
 
   const STRIDE_KEYS = ['S','T','R','I','D','E'];
 
+  var selectedMethod = 'STRIDE';
+  function selectMethod(m) {
+    selectedMethod = m;
+    document.getElementById('inp-method').value = m;
+    ['STRIDE','LINDDUN'].forEach(function(id) {
+      var btn = document.getElementById('mb-'+id);
+      if (!btn) return;
+      if (id === m) {
+        btn.style.border = '2px solid #0071e3';
+        btn.style.background = '#eff6ff';
+        btn.style.color = '#0071e3';
+      } else {
+        btn.style.border = '2px solid #e5e5ea';
+        btn.style.background = '#fff';
+        btn.style.color = '#6e6e73';
+      }
+    });
+  }
+
+  const METHODS = {
+    'STRIDE': [
+      {key:'S', label:'S - Spoofing',              badgeCls:'stride-S', examples:['Attacker spoofs user identity using stolen credentials','Forged JWT token bypasses authentication','DNS spoofing redirects traffic to malicious server']},
+      {key:'T', label:'T - Tampering',             badgeCls:'stride-T', examples:['Attacker modifies transaction data in transit','Unauthorized write to configuration file','SQL injection alters database records']},
+      {key:'R', label:'R - Repudiation',           badgeCls:'stride-R', examples:['User denies placing fraudulent order — no audit trail','Admin action not logged — cannot prove who made the change','Missing timestamps on critical operations']},
+      {key:'I', label:'I - Info Disclosure',       badgeCls:'stride-I', examples:['Error messages expose internal stack traces','Sensitive data returned in API response unnecessarily','Unencrypted PII stored in browser localStorage']},
+      {key:'D', label:'D - Denial of Service',     badgeCls:'stride-D', examples:['DDoS floods login endpoint causing outage','Memory exhaustion via large payload in API request','Recursive query causes database timeout']},
+      {key:'E', label:'E - Elevation of Privilege',badgeCls:'stride-E', examples:['Regular user accesses admin endpoint via IDOR','Privilege escalation via JWT role claim manipulation','Broken access control allows horizontal privilege escalation']}
+    ],
+    'LINDDUN': [
+      {key:'L',  label:'L - Linkability',          badgeCls:'linddun-L',  examples:['User browsing patterns linked across sessions via tracking','Transaction IDs correlated to identify user behavior','Device fingerprint used to re-identify users across sites']},
+      {key:'I',  label:'I - Identifiability',      badgeCls:'linddun-I',  examples:['IP address uniquely identifies individual user','Name and DOB re-identifies pseudonymous user','ZIP code + birthdate + gender identifies individual']},
+      {key:'N',  label:'N - Non-repudiation',      badgeCls:'linddun-N',  examples:['Audit log prevents user denying consent withdrawal','System records undeniable proof of sensitive user actions','Activity log cannot be deleted — privacy concern']},
+      {key:'D',  label:'D - Detectability',        badgeCls:'linddun-D2', examples:['Third party detects if user has account via timing attack','Metadata reveals existence of sensitive medical record','Ciphertext length reveals nature of encrypted data']},
+      {key:'Di', label:'Di - Disclosure of Info',  badgeCls:'linddun-Di', examples:['PII returned in API response unnecessarily','Sensitive data cached in browser history','Health data visible to unauthorized third party']},
+      {key:'U',  label:'U - Unawareness',          badgeCls:'linddun-U',  examples:['User unaware data shared with analytics partners','No privacy notice before data collection','Consent buried in terms of service document']},
+      {key:'Nc', label:'Nc - Non-compliance',      badgeCls:'linddun-Nc', examples:['Personal data retained beyond GDPR retention limit','No right-to-erasure mechanism implemented','Missing data processing agreement with processor']}
+    ],
+    'DREAD': [
+      {key:'S', label:'S - Spoofing',              badgeCls:'stride-S', examples:['Identity spoofing — rate each DREAD dimension 1-5']},
+      {key:'T', label:'T - Tampering',             badgeCls:'stride-T', examples:['Data tampering — rate each DREAD dimension 1-5']},
+      {key:'R', label:'R - Repudiation',           badgeCls:'stride-R', examples:['Action denial — rate each DREAD dimension 1-5']},
+      {key:'I', label:'I - Info Disclosure',       badgeCls:'stride-I', examples:['Data exposure — rate each DREAD dimension 1-5']},
+      {key:'D', label:'D - Denial of Service',     badgeCls:'stride-D', examples:['Availability attack — rate each DREAD dimension 1-5']},
+      {key:'E', label:'E - Elevation of Privilege',badgeCls:'stride-E', examples:['Privilege escalation — rate each DREAD dimension 1-5']}
+    ],
+    'PASTA': [
+      {key:'P1', label:'P1 - Define Objectives',      badgeCls:'stride-S', examples:['Protect customer PII per GDPR','Ensure 99.9% availability of payment service','Prevent unauthorized access to policyholder data']},
+      {key:'P2', label:'P2 - Technical Scope',        badgeCls:'stride-T', examples:['In scope: Payment API, Auth service, Policy DB','External: PSP, Identity Provider, Actuarial system','Trust boundaries: DMZ, internal network, cloud']},
+      {key:'P3', label:'P3 - Decompose Application',  badgeCls:'stride-R', examples:['DFD: Customer Portal > Auth API > Policy DB','Data flow: PII from registration to underwriting','Encrypted column for PII in PostgreSQL']},
+      {key:'P4', label:'P4 - Analyze Threats',        badgeCls:'stride-I', examples:['Threat agent: External attacker, financially motivated','Credential stuffing against login endpoint','SQL injection in policy search parameter']},
+      {key:'P5', label:'P5 - Vulnerability Analysis', badgeCls:'stride-D', examples:['CVE-2024-1234 in auth library — unpatched','Missing input validation on API parameters','Overly permissive IAM roles on storage bucket']},
+      {key:'P6', label:'P6 - Attack Modeling',        badgeCls:'stride-E', examples:['Kill chain: Recon > Exploit auth > Pivot to DB > Exfil','Attack tree: Access policyholder PII','Supply chain attack via compromised npm package']},
+      {key:'P7', label:'P7 - Risk and Impact',        badgeCls:'stride-S', examples:['Residual risk: High after planned MFA implementation','Business impact: EUR 2M fine + reputational damage','Risk acceptance required for legacy system gap']}
+    ],
+    'RaD-TM': [
+      {key:'S', label:'S - Spoofing',              badgeCls:'stride-S', examples:['Feature risk: Authentication bypass via spoofed token']},
+      {key:'T', label:'T - Tampering',             badgeCls:'stride-T', examples:['Feature risk: Unauthorized modification of feature data']},
+      {key:'R', label:'R - Repudiation',           badgeCls:'stride-R', examples:['Feature risk: Missing audit trail for feature actions']},
+      {key:'I', label:'I - Info Disclosure',       badgeCls:'stride-I', examples:['Feature risk: PII exposed in feature API response']},
+      {key:'D', label:'D - Denial of Service',     badgeCls:'stride-D', examples:['Feature risk: Feature endpoint susceptible to DoS']},
+      {key:'E', label:'E - Elevation of Privilege',badgeCls:'stride-E', examples:['Feature risk: Feature grants unintended elevated access']}
+    ],
+    'Hybrid': [
+      {key:'S',  label:'S - Spoofing',             badgeCls:'stride-S',   group:'STRIDE',  examples:['Attacker spoofs user identity with stolen credentials']},
+      {key:'T',  label:'T - Tampering',            badgeCls:'stride-T',   group:'STRIDE',  examples:['Attacker modifies data in transit']},
+      {key:'R',  label:'R - Repudiation',          badgeCls:'stride-R',   group:'STRIDE',  examples:['User denies action — no audit trail']},
+      {key:'I',  label:'I - Info Disclosure',      badgeCls:'stride-I',   group:'STRIDE',  examples:['Sensitive data exposed in API response']},
+      {key:'D',  label:'D - Denial of Service',    badgeCls:'stride-D',   group:'STRIDE',  examples:['Service flooded causing outage']},
+      {key:'E',  label:'E - Elevation',            badgeCls:'stride-E',   group:'STRIDE',  examples:['User escalates to admin role']},
+      {key:'L',  label:'L - Linkability',          badgeCls:'linddun-L',  group:'LINDDUN', examples:['User behavior linked across sessions']},
+      {key:'Di', label:'Di - Disclosure of Info',  badgeCls:'linddun-Di', group:'LINDDUN', examples:['PII returned unnecessarily in response']},
+      {key:'U',  label:'U - Unawareness',          badgeCls:'linddun-U',  group:'LINDDUN', examples:['User unaware data shared with third parties']},
+      {key:'Nc', label:'Nc - Non-compliance',      badgeCls:'linddun-Nc', group:'LINDDUN', examples:['Data retained beyond GDPR limit']}
+    ]
+  };
+
   function riskScore(l,i) { return l*i; }
   function riskLevel(s) { return s>=17?'Critical':s>=10?'High':s>=5?'Medium':'Low'; }
   function riskCls(s) { return s>=17?'risk-critical':s>=10?'risk-high':s>=5?'risk-medium':'risk-low'; }
@@ -353,45 +534,99 @@
 
   function save() { localStorage.setItem('stride-v3', JSON.stringify(models)); }
   function setPage(p) {
-    ['dashboard','howto'].forEach(n => document.getElementById('page-'+n).classList.toggle('hidden', n!==p));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('text-blue-600','font-semibold'));
-    const btn = document.getElementById('nav-'+p);
-    btn.classList.add('text-blue-600','font-semibold');
+    ['dashboard','howto'].forEach(function(n) {
+      var el = document.getElementById('page-'+n);
+      if (n === p) { el.classList.remove('hidden'); el.style.display = ''; }
+      else { el.classList.add('hidden'); el.style.display = 'none'; }
+    });
+    document.querySelectorAll('.nav-btn').forEach(function(b) { b.style.color=''; b.style.fontWeight=''; });
+    var btn = document.getElementById('nav-'+p);
+    if (btn) { btn.style.color='#0071e3'; btn.style.fontWeight='600'; }
   }
   function showView(v) {
-    ['welcome','model','stride'].forEach(n => document.getElementById('view-'+n).classList.add('hidden'));
-    document.getElementById('view-'+v).classList.remove('hidden');
+    ['welcome','model','stride'].forEach(function(n) {
+      var el = document.getElementById('view-'+n);
+      el.classList.add('hidden');
+      el.style.display = 'none';
+    });
+    var show = document.getElementById('view-'+v);
+    show.classList.remove('hidden');
+    show.style.display = '';
   }
-  function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  function openModal(id) {
+    var el = document.getElementById(id);
+    el.style.display = '';           // clear the inline style="display:none"
+    el.classList.remove('hidden');
+  }
+  function closeModal(id) {
+    var el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.style.display = 'none';       // belt-and-suspenders
+  }
 
   function openNewModel() { openModal('modal-model'); }
 
   function createModel() {
-    const name = document.getElementById('inp-name').value.trim();
-    if (!name) return;
-    M = { id: Date.now(), name, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), created: new Date().toLocaleDateString('nl-NL'), components: [] };
-    models.push(M); save(); renderSidebar(); loadModel(M); closeModal('modal-model');
-    ['inp-name','inp-desc','inp-assessor'].forEach(id => document.getElementById(id).value='');
+    var name = document.getElementById('inp-name').value.trim();
+    if (!name) { document.getElementById('inp-name').focus(); return; }
+    var methodology = document.getElementById('inp-method').value || 'STRIDE';
+    var assessor = document.getElementById('inp-assessor').value.trim();
+    // Auto-create first component named after the model so user goes straight to assessment
+    var firstComp = { id: Date.now(), name: name, type: 'Process', threats: [], addedAt: new Date().toISOString() };
+    M = { id: Date.now()+1, name: name, methodology: methodology, desc: '', assessor: assessor, created: new Date().toLocaleDateString('nl-NL'), components: [firstComp] };
+    selectMethod('STRIDE');
+    models.push(M); save(); renderSidebar(); closeModal('modal-model');
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-assessor').value = '';
+    // Go straight to assessment — skip the component list step
+    CI = 0;
+    document.getElementById('stride-title').textContent = name;
+    showView('stride');
+    renderStrideCats(0);
+    renderRiskSummary(); renderProgress(); renderHeatmap();
   }
 
   function loadModel(m) {
-    M = m; showView('model');
-    document.getElementById('mv-name').textContent = m.name;
-    document.getElementById('mv-desc').textContent = m.desc || '';
-    document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created;
-    renderRiskSummary(); renderComponents(); renderProgress(); renderHeatmap();
+    M = m;
+    renderSidebar();
+    renderRiskSummary(); renderProgress(); renderHeatmap();
+    // If model has exactly 1 component (simple case), go straight to assessment
+    if (m.components.length === 1) {
+      CI = 0;
+      document.getElementById('stride-title').textContent = m.components[0].name;
+      showView('stride');
+      renderStrideCats(0);
+    } else {
+      // Multi-component models show overview first
+      showView('model');
+      document.getElementById('mv-name').textContent = m.name;
+      document.getElementById('mv-desc').textContent = m.desc || '';
+      document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created+' · Method: '+(m.methodology||'STRIDE');
+      renderComponents();
+    }
   }
 
   function renderSidebar() {
-    const c = document.getElementById('model-list');
+    var c = document.getElementById('model-list');
     c.innerHTML = '';
-    models.forEach(m => {
-      const total = m.components.flatMap(c=>c.threats||[]).length;
-      const el = document.createElement('div');
+    if (!models.length) {
+      c.innerHTML = '<div style="padding:12px 8px;color:#aeaeb2;font-size:12px;text-align:center">No models yet</div>';
+      return;
+    }
+    models.forEach(function(m) {
+      var total = m.components.reduce(function(sum,comp){ return sum+(comp.threats||[]).length; },0);
+      var method = m.methodology || 'STRIDE';
+      var el = document.createElement('div');
       el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
-      el.innerHTML = `<span class="truncate text-sm">${m.name}</span><span class="text-xs text-gray-400 flex-shrink-0 ml-2">${total}</span>`;
-      el.onclick = () => loadModel(m);
+      el.style.cssText = 'padding:10px 12px;border-radius:10px;margin-bottom:2px;display:flex;flex-direction:column;gap:4px;cursor:pointer';
+      el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">'
+        + '<span style="font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">' + m.name + '</span>'
+        + '<span style="font-size:11px;color:#86868b;flex-shrink:0;margin-left:6px">' + total + ' threat' + (total!==1?'s':'') + '</span>'
+        + '</div>'
+        + '<div>'
+        + '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:980px" class="mb-' + method + '">' + method + '</span>'
+        + '</div>';
+      el.onclick = function() { loadModel(m); };
       c.appendChild(el);
     });
   }
@@ -400,10 +635,11 @@
     const threats = M.components.flatMap(c=>c.threats||[]);
     const counts = {Critical:0,High:0,Medium:0,Low:0};
     threats.forEach(t => counts[riskLevel(riskScore(t.likelihood||1,t.impact||1))]++);
-    const cfg = {Critical:{icon:'🔴',cls:'risk-badge-critical'},High:{icon:'🟠',cls:'risk-badge-high'},Medium:{icon:'🟡',cls:'risk-badge-medium'},Low:{icon:'🟢',cls:'risk-badge-low'}};
-    document.getElementById('risk-summary').innerHTML = Object.entries(counts).map(([k,v]) =>
-      `<div class="sf-card p-4"><div class="text-2xl font-bold text-gray-900">${v}</div><div class="flex items-center gap-1.5 mt-1"><span class="text-xs px-2 py-0.5 rounded-full font-semibold ${cfg[k].cls}">${k}</span></div></div>`
-    ).join('');
+    var cfgMap = {Critical:{cls:'risk-badge-critical'},High:{cls:'risk-badge-high'},Medium:{cls:'risk-badge-medium'},Low:{cls:'risk-badge-low'}};
+    document.getElementById('risk-summary').innerHTML = Object.entries(counts).map(function(pair) {
+      var k=pair[0], v=pair[1], cfg=cfgMap[k];
+      return '<div class="sf-card p-4"><div style="font-size:26px;font-weight:700;color:#1d1d1f">'+v+'</div><div style="margin-top:4px"><span class="text-xs px-2 py-0.5 rounded-full font-semibold '+cfg.cls+'">'+k+'</span></div></div>';
+    }).join('');
   }
 
   function renderProgress() {
@@ -430,7 +666,7 @@
       el.innerHTML = `
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-base">⚙️</div>
+            <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center" style="width:36px;height:36px;border-radius:10px;background:#eff6ff;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg style="width:16px;height:16px;color:#2563eb" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
             <div>
               <div class="font-semibold text-gray-900 text-sm">${comp.name}</div>
               <div class="text-xs text-gray-400 mt-0.5">${comp.type}${threats.length ? ` · ${threats.length} threat${threats.length>1?'s':''}` : ' · Not assessed'}${maxScore ? ` · <span class="${riskCls(maxScore)} font-semibold">${riskLevel(maxScore)}</span>` : ''}</div>
@@ -445,11 +681,16 @@
   }
 
   function addComponent() {
-    const name = prompt('Component name (e.g. Auth API, User Database)');
-    if (!name||!M) return;
-    const type = prompt('Type: Process / DataStore / ExternalEntity / TrustBoundary') || 'Process';
+    openModal('modal-comp');
+  }
+  function saveComponent() {
+    var name = document.getElementById('comp-name').value.trim();
+    if (!name || !M) return;
+    var type = document.getElementById('comp-type').value || 'Process';
     M.components.push({id:Date.now(), name, type, threats:[], addedAt:new Date().toISOString()});
     save(); renderComponents(); renderProgress(); renderHeatmap(); renderSidebar();
+    closeModal('modal-comp');
+    document.getElementById('comp-name').value = '';
   }
 
   function startStride(i) {
@@ -463,37 +704,69 @@
   function backToModel() { showView('model'); renderComponents(); renderRiskSummary(); renderProgress(); renderHeatmap(); renderSidebar(); }
 
   function renderStrideCats(ci) {
-    const comp = M.components[ci];
-    const threats = comp.threats||[];
+    var comp = M.components[ci];
+    // Update subtitle with methodology context
+    var methodDesc = document.getElementById('stride-method-desc');
+    if (methodDesc) {
+      var method = M.methodology || 'STRIDE';
+      var descs = {
+        'STRIDE': 'Security assessment — work through each category, add threats, set likelihood and impact.',
+        'LINDDUN': 'Privacy assessment — identify how personal data could be misused or exposed.'
+      };
+      methodDesc.textContent = descs[method] || 'Work through each category and record threats.';
+    }
+    var threats = comp.threats||[];
+    var method = M.methodology || 'STRIDE';
+    var cats = METHODS[method] || METHODS['STRIDE'];
     document.getElementById('stride-count').textContent = threats.length + ' threat'+(threats.length!==1?'s':'')+' recorded';
-    const c = document.getElementById('stride-cats');
+    var c = document.getElementById('stride-cats');
     c.innerHTML = '';
-    Object.entries(EXAMPLES).forEach(([cat, examples]) => {
-      const key = cat.split(' - ')[0];
-      const catThreats = threats.filter(t=>t.category===cat);
-      const div = document.createElement('div');
+    var lastGroup = null;
+    cats.forEach(function(catDef) {
+      var cat = catDef.label;
+      var key = catDef.key;
+      var badgeCls = catDef.badgeCls || ('stride-' + key);
+      var examples = catDef.examples || [];
+      var catThreats = threats.filter(function(t) { return t.category === cat; });
+      var safeId = 'ex' + ci + key.replace(/[^a-zA-Z0-9]/g,'');
+      if (method === 'Hybrid' && catDef.group && catDef.group !== lastGroup) {
+        lastGroup = catDef.group;
+        var hdr = document.createElement('div');
+        hdr.className = 'px-2 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400';
+        hdr.textContent = catDef.group === 'STRIDE' ? 'STRIDE — Security Threats' : 'LINDDUN — Privacy Threats';
+        c.appendChild(hdr);
+      }
+      var optionsHtml = '<option value="">— Select example —</option>' + examples.map(function(e) { return '<option value="' + e.replace(/"/g,'&quot;') + '">' + e + '</option>'; }).join('');
+      var threatRowsHtml = catThreats.length === 0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map(function(t,ti) { return renderThreatRow(t,ci,ti); }).join('');
+      var countBadge = catThreats.length ? '<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">' + catThreats.length + '</span>' : '';
+      var div = document.createElement('div');
+            var catName = cat.split(' - ').slice(1).join(' - ');
       div.className = 'sf-card overflow-hidden';
-      div.innerHTML = `
-        <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <div class="flex items-center gap-2.5">
-            <span class="stride-${key} px-2.5 py-0.5 rounded-lg text-xs font-bold">${key}</span>
-            <span class="font-semibold text-gray-900 text-sm">${cat.split(' - ')[1]}</span>
-            ${catThreats.length ? `<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">${catThreats.length}</span>` : ''}
-          </div>
-          <div class="flex gap-2 items-center">
-            <select id="ex-${ci}-${cat.replace(/[\s-]/g,'')}" class="sf-input text-xs py-1.5 w-56">
-              <option value="">— Select example threat —</option>
-              ${examples.map(e=>`<option value="${e}">${e}</option>`).join('')}
-            </select>
-            <button onclick="addFromExample(${ci},'${cat}')" class="sf-btn-primary text-xs px-3 py-1.5">Add</button>
-            <button onclick="openThreatModal(${ci},'${cat}','')" class="sf-btn-secondary text-xs px-3 py-1.5">Custom</button>
-          </div>
-        </div>
-        <div id="tlist-${ci}-${cat.replace(/[\s-]/g,'')}">
-          ${catThreats.length===0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map((t,ti)=>renderThreatRow(t,ci,ti)).join('')}
-        </div>`;
+      // v8 — minimal Apple-style row (no gray band, tight spacing)
+      div.innerHTML = '<div style="padding:13px 18px;border-bottom:1px solid #f5f5f7">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        + '<span class="' + badgeCls + '" style="padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700;flex-shrink:0">' + key + '</span>'
+        + '<span style="font-weight:600;color:#1d1d1f;font-size:14px">' + catName + '</span>'
+        + (catThreats.length ? '<span style="font-size:11px;background:#e8e8ed;color:#6e6e73;padding:2px 8px;border-radius:980px;font-weight:600">' + catThreats.length + '</span>' : '')
+        + '</div>'
+        + '<button onclick="openThreatModal(' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\',\'\');" style="padding:5px 11px;background:#fff;border:1px solid #d2d2d7;border-radius:8px;font-size:12px;font-weight:500;color:#3a3a3c;cursor:pointer">+ Custom</button>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;align-items:center">'
+        + '<select id="' + safeId + '" style="background:#fff;border:1px solid #e5e5ea;border-radius:8px;padding:5px 9px;font-size:12px;color:#3a3a3c;outline:none;font-family:inherit;max-width:200px">' + optionsHtml + '</select>'
+        + '<button onclick="addExDyn(\'' + safeId + '\',' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\');" style="padding:5px 12px;background:#0071e3;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Add threat</button>'
+        + '</div>'
+        + '</div>'
+        + '<div id="tlist-' + safeId + '">' + threatRowsHtml + '</div>';
       c.appendChild(div);
     });
+  }
+
+  function addExDyn(safeId, ci, cat) {
+    var sel = document.getElementById(safeId);
+    if (!sel || !sel.value) { alert('Select an example first'); return; }
+    openThreatModal(ci, cat, sel.value);
+    sel.value = '';
   }
 
   function renderThreatRow(t, ci, ti) {
@@ -507,7 +780,7 @@
           <div class="flex flex-wrap gap-2 items-center">
             <span class="text-xs ${riskBadgeCls(score)} px-2 py-0.5 rounded-full font-semibold">L${t.likelihood} × I${t.impact} = ${score} ${riskLevel(score)}</span>
             ${t.treatment ? `<span class="treat-pill ${treatCls[t.treatment]||''}">${t.treatment}</span>` : ''}
-            ${t.mitigation ? `<span class="text-xs text-gray-400">🛡 ${t.mitigation}</span>` : ''}
+            ${t.mitigation ? '<span class="text-xs text-gray-400 italic">' + t.mitigation + '</span>' : ''}
           </div>
         </div>
         <span class="text-xs font-medium ${statCls[t.status]||'text-gray-400'} whitespace-nowrap">${t.status||'Open'}</span>
@@ -537,16 +810,19 @@
   }
 
   function renderScoreBtns() {
-    ['like','imp'].forEach(type => {
-      const c = document.getElementById(type+'-btns');
+    ['like','imp'].forEach(function(type) {
+      var c = document.getElementById(type+'-btns');
       c.innerHTML='';
-      for (let n=1;n<=5;n++) {
-        const isL = type==='like';
-        const active = (isL?tL:tI)===n;
-        const btn = document.createElement('button');
+      for (var n=1;n<=5;n++) {
+        var isL = type==='like';
+        var active = (isL?tL:tI)===n;
+        var btn = document.createElement('button');
         btn.className = 'score-btn'+(active?' active':'');
+        btn.dataset.v = n;
         btn.textContent = n;
-        btn.onclick = ()=>{ if(isL)tL=n; else tI=n; renderScoreBtns(); updateScore(); };
+        (function(num, isLike) {
+          btn.onclick = function() { if(isLike)tL=num; else tI=num; renderScoreBtns(); updateScore(); };
+        })(n, isL);
         c.appendChild(btn);
       }
     });
