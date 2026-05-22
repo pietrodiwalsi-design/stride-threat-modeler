@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Threat Modeler</title>
+<title>STRIDE Threat Modeler</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -42,15 +42,6 @@
   .stride-D { background: #edfdf4; color: #1a7f37; border: 1px solid #b0efc5; }
   .stride-E { background: #fdf0f7; color: #c0177a; border: 1px solid #f5c0e0; }
 
-  /* LINDDUN badges */
-  .linddun-L  { background: #e8f8f7; color: #0e7c75; border: 1px solid #a0ddd8; }
-  .linddun-I  { background: #f0eaff; color: #5b21b6; border: 1px solid #c4b5fd; }
-  .linddun-N  { background: #fff1f9; color: #9d174d; border: 1px solid #fbcfe8; }
-  .linddun-D2 { background: #e8f0ff; color: #1e40af; border: 1px solid #bfdbfe; }
-  .linddun-Di { background: #fef3e8; color: #92400e; border: 1px solid #fcd9b0; }
-  .linddun-U  { background: #f0fef0; color: #166534; border: 1px solid #bbf7d0; }
-  .linddun-Nc { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-
   /* Treatment pills */
   .treat-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 980px; }
   .treat-Mitigate { background: #e8f0fe; color: #1558d6; }
@@ -81,7 +72,7 @@
 <nav class="sf-nav fixed top-0 left-0 right-0 z-40 h-12 flex items-center px-5 gap-4">
   <div class="flex items-center gap-2 mr-4">
     <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-    <span class="font-semibold text-sm text-gray-800">Threat Modeler</span>
+    <span class="font-semibold text-sm text-gray-800">STRIDE Threat Modeler</span>
   </div>
   <button onclick="setPage('dashboard')" id="nav-dashboard" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">Dashboard</button>
   <button onclick="setPage('howto')" id="nav-howto" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">How to Use</button>
@@ -109,7 +100,7 @@
   <div id="view-welcome" class="p-8 max-w-4xl">
     <div class="mb-10">
       <h1 class="text-3xl font-semibold text-gray-900 mb-2 tracking-tight">Threat Modeling</h1>
-      <p class="text-gray-500 text-base">Choose your methodology. Map your system. Identify and mitigate threats.</p>
+      <p class="text-gray-500 text-base">Identify and analyze security threats using the STRIDE framework.</p>
     </div>
     <div class="grid grid-cols-3 gap-4 mb-10">
       <div class="sf-card p-6">
@@ -124,7 +115,7 @@
           <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
         </div>
         <h3 class="font-semibold text-gray-900 mb-1">Identify Threats</h3>
-        <p class="text-sm text-gray-500">Run STRIDE, LINDDUN, DREAD, PASTA or hybrid assessments per component</p>
+        <p class="text-sm text-gray-500">Work through all 6 STRIDE categories per component</p>
       </div>
       <div class="sf-card p-6">
         <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-4">
@@ -176,7 +167,7 @@
     <div class="sf-card p-6 mb-6">
       <div class="flex items-center justify-between mb-5">
         <div>
-          <h3 class="font-semibold text-gray-900">Risk Heatmap <span id="heatmap-method-badge" class="text-xs font-medium text-gray-400 ml-1"></span></h3>
+          <h3 class="font-semibold text-gray-900">Risk Heatmap</h3>
           <p class="text-xs text-gray-400 mt-0.5">Threats plotted by Likelihood × Impact — hover for details</p>
         </div>
         <div class="flex gap-4 text-xs text-gray-500">
@@ -231,18 +222,6 @@
   <h1 class="text-2xl font-semibold text-gray-900 tracking-tight mb-1">How to Use</h1>
   <p class="text-gray-400 text-sm mb-7">A practical guide to executing structured STRIDE threat assessments</p>
   <div class="space-y-4">
-
-    <div class="sf-card p-6 mb-4">
-      <h2 class="font-semibold text-gray-900 mb-4">Supported Methodologies</h2>
-      <div class="space-y-3">
-        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-sm mb-1">🔐 STRIDE <span class="text-xs text-gray-400 font-normal ml-2">Security</span></div><p class="text-xs text-gray-500">Covers 6 security threat categories. Best for general security assessments of any system architecture.</p></div>
-        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-sm mb-1">🛡 LINDDUN <span class="text-xs text-gray-400 font-normal ml-2">Privacy (GDPR/HIPAA)</span></div><p class="text-xs text-gray-500">Covers 7 privacy threat categories. Fully compatible with STRIDE — run both in parallel on the same model for full coverage.</p></div>
-        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-sm mb-1">📊 DREAD <span class="text-xs text-gray-400 font-normal ml-2">Quantitative</span></div><p class="text-xs text-gray-500">Rates threats on Damage, Reproducibility, Exploitability, Affected Users, Discoverability. Produces a numeric score for prioritization.</p></div>
-        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-sm mb-1">🎯 PASTA <span class="text-xs text-gray-400 font-normal ml-2">7-Step Risk-Centric</span></div><p class="text-xs text-gray-500">A structured 7-stage methodology integrating business objectives with technical requirements. Attacker-centric, ideal for executive reporting.</p></div>
-        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-sm mb-1">⚡ RaD-TM <span class="text-xs text-gray-400 font-normal ml-2">Developer-Friendly</span></div><p class="text-xs text-gray-500">Lightweight, feature-focused using predefined risk templates. Perfect for agile teams assessing individual features.</p></div>
-        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-sm mb-1">🔀 Hybrid <span class="text-xs text-gray-400 font-normal ml-2">STRIDE + LINDDUN</span></div><p class="text-xs text-gray-500">Runs both STRIDE and LINDDUN categories in one assessment. Recommended for systems handling sensitive personal data.</p></div>
-      </div>
-    </div>
 
     <div class="sf-card p-6">
       <h2 class="font-semibold text-gray-900 mb-3">What is STRIDE?</h2>
@@ -302,18 +281,6 @@
       <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API Assessment Q2 2026" class="sf-input"></div>
       <div><label class="sf-label">Scope / description</label><textarea id="inp-desc" rows="2" placeholder="What system are you assessing?" class="sf-input resize-none"></textarea></div>
       <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input"></div>
-      <div>
-        <label class="sf-label">Methodology</label>
-        <select id="inp-method" class="sf-input">
-          <option value="STRIDE">STRIDE — Security</option>
-          <option value="LINDDUN">LINDDUN — Privacy</option>
-          <option value="DREAD">DREAD — Quantitative</option>
-          <option value="PASTA">PASTA — 7-Step Risk-Centric</option>
-          <option value="RaD-TM">RaD-TM — Developer-Driven</option>
-          <option value="Hybrid">Hybrid — STRIDE + LINDDUN</option>
-        </select>
-        <p class="text-xs text-gray-400 mt-1.5">STRIDE for security · LINDDUN for privacy · Hybrid for both</p>
-      </div>
     </div>
     <div class="flex gap-3 mt-5">
       <button onclick="closeModal('modal-model')" class="sf-btn-secondary flex-1">Cancel</button>
@@ -379,96 +346,6 @@
 
   const STRIDE_KEYS = ['S','T','R','I','D','E'];
 
-  const METHODS = {
-    STRIDE: [
-      {key:'S', label:'S - Spoofing',              desc:'Identity impersonation'},
-      {key:'T', label:'T - Tampering',              desc:'Unauthorized data modification'},
-      {key:'R', label:'R - Repudiation',            desc:'Denying performed actions'},
-      {key:'I', label:'I - Information Disclosure', desc:'Unauthorized data exposure'},
-      {key:'D', label:'D - Denial of Service',      desc:'Availability attacks'},
-      {key:'E', label:'E - Elevation of Privilege', desc:'Unauthorized access escalation'}
-    ],
-    LINDDUN: [
-      {key:'L',  label:'L - Linkability',         desc:'Linking data to individuals'},
-      {key:'I',  label:'I - Identifiability',      desc:'Identifying users from data'},
-      {key:'N',  label:'N - Non-repudiation',      desc:'Undeniable user actions'},
-      {key:'D2', label:'D - Detectability',        desc:'Observing that data exists'},
-      {key:'Di', label:'Di - Disclosure of Info',  desc:'Privacy leaks and data exposure'},
-      {key:'U',  label:'U - Unawareness',          desc:'User unaware of data processing'},
-      {key:'Nc', label:'Nc - Non-compliance',      desc:'GDPR, HIPAA violations'}
-    ],
-    DREAD: [
-      {key:'S', label:'S - Spoofing',              desc:'DREAD scored'},
-      {key:'T', label:'T - Tampering',             desc:'DREAD scored'},
-      {key:'R', label:'R - Repudiation',           desc:'DREAD scored'},
-      {key:'I', label:'I - Information Disclosure',desc:'DREAD scored'},
-      {key:'D', label:'D - Denial of Service',     desc:'DREAD scored'},
-      {key:'E', label:'E - Elevation of Privilege',desc:'DREAD scored'}
-    ],
-    PASTA: [
-      {key:'P1', label:'P1 - Define Objectives',      desc:'Business and security objectives'},
-      {key:'P2', label:'P2 - Technical Scope',        desc:'Define technical boundaries'},
-      {key:'P3', label:'P3 - Decompose Application',  desc:'DFDs, components, data flows'},
-      {key:'P4', label:'P4 - Analyze Threats',        desc:'Enumerate threat agents'},
-      {key:'P5', label:'P5 - Vulnerability Analysis', desc:'Map vulnerabilities to threats'},
-      {key:'P6', label:'P6 - Attack Modeling',        desc:'Attack scenarios and trees'},
-      {key:'P7', label:'P7 - Risk & Impact Analysis', desc:'Residual risk and business impact'}
-    ],
-    'RaD-TM': [
-      {key:'S', label:'S - Spoofing Template',              desc:'Feature risk template'},
-      {key:'T', label:'T - Tampering Template',             desc:'Feature risk template'},
-      {key:'R', label:'R - Repudiation Template',           desc:'Feature risk template'},
-      {key:'I', label:'I - Info Disclosure Template',       desc:'Feature risk template'},
-      {key:'D', label:'D - DoS Template',                   desc:'Feature risk template'},
-      {key:'E', label:'E - Elevation Template',             desc:'Feature risk template'}
-    ],
-    Hybrid: [
-      {key:'S',  label:'S - Spoofing',             desc:'STRIDE', group:'STRIDE'},
-      {key:'T',  label:'T - Tampering',            desc:'STRIDE', group:'STRIDE'},
-      {key:'R',  label:'R - Repudiation',          desc:'STRIDE', group:'STRIDE'},
-      {key:'I',  label:'I - Info Disclosure',      desc:'STRIDE', group:'STRIDE'},
-      {key:'D',  label:'D - Denial of Service',    desc:'STRIDE', group:'STRIDE'},
-      {key:'E',  label:'E - Elevation',            desc:'STRIDE', group:'STRIDE'},
-      {key:'L',  label:'L - Linkability',          desc:'LINDDUN', group:'LINDDUN'},
-      {key:'Di', label:'Di - Disclosure of Info',  desc:'LINDDUN', group:'LINDDUN'},
-      {key:'U',  label:'U - Unawareness',          desc:'LINDDUN', group:'LINDDUN'},
-      {key:'Nc', label:'Nc - Non-compliance',      desc:'LINDDUN', group:'LINDDUN'}
-    ]
-  };
-
-  const LINDDUN_EXAMPLES = {
-    'L - Linkability':        ['User browsing patterns linked across sessions','Transaction IDs correlated to identify user'],
-    'I - Identifiability':    ['IP address identifies individual user','Device fingerprint uniquely identifies visitor'],
-    'N - Non-repudiation':    ['User cannot deny submitting form — audit log retained','Action tied to authenticated identity'],
-    'D - Detectability':      ['Third party can detect if user has an account','Metadata reveals existence of sensitive records'],
-    'Di - Disclosure of Info':['PII returned in API response unnecessarily','Sensitive data stored unencrypted in browser'],
-    'U - Unawareness':        ['User unaware data shared with third parties','No privacy notice before data collection'],
-    'Nc - Non-compliance':    ['Data retained beyond GDPR retention limit','No right-to-erasure mechanism implemented']
-  };
-
-  const PASTA_EXAMPLES = {
-    'P1 - Define Objectives':     ['Protect customer PII per GDPR','Ensure 99.9% availability of payment service'],
-    'P2 - Technical Scope':       ['Scope: Payment API, Auth service, Policy DB','External entities: Customer Portal, PSP'],
-    'P3 - Decompose Application': ['DFD: Customer Portal → Auth API → Policy DB','Data flow: PII from registration to storage'],
-    'P4 - Analyze Threats':       ['Credential stuffing against login endpoint','SQL injection in policy search parameter'],
-    'P5 - Vulnerability Analysis':['CVE-2024-1234 in auth library unpatched','Missing input validation on API parameters'],
-    'P6 - Attack Modeling':       ['Kill chain: recon → exploit → exfil','Attacker profile: external, financially motivated'],
-    'P7 - Risk & Impact Analysis':['Residual risk: High after planned controls','Business impact: regulatory fine + reputation']
-  };
-
-  function getMethodExamples(method, catLabel) {
-    if (method === 'LINDDUN') return LINDDUN_EXAMPLES[catLabel] || [];
-    if (method === 'PASTA') return PASTA_EXAMPLES[catLabel] || [];
-    return EXAMPLES[catLabel] || [];
-  }
-
-  function getCatBadge(method, key) {
-    const linddunKeys = ['L','I','N','D2','Di','U','Nc'];
-    if (method === 'LINDDUN') return 'linddun-' + key;
-    if (method === 'Hybrid' && linddunKeys.includes(key)) return 'linddun-' + key;
-    return 'stride-' + key;
-  }
-
   function riskScore(l,i) { return l*i; }
   function riskLevel(s) { return s>=17?'Critical':s>=10?'High':s>=5?'Medium':'Low'; }
   function riskCls(s) { return s>=17?'risk-critical':s>=10?'risk-high':s>=5?'risk-medium':'risk-low'; }
@@ -493,7 +370,7 @@
   function createModel() {
     const name = document.getElementById('inp-name').value.trim();
     if (!name) return;
-    const selMethod = document.getElementById('inp-method'); const methodology = selMethod ? selMethod.value : 'STRIDE'; M = { id: Date.now(), name, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), methodology, created: new Date().toLocaleDateString('nl-NL'), components: [] };
+    M = { id: Date.now(), name, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), created: new Date().toLocaleDateString('nl-NL'), components: [] };
     models.push(M); save(); renderSidebar(); loadModel(M); closeModal('modal-model');
     ['inp-name','inp-desc','inp-assessor'].forEach(id => document.getElementById(id).value='');
   }
@@ -502,7 +379,7 @@
     M = m; showView('model');
     document.getElementById('mv-name').textContent = m.name;
     document.getElementById('mv-desc').textContent = m.desc || '';
-    document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created+' · Method: '+(m.methodology||'STRIDE');
+    document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created;
     renderRiskSummary(); renderComponents(); renderProgress(); renderHeatmap();
   }
 
@@ -513,10 +390,7 @@
       const total = m.components.flatMap(c=>c.threats||[]).length;
       const el = document.createElement('div');
       el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
-      const methodColors = {LINDDUN:'bg-teal-50 text-teal-700',DREAD:'bg-orange-50 text-orange-700',PASTA:'bg-purple-50 text-purple-700','RaD-TM':'bg-green-50 text-green-700',Hybrid:'bg-indigo-50 text-indigo-700'};
-      const mc = m.methodology && methodColors[m.methodology] ? methodColors[m.methodology] : null;
-      const methodBadge = mc ? '<span class="text-xs font-semibold px-1.5 py-0.5 rounded-md '+mc+' flex-shrink-0 ml-1">'+m.methodology+'</span>' : '';
-      el.innerHTML = `<span class="truncate text-sm">${m.name}</span><div class="flex items-center gap-1 flex-shrink-0">${methodBadge}<span class="text-xs text-gray-400 ml-1">${total}</span></div>`;
+      el.innerHTML = `<span class="truncate text-sm">${m.name}</span><span class="text-xs text-gray-400 flex-shrink-0 ml-2">${total}</span>`;
       el.onclick = () => loadModel(m);
       c.appendChild(el);
     });
@@ -544,7 +418,7 @@
     const c = document.getElementById('components-list');
     c.innerHTML = '';
     if (!M.components.length) {
-      c.innerHTML = '<div class="sf-card p-10 flex flex-col items-center justify-center text-center"><div class="w-14 h-14 rounded-full bg-gray-50 flex items-center justify-center mb-4"><svg class="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div><p class="text-sm font-semibold text-gray-500 mb-1">No components yet</p><p class="text-xs text-gray-400">Click + Component to define your system architecture</p></div>';
+      c.innerHTML = '<div class="sf-card p-8 text-center text-gray-400 text-sm">No components yet. Click "+ Component" to add your first system component.</div>';
       return;
     }
     M.components.forEach((comp, i) => {
@@ -581,11 +455,7 @@
   function startStride(i) {
     CI=i;
     const comp = M.components[i];
-    const methodColors2 = {LINDDUN:'bg-teal-50 text-teal-700',DREAD:'bg-orange-50 text-orange-700',PASTA:'bg-purple-50 text-purple-700','RaD-TM':'bg-green-50 text-green-700',Hybrid:'bg-indigo-50 text-indigo-700'};
-    const strideMethod = M.methodology || 'STRIDE';
-    const strideMc = methodColors2[strideMethod];
-    const strideBadge = strideMc ? ' <span class="text-xs font-semibold px-2 py-0.5 rounded-lg '+strideMc+' ml-2">'+strideMethod+'</span>' : '';
-    document.getElementById('stride-title').innerHTML = comp.name + strideBadge;
+    document.getElementById('stride-title').textContent = comp.name;
     showView('stride');
     renderStrideCats(i);
   }
@@ -595,40 +465,35 @@
   function renderStrideCats(ci) {
     const comp = M.components[ci];
     const threats = comp.threats||[];
-    const method = M.methodology || 'STRIDE';
-    const cats = METHODS[method] || METHODS.STRIDE;
     document.getElementById('stride-count').textContent = threats.length + ' threat'+(threats.length!==1?'s':'')+' recorded';
     const c = document.getElementById('stride-cats');
     c.innerHTML = '';
-    let lastGroup = null;
-    cats.forEach(function(cat) {
-      const catLabel = cat.label;
-      const catThreats = threats.filter(function(t){return t.category===catLabel;});
-      const examples = getMethodExamples(method, catLabel);
-      const badgeCls = getCatBadge(method, cat.key);
-      const safeId = 'c'+ci+'k'+cat.key.replace(/[^a-zA-Z0-9]/g,'');
-      if (method === 'Hybrid' && cat.group && cat.group !== lastGroup) {
-        lastGroup = cat.group;
-        const hdr = document.createElement('div');
-        hdr.className = 'text-xs font-semibold uppercase tracking-wider text-gray-400 mt-4 mb-1 px-1';
-        hdr.textContent = cat.group === 'STRIDE' ? 'STRIDE — Security Threats' : 'LINDDUN — Privacy Threats';
-        c.appendChild(hdr);
-      }
-      const exOptions = examples.map(function(e){return '<option value="'+e.replace(/"/g,'&quot;')+'">'+e+'</option>';}).join('');
-      const exSelect = examples.length ? '<select id="'+safeId+'" class="sf-input text-xs py-1.5 w-56"><option value="">— Select example —</option>'+exOptions+'</select><button onclick="addExDyn(''+safeId+'','+ci+',''+catLabel.replace(/'/g,"\'")+'')" class="sf-btn-primary text-xs px-3 py-1.5">Add</button>' : '';
-      const threatRows = catThreats.length===0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map(function(t,ti){return renderThreatRow(t,ci,ti);}).join('');
+    Object.entries(EXAMPLES).forEach(([cat, examples]) => {
+      const key = cat.split(' - ')[0];
+      const catThreats = threats.filter(t=>t.category===cat);
       const div = document.createElement('div');
       div.className = 'sf-card overflow-hidden';
-      div.innerHTML = '<div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50"><div class="flex items-center gap-2.5"><span class="'+badgeCls+' px-2.5 py-0.5 rounded-lg text-xs font-bold">'+cat.key+'</span><span class="font-semibold text-gray-900 text-sm">'+catLabel.split(' - ').slice(1).join(' - ')+'</span><span class="text-xs text-gray-400 ml-1">'+cat.desc+'</span>'+(catThreats.length?'<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">'+catThreats.length+'</span>':'')+'</div><div class="flex gap-2 items-center">'+exSelect+'<button onclick="openThreatModal('+ci+',\''+catLabel.replace(/'/g,"\\\'")+'\',\'\')" class="sf-btn-secondary text-xs px-3 py-1.5">Custom</button></div></div><div id="tlist-'+safeId+'">'+threatRows+'</div>';
+      div.innerHTML = `
+        <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <div class="flex items-center gap-2.5">
+            <span class="stride-${key} px-2.5 py-0.5 rounded-lg text-xs font-bold">${key}</span>
+            <span class="font-semibold text-gray-900 text-sm">${cat.split(' - ')[1]}</span>
+            ${catThreats.length ? `<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">${catThreats.length}</span>` : ''}
+          </div>
+          <div class="flex gap-2 items-center">
+            <select id="ex-${ci}-${cat.replace(/[\s-]/g,'')}" class="sf-input text-xs py-1.5 w-56">
+              <option value="">— Select example threat —</option>
+              ${examples.map(e=>`<option value="${e}">${e}</option>`).join('')}
+            </select>
+            <button onclick="addFromExample(${ci},'${cat}')" class="sf-btn-primary text-xs px-3 py-1.5">Add</button>
+            <button onclick="openThreatModal(${ci},'${cat}','')" class="sf-btn-secondary text-xs px-3 py-1.5">Custom</button>
+          </div>
+        </div>
+        <div id="tlist-${ci}-${cat.replace(/[\s-]/g,'')}">
+          ${catThreats.length===0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map((t,ti)=>renderThreatRow(t,ci,ti)).join('')}
+        </div>`;
       c.appendChild(div);
     });
-  }
-
-  function addExDyn(safeId, ci, cat) {
-    var sel = document.getElementById(safeId);
-    if (!sel||!sel.value) { alert('Select an example first'); return; }
-    openThreatModal(ci, cat, sel.value);
-    sel.value = '';
   }
 
   function renderThreatRow(t, ci, ti) {
@@ -713,10 +578,6 @@
   function renderHeatmap() {
     const grid = document.getElementById('heatmap-grid');
     if (!grid) return;
-    const allThreats = M.components.flatMap(c=>(c.threats||[]));
-    const badge = document.getElementById('heatmap-method-badge');
-    if (badge && M) { const total = allThreats.length; badge.textContent = (M.methodology || 'STRIDE') + (total ? ' · '+total+' threat'+(total!==1?'s':'') : ''); }
-    if (allThreats.length === 0) { grid.innerHTML = '<div class="flex flex-col items-center justify-center py-10 text-center"><div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3"><svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><p class="text-sm text-gray-400 font-medium">No threats recorded yet</p><p class="text-xs text-gray-300 mt-1">Add threats to see them plotted here</p></div>'; return; }
     const threats = M.components.flatMap(c=>(c.threats||[]).map(t=>({...t,compName:c.name})));
     const cells = {};
     threats.forEach(t => {
