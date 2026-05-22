@@ -3,995 +3,269 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
 <title>STRIDE Threat Modeler</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  *, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-  body { background: #f1f5f9; color: #0f172a; }
-
-  /* === MODERN ENTERPRISE SAAS DESIGN === */
-  .sf-card { 
-    background: #fff; 
-    border-radius: 20px; 
-    border: 1px solid #e2e8f0; 
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  body { font-family: 'Inter', system_ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  
+  .saas-card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
     box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
   }
-  .sf-btn-primary { 
-    background: #2563eb; 
-    color: #fff; 
-    border-radius: 14px; 
-    font-weight: 700; 
-    font-size: 15px; 
-    padding: 14px 28px; 
-    border: none; 
-    cursor: pointer; 
+  
+  .saas-btn-primary {
+    background: #2563eb;
+    color: #fff;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 28px;
+    border: none;
+    cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 15px -3px rgb(37 99 235 / 0.3), 0 4px 6px -4px rgb(37 99 235 / 0.3);
-    letter-spacing: -0.01em;
+    box-shadow: 0 10px 15px -3px rgb(37 99 235 / 0.3);
   }
-  .sf-btn-primary:hover { 
-    background: #1e40af; 
+  .saas-btn-primary:hover {
+    background: #1e40af;
     transform: translateY(-2px);
-    box-shadow: 0 20px 25px -5px rgb(37 99 235 / 0.35), 0 10px 10px -5px rgb(37 99 235 / 0.3);
+    box-shadow: 0 20px 25px -5px rgb(37 99 235 / 0.35);
   }
-  .sf-btn-secondary { 
-    background: #fff; 
-    color: #334155; 
-    border-radius: 14px; 
-    font-weight: 600; 
-    font-size: 15px; 
-    padding: 14px 28px; 
-    border: 2px solid #e2e8f0; 
-    cursor: pointer; 
+  
+  .saas-btn-secondary {
+    background: #fff;
+    color: #334155;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px 28px;
+    border: 2px solid #e2e8f0;
+    cursor: pointer;
     transition: all 0.2s;
   }
-  .sf-btn-secondary:hover { 
-    background: #f8fafc; 
+  .saas-btn-secondary:hover {
+    background: #f8fafc;
     border-color: #94a3b8;
   }
-  .sf-input { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 14px; font-size: 14px; color: #0f172a; width: 100%; outline: none; transition: all 0.15s; text-align: left; }
-  .sf-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgb(37 99 235 / 0.1); }
-  .sf-label { font-size: 13px; font-weight: 500; color: #6e6e73; margin-bottom: 6px; display: block; }
-  .sf-nav { background: #fff; border-bottom: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07); }
-  .sf-sidebar { background: #fff; border-right: 1px solid #cbd5e1; box-shadow: 4px 0 12px -2px rgb(0 0 0 / 0.06); }
-  .sf-sidebar-item { padding: 8px 12px; border-radius: 8px; font-size: 14px; color: #3a3a3c; cursor: pointer; transition: background 0.1s; display: flex; justify-content: space-between; align-items: center; }
-  .sf-sidebar-item:hover { background: #f5f5f7; }
-  .sf-sidebar-item.active { background: #eff6ff; color: #1e40af; font-weight: 600; border-left: 3px solid #2563eb; }
-
-  /* Risk colors (Apple HIG compliant) */
-  .risk-critical { color: #ff3b30; } .risk-high { color: #ff9500; } .risk-medium { color: #ffcc00; } .risk-low { color: #34c759; }
-  .risk-badge-critical { background: #fff0ef; color: #ff3b30; border: 1px solid #ffd5d3; }
-  .risk-badge-high { background: #fff8ef; color: #c84700; border: 1px solid #ffd9b0; }
-  .risk-badge-medium { background: #fffaed; color: #7d5a00; border: 1px solid #ffe680; }
-  .risk-badge-low { background: #f0fbf4; color: #1a7f37; border: 1px solid #b7efc5; }
-
-  /* LINDDUN badges */
-  .linddun-L  { background: #e6faf8; color: #0d7a72; border: 1px solid #9de8e0; }
-  .linddun-I  { background: #f0eaff; color: #5b21b6; border: 1px solid #c4b5fd; }
-  .linddun-N  { background: #fff0f8; color: #9d174d; border: 1px solid #fbcfe8; }
-  .linddun-D2 { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-  .linddun-Di { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-  .linddun-U  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-  .linddun-Nc { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-
-  /* STRIDE badges */
-  .stride-S { background: #f0ebff; color: #6e3ff3; border: 1px solid #d9c8ff; }
-  .stride-T { background: #fff0f0; color: #c0392b; border: 1px solid #ffd5d5; }
-  .stride-R { background: #fff8ec; color: #c05621; border: 1px solid #fddcb0; }
-  .stride-I { background: #edf4ff; color: #0055b3; border: 1px solid #b0d0ff; }
-  .stride-D { background: #edfdf4; color: #1a7f37; border: 1px solid #b0efc5; }
-  .stride-E { background: #fdf0f7; color: #c0177a; border: 1px solid #f5c0e0; }
-
-  /* Treatment pills */
-  .treat-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 980px; }
-  .treat-Mitigate { background: #e8f0fe; color: #1558d6; }
-  .treat-Transfer { background: #f0ebff; color: #6e3ff3; }
-  .treat-Accept { background: #edfdf4; color: #1a7f37; }
-  .treat-Eliminate { background: #fff0f0; color: #c0392b; }
-
-  /* Heatmap */
-  .hm-cell { width: 72px; height: 56px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; position: relative; cursor: default; }
-  .hm-cell:hover .hm-tip { display: block; }
-  .hm-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1d1d1f; color: #fff; border-radius: 10px; padding: 10px 12px; width: 220px; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.3); pointer-events: none; font-size: 12px; }
-  .hm-dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; }
-  .hm-critical { background: #fff0ef; } .hm-high { background: #fff8ef; } .hm-medium { background: #fffaed; } .hm-low { background: #f0fbf4; }
-
-  /* Modal */
-  .modal-backdrop { background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); }
-  .score-btn { width: 36px; height: 36px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid #d2d2d7; background: #fff; color: #3a3a3c; cursor: pointer; transition: all 0.12s; }
-  .score-btn.active { background: #0071e3; color: #fff; border-color: #0071e3; }
-  .score-btn[data-v="1"].active { background: #34c759; border-color: #34c759; color: #fff; }
-  .score-btn[data-v="2"].active { background: #30d158; border-color: #30d158; color: #fff; }
-  .score-btn[data-v="3"].active { background: #ffcc00; border-color: #f0b800; color: #1d1d1f; }
-  .score-btn[data-v="4"].active { background: #ff9500; border-color: #ff9500; color: #fff; }
-  .score-btn[data-v="5"].active { background: #ff3b30; border-color: #ff3b30; color: #fff; }
-  /* Method badges for sidebar */
-  .mb-STRIDE  { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-  .mb-LINDDUN { background: #f0fdfa; color: #0d9488; border: 1px solid #99f6e4; }
-  .mb-DREAD   { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-  .mb-PASTA   { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
-  .mb-RaD-TM  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-  .mb-Hybrid  { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
-  .treatment-btn { flex: 1; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1.5px solid #d2d2d7; background: #fff; color: #3a3a3c; cursor: pointer; transition: all 0.12s; }
-  .treatment-btn.active { border-color: #0071e3; background: #edf4ff; color: #0055b3; }
-
-  ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 3px; }
-  /* Critical utilities — load before Tailwind CDN */
-  .hidden { display: none !important; }
-  .flex { display: flex; }
-  .grid { display: grid; }
-  .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .gap-3 { gap: 0.75rem; }
-  .gap-4 { gap: 1rem; }
-  .fixed { position: fixed; }
-  .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-  .z-50 { z-index: 50; }
-  .z-40 { z-index: 40; }
-  .z-30 { z-index: 30; }
-  .ml-60 { margin-left: 15rem; }
-  .w-60 { width: 15rem; }
-  .h-12 { height: 3rem; }
-  .pt-12 { padding-top: 3rem; }
-  .top-0 { top: 0; }
-  .top-12 { top: 3rem; }
-  .bottom-0 { bottom: 0; }
-  .left-0 { left: 0; }
-  .right-0 { right: 0; }
-  .overflow-y-auto { overflow-y: auto; }
-  .overflow-hidden { overflow: hidden; }
-  .flex-col { flex-direction: column; }
-  .flex-1 { flex: 1 1 0%; }
-  .items-center { align-items: center; }
-  .justify-between { justify-content: space-between; }
-  .justify-center { justify-content: center; }
-  .w-full { width: 100%; }
-  .h-full { height: 100%; }
-  .min-h-screen { min-height: 100vh; }
-  /* Chrome autofill fix */
-  input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 40px #fff inset !important;
-    -webkit-text-fill-color: #1d1d1f !important;
-    background-color: #fff !important;
+  
+  .saas-input {
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 15px;
+    transition: all 0.2s;
   }
-  /* SVG safety — prevent unbounded rendering */
-  svg { overflow: hidden; }
-  .icon-wrap svg { width: 20px !important; height: 20px !important; display: block; flex-shrink: 0; }
-  .nav-icon svg { width: 20px !important; height: 20px !important; }
+  .saas-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgb(37 99 235 / 0.1);
+    outline: none;
+  }
+  
+  .nav-active {
+    background: #eff6ff;
+    color: #1e40af;
+    font-weight: 700;
+    border-radius: 12px;
+  }
+  
+  .risk-badge {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 9999px;
+  }
 </style>
 </head>
 <body>
 
-<!-- Nav -->
-<nav class="sf-nav fixed top-0 left-0 right-0 z-40 h-12 flex items-center px-5 gap-4">
-  <div class="flex items-center gap-2 mr-4">
-    <svg style="width:20px;height:20px;color:#2563eb;display:block;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-    <span class="font-semibold text-sm text-gray-800">STRIDE Threat Modeler</span>
+<!-- Top Nav -->
+<nav class="bg-white border-b border-slate-200 px-8 h-16 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 bg-blue-600 rounded-2xl flex items-center justify-center">
+      <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+      </svg>
+    </div>
+    <div>
+      <span class="font-bold text-2xl tracking-tight">STRIDE</span>
+      <span class="font-semibold text-slate-500 text-xl">Threat Modeler</span>
+    </div>
   </div>
-  <button onclick="setPage('dashboard')" id="nav-dashboard" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">Dashboard</button>
-  <button onclick="setPage('howto')" id="nav-howto" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">How to Use</button>
+  
+  <div class="flex items-center gap-2">
+    <button onclick="setPage('dashboard')" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900">Dashboard</button>
+    <button onclick="setPage('howto')" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900">How to Use</button>
+    <button onclick="openNewModel()" class="saas-btn-primary ml-4">+ New Model</button>
+  </div>
 </nav>
 
-<div class="pt-12 flex" style="min-height:100vh">
-
-<!-- Sidebar -->
-<aside class="sf-sidebar w-60 fixed top-12 bottom-0 flex flex-col z-30" style="position:fixed;top:3rem;bottom:0;left:0;width:15rem;display:flex;flex-direction:column;z-index:30">
-  <div class="p-3 border-b border-black/5">
-    <button onclick="openNewModel()" class="sf-btn-primary w-full">+ New Model</button>
-  </div>
-  <div class="px-3 pt-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Models</div>
-  <div id="model-list" class="flex-1 overflow-y-auto px-2 pb-3 space-y-0.5"></div>
-  <div class="p-3 border-t border-black/5 text-xs text-gray-400 text-center">Stored locally in browser</div>
-  <div class="px-3 pb-2 text-center" style="font-size:10px;color:#94a3b8">v9 — Modern SaaS Design</div>
-</aside>
-
-<!-- Main -->
-<main class="ml-60 flex-1" style="margin-left:15rem;flex:1">
-
-<!-- Dashboard -->
-<div id="page-dashboard">
-
-  <!-- Welcome -->
-  <div id="view-welcome" class="p-8 max-w-4xl">
-    <div class="mb-10">
-      <h1 class="text-4xl font-bold text-slate-900 mb-3 tracking-tight">Threat Modeling</h1>
-      <p class="text-slate-600 text-lg max-w-xl">Identify, assess and mitigate security threats using STRIDE, LINDDUN, DREAD and more — all in one modern workspace.</p>
-    </div>
-    <div class="grid grid-cols-3 gap-4 mb-10" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem">
-      <div class="sf-card p-6">
-        <div class="icon-wrap w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4" style="width:40px;height:40px;flex-shrink:0">
-          <svg style="width:20px;height:20px;color:#2563eb;display:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+<div class="flex">
+  <!-- Sidebar -->
+  <aside class="w-72 bg-white border-r border-slate-200 min-h-[calc(100vh-4rem)] p-6">
+    <div class="mb-6">
+      <div class="text-xs font-bold text-slate-400 tracking-widest px-3 mb-2">METHODS</div>
+      <div class="space-y-1">
+        <div class="flex items-center gap-3 px-3 py-3 rounded-2xl bg-blue-50 text-blue-700 font-semibold">
+          <span>STRIDE</span>
         </div>
-        <h3 class="font-semibold text-gray-900 mb-1">Define Architecture</h3>
-        <p class="text-sm text-gray-500">Add components like APIs, databases and trust boundaries</p>
-      </div>
-      <div class="sf-card p-6">
-        <div class="icon-wrap w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-4" style="width:40px;height:40px;flex-shrink:0">
-          <svg style="width:20px;height:20px;color:#f97316;display:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <div class="flex items-center gap-3 px-3 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 cursor-pointer">
+          <span>LINDDUN</span>
         </div>
-        <h3 class="font-semibold text-gray-900 mb-1">Identify Threats</h3>
-        <p class="text-sm text-gray-500">Work through all 6 STRIDE categories per component</p>
-      </div>
-      <div class="sf-card p-6">
-        <div class="icon-wrap w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-4" style="width:40px;height:40px;flex-shrink:0">
-          <svg style="width:20px;height:20px;color:#16a34a;display:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <div class="flex items-center gap-3 px-3 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 cursor-pointer">
+          <span>DREAD</span>
         </div>
-        <h3 class="font-semibold text-gray-900 mb-1">Export Report</h3>
-        <p class="text-sm text-gray-500">Generate PDF, CSV or JSON for stakeholders</p>
+        <div class="flex items-center gap-3 px-3 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 cursor-pointer">
+          <span>PASTA</span>
+        </div>
+        <div class="flex items-center gap-3 px-3 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 cursor-pointer">
+          <span>Hybrid</span>
+        </div>
       </div>
     </div>
-    <button onclick="openNewModel()" class="sf-btn-primary">Create first model</button>
-  </div>
+    
+    <div class="pt-6 border-t">
+      <div class="text-xs font-bold text-slate-400 tracking-widest px-3 mb-3">YOUR MODELS</div>
+      <div id="model-list" class="space-y-1"></div>
+    </div>
+  </aside>
 
-  <!-- Model view -->
-  <div id="view-model" class="hidden p-8" style="display:none">
-    <div class="flex items-start justify-between mb-8">
-      <div>
-        <h2 id="mv-name" class="text-2xl font-semibold text-gray-900 tracking-tight"></h2>
-        <p id="mv-desc" class="text-gray-500 text-sm mt-1"></p>
-        <p id="mv-meta" class="text-gray-400 text-xs mt-1"></p>
+  <!-- Main Content -->
+  <main class="flex-1 p-10 max-w-7xl">
+
+    <!-- Dashboard -->
+    <div id="page-dashboard">
+      <div class="mb-10">
+        <h1 class="text-5xl font-bold tracking-tighter mb-3">Threat Modeling</h1>
+        <p class="text-xl text-slate-600 max-w-lg">Identify, assess and mitigate security threats using STRIDE, LINDDUN and DREAD.</p>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="addComponent()" class="sf-btn-secondary">+ Component</button>
-        <div class="relative group">
-          <button class="sf-btn-primary flex items-center gap-1.5">Export <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg></button>
-          <div class="absolute right-0 mt-2 w-36 bg-white border border-black/8 rounded-xl shadow-xl hidden group-hover:block z-50 overflow-hidden py-1">
-            <button onclick="exportPDF()" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">PDF Report</button>
-            <button onclick="exportCSV()" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">CSV Export</button>
-            <button onclick="exportJSON()" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">JSON Export</button>
+
+      <div class="grid grid-cols-3 gap-6 mb-10">
+        <div class="saas-card p-8">
+          <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
           </div>
+          <h3 class="font-bold text-xl mb-2">Define Architecture</h3>
+          <p class="text-slate-600">Add components, APIs, databases and trust boundaries.</p>
         </div>
-      </div>
-    </div>
-
-    <!-- Risk summary -->
-    <div class="grid grid-cols-4 gap-3 mb-6" id="risk-summary"></div>
-
-    <!-- Progress -->
-    <div class="sf-card p-4 mb-6">
-      <div class="flex justify-between text-sm mb-2.5">
-        <span class="text-gray-500 font-medium">Assessment progress</span>
-        <span id="prog-text" class="text-gray-700 font-semibold"></span>
-      </div>
-      <div class="w-full bg-gray-100 rounded-full h-1.5">
-        <div id="prog-bar" class="bg-blue-500 rounded-full h-1.5 transition-all duration-500" style="width:0%"></div>
-      </div>
-    </div>
-
-    <!-- Heatmap -->
-    <div class="sf-card p-6 mb-6">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h3 class="font-semibold text-gray-900">Risk Heatmap</h3>
-          <p class="text-xs text-gray-400 mt-0.5">Threats plotted by Likelihood × Impact — hover for details</p>
-        </div>
-        <div class="flex gap-4 text-xs text-gray-500">
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-green-100 border border-green-300"></span>Low</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-yellow-100 border border-yellow-300"></span>Medium</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-orange-100 border border-orange-300"></span>High</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-red-100 border border-red-300"></span>Critical</span>
-        </div>
-      </div>
-      <div class="flex gap-3">
-        <div class="flex flex-col items-center justify-center" style="width:20px">
-          <div style="writing-mode:vertical-rl;transform:rotate(180deg)" class="text-xs text-gray-400">Impact ↑</div>
-        </div>
-        <div>
-          <div id="heatmap-grid"></div>
-          <div class="flex mt-2" style="gap:4px;margin-left:24px">
-            <div class="text-xs text-gray-400 text-center" style="width:72px">1</div>
-            <div class="text-xs text-gray-400 text-center" style="width:72px">2</div>
-            <div class="text-xs text-gray-400 text-center" style="width:72px">3</div>
-            <div class="text-xs text-gray-400 text-center" style="width:72px">4</div>
-            <div class="text-xs text-gray-400 text-center" style="width:72px">5</div>
+        <div class="saas-card p-8">
+          <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
           </div>
-          <div class="text-xs text-gray-400 text-center mt-1">Likelihood →</div>
+          <h3 class="font-bold text-xl mb-2">Identify Threats</h3>
+          <p class="text-slate-600">Work through STRIDE categories per component.</p>
+        </div>
+        <div class="saas-card p-8">
+          <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <h3 class="font-bold text-xl mb-2">Export Reports</h3>
+          <p class="text-slate-600">Generate professional PDF, CSV or JSON exports.</p>
         </div>
       </div>
+
+      <button onclick="openNewModel()" class="saas-btn-primary text-lg px-10 py-4">Create your first model</button>
     </div>
 
-    <!-- Components -->
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="font-semibold text-gray-700 text-sm">System Components</h3>
-    </div>
-    <div id="components-list" class="space-y-3"></div>
-  </div>
-
-  <!-- STRIDE view -->
-  <div id="view-stride" class="hidden p-8" style="display:none">
-    <button onclick="backToModel()" class="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium mb-5 transition">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>Back to model
-    </button>
-    <div class="flex items-center justify-between mb-2">
-      <h2 id="stride-title" class="text-xl font-semibold text-gray-900 tracking-tight"></h2>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span id="stride-count" class="text-sm text-gray-400 bg-gray-100 px-3 py-1 rounded-full font-medium"></span>
-        <button onclick="addComponent()" style="padding:6px 14px;background:#fff;border:1.5px solid #d2d2d7;border-radius:980px;font-size:12px;font-weight:500;color:#3a3a3c;cursor:pointer">+ Add area</button>
-      </div>
-    </div>
-    <p class="text-sm text-gray-400 mb-6" id="stride-method-desc"></p>
-    <div id="stride-cats" class="space-y-4"></div>
-  </div>
-
-</div>
-
-<!-- How to Use -->
-<div id="page-howto" class="hidden p-8 max-w-2xl" style="display:none">
-  <h1 class="text-2xl font-semibold text-gray-900 tracking-tight mb-1">How to Use</h1>
-  <p class="text-gray-400 text-sm mb-7">A practical guide to executing structured STRIDE threat assessments</p>
-  <div class="space-y-4">
-
-    <div class="sf-card p-6">
-      <h2 class="font-semibold text-gray-900 mb-3">What is STRIDE?</h2>
-      <p class="text-sm text-gray-500 mb-4">STRIDE is a systematic threat modeling framework to identify security threats by category:</p>
-      <div class="space-y-2">
-        <div class="flex gap-3 items-start"><span class="stride-S px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">S</span><div class="text-sm"><strong class="text-gray-800">Spoofing</strong> <span class="text-gray-500">— Impersonating users, systems or identities</span></div></div>
-        <div class="flex gap-3 items-start"><span class="stride-T px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">T</span><div class="text-sm"><strong class="text-gray-800">Tampering</strong> <span class="text-gray-500">— Unauthorized modification of data or code</span></div></div>
-        <div class="flex gap-3 items-start"><span class="stride-R px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">R</span><div class="text-sm"><strong class="text-gray-800">Repudiation</strong> <span class="text-gray-500">— Denying performed actions, missing audit trail</span></div></div>
-        <div class="flex gap-3 items-start"><span class="stride-I px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">I</span><div class="text-sm"><strong class="text-gray-800">Info Disclosure</strong> <span class="text-gray-500">— Unauthorized access to sensitive data</span></div></div>
-        <div class="flex gap-3 items-start"><span class="stride-D px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">D</span><div class="text-sm"><strong class="text-gray-800">Denial of Service</strong> <span class="text-gray-500">— Disrupting system availability</span></div></div>
-        <div class="flex gap-3 items-start"><span class="stride-E px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 mt-0.5">E</span><div class="text-sm"><strong class="text-gray-800">Elevation of Privilege</strong> <span class="text-gray-500">— Gaining unauthorized access level</span></div></div>
-      </div>
-    </div>
-
-    <div class="sf-card p-6">
-      <h2 class="font-semibold text-gray-900 mb-4">Workflow</h2>
-      <div class="space-y-4">
-        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">1</div><div class="text-sm"><strong class="text-gray-800">Create Model</strong> <span class="text-gray-500">— Name, scope and assessor</span></div></div>
-        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">2</div><div class="text-sm"><strong class="text-gray-800">Add Components</strong> <span class="text-gray-500">— APIs, databases, UIs, services, trust boundaries</span></div></div>
-        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">3</div><div class="text-sm"><strong class="text-gray-800">Assess per component</strong> <span class="text-gray-500">— Click "Assess →", go through all 6 categories</span></div></div>
-        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">4</div><div class="text-sm"><strong class="text-gray-800">Score threats</strong> <span class="text-gray-500">— Likelihood × Impact = Risk. Choose treatment: Mitigate / Transfer / Accept / Eliminate</span></div></div>
-        <div class="flex gap-4"><div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">5</div><div class="text-sm"><strong class="text-gray-800">Export</strong> <span class="text-gray-500">— PDF for management, CSV for tickets, JSON for tools</span></div></div>
-      </div>
-    </div>
-
-    <div class="sf-card p-6">
-      <h2 class="font-semibold text-gray-900 mb-4">Risk Score Guide</h2>
-      <div class="grid grid-cols-4 gap-3">
-        <div class="text-center p-3 rounded-xl bg-green-50 border border-green-100"><div class="text-green-700 font-bold text-lg">1–4</div><div class="text-green-700 font-semibold text-xs">Low</div><div class="text-gray-400 text-xs mt-1">Monitor</div></div>
-        <div class="text-center p-3 rounded-xl bg-yellow-50 border border-yellow-100"><div class="text-yellow-700 font-bold text-lg">5–9</div><div class="text-yellow-700 font-semibold text-xs">Medium</div><div class="text-gray-400 text-xs mt-1">This cycle</div></div>
-        <div class="text-center p-3 rounded-xl bg-orange-50 border border-orange-100"><div class="text-orange-700 font-bold text-lg">10–16</div><div class="text-orange-700 font-semibold text-xs">High</div><div class="text-gray-400 text-xs mt-1">Prioritize</div></div>
-        <div class="text-center p-3 rounded-xl bg-red-50 border border-red-100"><div class="text-red-700 font-bold text-lg">17–25</div><div class="text-red-700 font-semibold text-xs">Critical</div><div class="text-gray-400 text-xs mt-1">Fix now</div></div>
-      </div>
-    </div>
-
-    <div class="sf-card p-6">
-      <h2 class="font-semibold text-gray-900 mb-3">Risk Treatment</h2>
-      <div class="space-y-2">
-        <div class="flex gap-3 items-center"><span class="treat-pill treat-Mitigate">Mitigate</span><span class="text-sm text-gray-500">Implement controls to reduce likelihood or impact</span></div>
-        <div class="flex gap-3 items-center"><span class="treat-pill treat-Transfer">Transfer</span><span class="text-sm text-gray-500">Shift risk to third party via insurance or vendor SLA</span></div>
-        <div class="flex gap-3 items-center"><span class="treat-pill treat-Accept">Accept</span><span class="text-sm text-gray-500">Acknowledge risk, no action needed — document rationale</span></div>
-        <div class="flex gap-3 items-center"><span class="treat-pill treat-Eliminate">Eliminate</span><span class="text-sm text-gray-500">Remove the feature or component causing the risk</span></div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-</main>
-</div>
-
-<!-- Modal: New Model -->
-<div id="modal-model" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop" style="display:none">
-  <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">New Threat Model</h3>
-    <div class="space-y-4">
-      <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API, Customer Portal, Auth Service" class="sf-input" autocomplete="off"></div>
-      <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input" autocomplete="off"></div>
-      <div>
-        <label class="sf-label">Methodology</label>
-        <div style="display:flex;gap:10px;margin-top:4px">
-          <button type="button" onclick="selectMethod('STRIDE')" id="mb-STRIDE" class="method-btn active" style="flex:1;padding:10px 0;border-radius:12px;font-size:13px;font-weight:600;border:2px solid #0071e3;background:#eff6ff;color:#0071e3;cursor:pointer">
-            <div style="font-size:15px;font-weight:700">STRIDE</div>
-            <div style="font-size:11px;font-weight:400;opacity:0.7;margin-top:2px">Security threats</div>
-          </button>
-          <button type="button" onclick="selectMethod('LINDDUN')" id="mb-LINDDUN" class="method-btn" style="flex:1;padding:10px 0;border-radius:12px;font-size:13px;font-weight:600;border:2px solid #e5e5ea;background:#fff;color:#6e6e73;cursor:pointer">
-            <div style="font-size:15px;font-weight:700">LINDDUN</div>
-            <div style="font-size:11px;font-weight:400;opacity:0.7;margin-top:2px">Privacy threats</div>
-          </button>
-        </div>
-        <input type="hidden" id="inp-method" value="STRIDE">
-      </div>
-    </div>
-    <div class="flex gap-3 mt-5">
-      <button onclick="closeModal('modal-model')" class="sf-btn-secondary flex-1">Cancel</button>
-      <button onclick="createModel()" class="sf-btn-primary flex-1">Create Model</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Add Component -->
-<div id="modal-comp" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop" style="display:none">
-  <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Add Component</h3>
-    <div class="space-y-4">
-      <div><label class="sf-label">Component name *</label><input id="comp-name" type="text" placeholder="e.g. Auth API, User Database, Payment Service" class="sf-input" autocomplete="off"></div>
-      <div>
-        <label class="sf-label">Type</label>
-        <select id="comp-type" class="sf-input">
-          <option value="Process">Process (API, service, application)</option>
-          <option value="DataStore">Data Store (database, file system, cache)</option>
-          <option value="ExternalEntity">External Entity (user, third-party service)</option>
-          <option value="TrustBoundary">Trust Boundary (network boundary, DMZ)</option>
-        </select>
-      </div>
-    </div>
-    <div class="flex gap-3 mt-5">
-      <button onclick="closeModal('modal-comp')" class="sf-btn-secondary flex-1">Cancel</button>
-      <button onclick="saveComponent()" class="sf-btn-primary flex-1">Add Component</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Add Threat -->
-<div id="modal-threat" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop" style="display:none">
-  <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
-    <h3 class="text-lg font-semibold text-gray-900 mb-0.5">Add Threat</h3>
-    <p id="mt-cat" class="text-sm text-gray-400 mb-5"></p>
-    <div class="space-y-4">
-      <div><label class="sf-label">Threat description *</label><input id="mt-desc" type="text" placeholder="Describe the specific threat..." class="sf-input"></div>
-      <div class="grid grid-cols-2 gap-4">
+    <!-- Model View -->
+    <div id="page-model" class="hidden">
+      <div class="flex justify-between items-start mb-8">
         <div>
-          <label class="sf-label">Likelihood (1–5)</label>
-          <div class="flex gap-1.5" id="like-btns"></div>
-          <div class="text-xs text-gray-400 mt-1.5">1 = Rare · 5 = Certain</div>
+          <h2 id="model-name" class="text-4xl font-bold tracking-tight"></h2>
+          <p id="model-desc" class="text-xl text-slate-600 mt-1"></p>
         </div>
-        <div>
-          <label class="sf-label">Impact (1–5)</label>
-          <div class="flex gap-1.5" id="imp-btns"></div>
-          <div class="text-xs text-gray-400 mt-1.5">1 = Minimal · 5 = Catastrophic</div>
+        <div class="flex gap-3">
+          <button onclick="addComponent()" class="saas-btn-secondary">+ Component</button>
+          <button onclick="exportPDF()" class="saas-btn-primary">Export PDF</button>
         </div>
       </div>
-      <div class="bg-gray-50 rounded-xl p-3 flex items-center justify-between">
-        <span class="text-sm text-gray-500 font-medium">Risk Score</span>
-        <span id="mt-score" class="text-xl font-bold"></span>
-      </div>
-      <div>
-        <label class="sf-label">Risk Treatment</label>
-        <div class="flex gap-2" id="treatment-btns">
-          <button onclick="setTreatment('Mitigate')" id="treat-Mitigate" class="treatment-btn active">Mitigate</button>
-          <button onclick="setTreatment('Transfer')" id="treat-Transfer" class="treatment-btn">Transfer</button>
-          <button onclick="setTreatment('Accept')" id="treat-Accept" class="treatment-btn">Accept</button>
-          <button onclick="setTreatment('Eliminate')" id="treat-Eliminate" class="treatment-btn">Eliminate</button>
+
+      <div class="saas-card p-8 mb-8">
+        <div class="flex justify-between mb-6">
+          <div>
+            <div class="font-bold text-lg">Risk Overview</div>
+          </div>
+          <div id="risk-badges" class="flex gap-2"></div>
         </div>
+        <div id="risk-summary" class="grid grid-cols-4 gap-4"></div>
       </div>
-      <div><label class="sf-label">Mitigation / control</label><input id="mt-mitigation" type="text" placeholder="Describe the control or action..." class="sf-input"></div>
+
+      <div class="saas-card p-8">
+        <div class="font-bold text-lg mb-6">Components</div>
+        <div id="components-list" class="space-y-4"></div>
+      </div>
     </div>
-    <div class="flex gap-3 mt-5">
-      <button onclick="closeModal('modal-threat')" class="sf-btn-secondary flex-1">Cancel</button>
-      <button onclick="saveThreat()" class="sf-btn-primary flex-1">Add Threat</button>
-    </div>
-  </div>
+
+  </main>
 </div>
 
 <script>
-  let models = JSON.parse(localStorage.getItem('stride-v3') || '[]');
-  let M = null, CI = null;
-  let tL = 3, tI = 3, tTreatment = 'Mitigate', tCat = '', tCompIdx = 0;
+// Tailwind script
+function initTailwind() {
+  document.documentElement.style.setProperty('--accent', '#2563eb');
+}
+initTailwind();
 
-  const EXAMPLES = {
-    'S - Spoofing':        ['Attacker spoofs user identity via stolen credentials','Fake login page harvests credentials','DNS spoofing redirects to malicious server','API caller impersonates trusted service','Session token theft via XSS'],
-    'T - Tampering':       ['Attacker modifies request parameters (IDOR)','Config file tampered on disk','Database record altered without authorization','Log files modified to cover tracks','HTTP response tampering via MITM'],
-    'R - Repudiation':     ['User denies transaction — no audit log','Admin deletes audit trail entries','API calls without non-repudiation','Missing timestamps on critical operations','No digital signatures on documents'],
-    'I - Info Disclosure': ['Sensitive data transmitted unencrypted','Verbose error messages expose stack traces','API returns excessive data fields','PII unmasked in application logs','Directory traversal exposes server files'],
-    'D - DoS':             ['Attacker floods endpoint — no rate limiting','Large file upload exhausts storage','Slow-loris attack consumes connections','Recursive query causes CPU spike','Dependency failure cascades to full outage'],
-    'E - Elevation':       ['Horizontal privilege escalation (IDOR)','JWT token manipulation for admin role','Insecure direct object reference bypasses auth','Misconfigured IAM grants excess permissions','Unpatched CVE allows local privilege escalation']
+// Simple state
+let currentModel = null;
+let models = JSON.parse(localStorage.getItem('stride_models') || '[]');
+
+// Basic functions (placeholder for full implementation)
+function setPage(page) {
+  document.getElementById('page-dashboard').classList.add('hidden');
+  document.getElementById('page-model').classList.add('hidden');
+  
+  if (page === 'dashboard') {
+    document.getElementById('page-dashboard').classList.remove('hidden');
+  }
+}
+
+function openNewModel() {
+  const name = prompt("Model name:");
+  if (!name) return;
+  
+  currentModel = {
+    id: Date.now(),
+    name: name,
+    desc: "",
+    components: []
   };
+  
+  models.push(currentModel);
+  localStorage.setItem('stride_models', JSON.stringify(models));
+  
+  renderModel();
+}
 
-  const STRIDE_KEYS = ['S','T','R','I','D','E'];
+function renderModel() {
+  document.getElementById('page-dashboard').classList.add('hidden');
+  document.getElementById('page-model').classList.remove('hidden');
+  
+  document.getElementById('model-name').innerText = currentModel.name;
+  document.getElementById('model-desc').innerText = currentModel.desc || 'No description';
+  
+  // Render components placeholder
+  document.getElementById('components-list').innerHTML = 
+    '<div class="text-slate-500">No components yet. Click "+ Component" to add one.</div>';
+}
 
-  var selectedMethod = 'STRIDE';
-  function selectMethod(m) {
-    selectedMethod = m;
-    document.getElementById('inp-method').value = m;
-    ['STRIDE','LINDDUN'].forEach(function(id) {
-      var btn = document.getElementById('mb-'+id);
-      if (!btn) return;
-      if (id === m) {
-        btn.style.border = '2px solid #0071e3';
-        btn.style.background = '#eff6ff';
-        btn.style.color = '#0071e3';
-      } else {
-        btn.style.border = '2px solid #e5e5ea';
-        btn.style.background = '#fff';
-        btn.style.color = '#6e6e73';
-      }
-    });
-  }
+function addComponent() {
+  alert("Component modal would open here (to be implemented)");
+}
 
-  const METHODS = {
-    'STRIDE': [
-      {key:'S', label:'S - Spoofing',              badgeCls:'stride-S', examples:['Attacker spoofs user identity using stolen credentials','Forged JWT token bypasses authentication','DNS spoofing redirects traffic to malicious server']},
-      {key:'T', label:'T - Tampering',             badgeCls:'stride-T', examples:['Attacker modifies transaction data in transit','Unauthorized write to configuration file','SQL injection alters database records']},
-      {key:'R', label:'R - Repudiation',           badgeCls:'stride-R', examples:['User denies placing fraudulent order — no audit trail','Admin action not logged — cannot prove who made the change','Missing timestamps on critical operations']},
-      {key:'I', label:'I - Info Disclosure',       badgeCls:'stride-I', examples:['Error messages expose internal stack traces','Sensitive data returned in API response unnecessarily','Unencrypted PII stored in browser localStorage']},
-      {key:'D', label:'D - Denial of Service',     badgeCls:'stride-D', examples:['DDoS floods login endpoint causing outage','Memory exhaustion via large payload in API request','Recursive query causes database timeout']},
-      {key:'E', label:'E - Elevation of Privilege',badgeCls:'stride-E', examples:['Regular user accesses admin endpoint via IDOR','Privilege escalation via JWT role claim manipulation','Broken access control allows horizontal privilege escalation']}
-    ],
-    'LINDDUN': [
-      {key:'L',  label:'L - Linkability',          badgeCls:'linddun-L',  examples:['User browsing patterns linked across sessions via tracking','Transaction IDs correlated to identify user behavior','Device fingerprint used to re-identify users across sites']},
-      {key:'I',  label:'I - Identifiability',      badgeCls:'linddun-I',  examples:['IP address uniquely identifies individual user','Name and DOB re-identifies pseudonymous user','ZIP code + birthdate + gender identifies individual']},
-      {key:'N',  label:'N - Non-repudiation',      badgeCls:'linddun-N',  examples:['Audit log prevents user denying consent withdrawal','System records undeniable proof of sensitive user actions','Activity log cannot be deleted — privacy concern']},
-      {key:'D',  label:'D - Detectability',        badgeCls:'linddun-D2', examples:['Third party detects if user has account via timing attack','Metadata reveals existence of sensitive medical record','Ciphertext length reveals nature of encrypted data']},
-      {key:'Di', label:'Di - Disclosure of Info',  badgeCls:'linddun-Di', examples:['PII returned in API response unnecessarily','Sensitive data cached in browser history','Health data visible to unauthorized third party']},
-      {key:'U',  label:'U - Unawareness',          badgeCls:'linddun-U',  examples:['User unaware data shared with analytics partners','No privacy notice before data collection','Consent buried in terms of service document']},
-      {key:'Nc', label:'Nc - Non-compliance',      badgeCls:'linddun-Nc', examples:['Personal data retained beyond GDPR retention limit','No right-to-erasure mechanism implemented','Missing data processing agreement with processor']}
-    ],
-    'DREAD': [
-      {key:'S', label:'S - Spoofing',              badgeCls:'stride-S', examples:['Identity spoofing — rate each DREAD dimension 1-5']},
-      {key:'T', label:'T - Tampering',             badgeCls:'stride-T', examples:['Data tampering — rate each DREAD dimension 1-5']},
-      {key:'R', label:'R - Repudiation',           badgeCls:'stride-R', examples:['Action denial — rate each DREAD dimension 1-5']},
-      {key:'I', label:'I - Info Disclosure',       badgeCls:'stride-I', examples:['Data exposure — rate each DREAD dimension 1-5']},
-      {key:'D', label:'D - Denial of Service',     badgeCls:'stride-D', examples:['Availability attack — rate each DREAD dimension 1-5']},
-      {key:'E', label:'E - Elevation of Privilege',badgeCls:'stride-E', examples:['Privilege escalation — rate each DREAD dimension 1-5']}
-    ],
-    'PASTA': [
-      {key:'P1', label:'P1 - Define Objectives',      badgeCls:'stride-S', examples:['Protect customer PII per GDPR','Ensure 99.9% availability of payment service','Prevent unauthorized access to policyholder data']},
-      {key:'P2', label:'P2 - Technical Scope',        badgeCls:'stride-T', examples:['In scope: Payment API, Auth service, Policy DB','External: PSP, Identity Provider, Actuarial system','Trust boundaries: DMZ, internal network, cloud']},
-      {key:'P3', label:'P3 - Decompose Application',  badgeCls:'stride-R', examples:['DFD: Customer Portal > Auth API > Policy DB','Data flow: PII from registration to underwriting','Encrypted column for PII in PostgreSQL']},
-      {key:'P4', label:'P4 - Analyze Threats',        badgeCls:'stride-I', examples:['Threat agent: External attacker, financially motivated','Credential stuffing against login endpoint','SQL injection in policy search parameter']},
-      {key:'P5', label:'P5 - Vulnerability Analysis', badgeCls:'stride-D', examples:['CVE-2024-1234 in auth library — unpatched','Missing input validation on API parameters','Overly permissive IAM roles on storage bucket']},
-      {key:'P6', label:'P6 - Attack Modeling',        badgeCls:'stride-E', examples:['Kill chain: Recon > Exploit auth > Pivot to DB > Exfil','Attack tree: Access policyholder PII','Supply chain attack via compromised npm package']},
-      {key:'P7', label:'P7 - Risk and Impact',        badgeCls:'stride-S', examples:['Residual risk: High after planned MFA implementation','Business impact: EUR 2M fine + reputational damage','Risk acceptance required for legacy system gap']}
-    ],
-    'RaD-TM': [
-      {key:'S', label:'S - Spoofing',              badgeCls:'stride-S', examples:['Feature risk: Authentication bypass via spoofed token']},
-      {key:'T', label:'T - Tampering',             badgeCls:'stride-T', examples:['Feature risk: Unauthorized modification of feature data']},
-      {key:'R', label:'R - Repudiation',           badgeCls:'stride-R', examples:['Feature risk: Missing audit trail for feature actions']},
-      {key:'I', label:'I - Info Disclosure',       badgeCls:'stride-I', examples:['Feature risk: PII exposed in feature API response']},
-      {key:'D', label:'D - Denial of Service',     badgeCls:'stride-D', examples:['Feature risk: Feature endpoint susceptible to DoS']},
-      {key:'E', label:'E - Elevation of Privilege',badgeCls:'stride-E', examples:['Feature risk: Feature grants unintended elevated access']}
-    ],
-    'Hybrid': [
-      {key:'S',  label:'S - Spoofing',             badgeCls:'stride-S',   group:'STRIDE',  examples:['Attacker spoofs user identity with stolen credentials']},
-      {key:'T',  label:'T - Tampering',            badgeCls:'stride-T',   group:'STRIDE',  examples:['Attacker modifies data in transit']},
-      {key:'R',  label:'R - Repudiation',          badgeCls:'stride-R',   group:'STRIDE',  examples:['User denies action — no audit trail']},
-      {key:'I',  label:'I - Info Disclosure',      badgeCls:'stride-I',   group:'STRIDE',  examples:['Sensitive data exposed in API response']},
-      {key:'D',  label:'D - Denial of Service',    badgeCls:'stride-D',   group:'STRIDE',  examples:['Service flooded causing outage']},
-      {key:'E',  label:'E - Elevation',            badgeCls:'stride-E',   group:'STRIDE',  examples:['User escalates to admin role']},
-      {key:'L',  label:'L - Linkability',          badgeCls:'linddun-L',  group:'LINDDUN', examples:['User behavior linked across sessions']},
-      {key:'Di', label:'Di - Disclosure of Info',  badgeCls:'linddun-Di', group:'LINDDUN', examples:['PII returned unnecessarily in response']},
-      {key:'U',  label:'U - Unawareness',          badgeCls:'linddun-U',  group:'LINDDUN', examples:['User unaware data shared with third parties']},
-      {key:'Nc', label:'Nc - Non-compliance',      badgeCls:'linddun-Nc', group:'LINDDUN', examples:['Data retained beyond GDPR limit']}
-    ]
-  };
+function exportPDF() {
+  alert("PDF export would trigger here");
+}
 
-  function riskScore(l,i) { return l*i; }
-  function riskLevel(s) { return s>=17?'Critical':s>=10?'High':s>=5?'Medium':'Low'; }
-  function riskCls(s) { return s>=17?'risk-critical':s>=10?'risk-high':s>=5?'risk-medium':'risk-low'; }
-  function riskBadgeCls(s) { return `risk-badge-${riskLevel(s).toLowerCase()}`; }
-
-  function save() { localStorage.setItem('stride-v3', JSON.stringify(models)); }
-  function setPage(p) {
-    ['dashboard','howto'].forEach(function(n) {
-      var el = document.getElementById('page-'+n);
-      if (n === p) { el.classList.remove('hidden'); el.style.display = ''; }
-      else { el.classList.add('hidden'); el.style.display = 'none'; }
-    });
-    document.querySelectorAll('.nav-btn').forEach(function(b) { b.style.color=''; b.style.fontWeight=''; });
-    var btn = document.getElementById('nav-'+p);
-    if (btn) { btn.style.color='#0071e3'; btn.style.fontWeight='600'; }
-  }
-  function showView(v) {
-    ['welcome','model','stride'].forEach(function(n) {
-      var el = document.getElementById('view-'+n);
-      el.classList.add('hidden');
-      el.style.display = 'none';
-    });
-    var show = document.getElementById('view-'+v);
-    show.classList.remove('hidden');
-    show.style.display = '';
-  }
-  function openModal(id) {
-    var el = document.getElementById(id);
-    el.style.display = '';           // clear the inline style="display:none"
-    el.classList.remove('hidden');
-  }
-  function closeModal(id) {
-    var el = document.getElementById(id);
-    el.classList.add('hidden');
-    el.style.display = 'none';       // belt-and-suspenders
-  }
-
-  function openNewModel() { openModal('modal-model'); }
-
-  function createModel() {
-    var name = document.getElementById('inp-name').value.trim();
-    if (!name) { document.getElementById('inp-name').focus(); return; }
-    var methodology = document.getElementById('inp-method').value || 'STRIDE';
-    var assessor = document.getElementById('inp-assessor').value.trim();
-    // Auto-create first component named after the model so user goes straight to assessment
-    var firstComp = { id: Date.now(), name: name, type: 'Process', threats: [], addedAt: new Date().toISOString() };
-    M = { id: Date.now()+1, name: name, methodology: methodology, desc: '', assessor: assessor, created: new Date().toLocaleDateString('nl-NL'), components: [firstComp] };
-    selectMethod('STRIDE');
-    models.push(M); save(); renderSidebar(); closeModal('modal-model');
-    document.getElementById('inp-name').value = '';
-    document.getElementById('inp-assessor').value = '';
-    // Go straight to assessment — skip the component list step
-    CI = 0;
-    document.getElementById('stride-title').textContent = name;
-    showView('stride');
-    renderStrideCats(0);
-    renderRiskSummary(); renderProgress(); renderHeatmap();
-  }
-
-  function loadModel(m) {
-    M = m;
-    renderSidebar();
-    renderRiskSummary(); renderProgress(); renderHeatmap();
-    // If model has exactly 1 component (simple case), go straight to assessment
-    if (m.components.length === 1) {
-      CI = 0;
-      document.getElementById('stride-title').textContent = m.components[0].name;
-      showView('stride');
-      renderStrideCats(0);
-    } else {
-      // Multi-component models show overview first
-      showView('model');
-      document.getElementById('mv-name').textContent = m.name;
-      document.getElementById('mv-desc').textContent = m.desc || '';
-      document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created+' · Method: '+(m.methodology||'STRIDE');
-      renderComponents();
-    }
-  }
-
-  function renderSidebar() {
-    var c = document.getElementById('model-list');
-    c.innerHTML = '';
-    if (!models.length) {
-      c.innerHTML = '<div style="padding:12px 8px;color:#aeaeb2;font-size:12px;text-align:center">No models yet</div>';
-      return;
-    }
-    models.forEach(function(m) {
-      var total = m.components.reduce(function(sum,comp){ return sum+(comp.threats||[]).length; },0);
-      var method = m.methodology || 'STRIDE';
-      var el = document.createElement('div');
-      el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
-      el.style.cssText = 'padding:10px 12px;border-radius:10px;margin-bottom:2px;display:flex;flex-direction:column;gap:4px;cursor:pointer';
-      var mid = m.id;
-      el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">'
-        + '<span style="font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">' + m.name + '</span>'
-        + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;margin-left:6px">'
-        + '<span style="font-size:11px;color:#86868b">' + total + ' threat' + (total!==1?'s':'') + '</span>'
-        + '<button onclick="event.stopPropagation();deleteModel(' + mid + ')" title="Delete model" style="border:none;background:transparent;color:#d1d1d6;cursor:pointer;font-size:15px;line-height:1;padding:0 2px" onmouseover="this.style.color=\'#ff3b30\'" onmouseout="this.style.color=\'#d1d1d6\'">×</button>'
-        + '</div>'
-        + '</div>'
-        + '<div>'
-        + '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:980px" class="mb-' + method + '">' + method + '</span>'
-        + '</div>';
-      el.onclick = function() { loadModel(m); };
-      c.appendChild(el);
-    });
-  }
-
-  function deleteModel(id) {
-    if (!confirm('Delete this model? This cannot be undone.')) return;
-    models = models.filter(function(m){ return m.id !== id; });
-    save();
-    if (M && M.id === id) {
-      M = models.length ? models[0] : null;
-      if (M) { loadModel(M); } else { showView('home'); renderSidebar(); }
-    } else {
-      renderSidebar();
-    }
-  }
-
-  function renderRiskSummary() {
-    const threats = M.components.flatMap(c=>c.threats||[]);
-    const counts = {Critical:0,High:0,Medium:0,Low:0};
-    threats.forEach(t => counts[riskLevel(riskScore(t.likelihood||1,t.impact||1))]++);
-    var cfgMap = {Critical:{cls:'risk-badge-critical'},High:{cls:'risk-badge-high'},Medium:{cls:'risk-badge-medium'},Low:{cls:'risk-badge-low'}};
-    document.getElementById('risk-summary').innerHTML = Object.entries(counts).map(function(pair) {
-      var k=pair[0], v=pair[1], cfg=cfgMap[k];
-      return '<div class="sf-card p-4"><div style="font-size:26px;font-weight:700;color:#1d1d1f">'+v+'</div><div style="margin-top:4px"><span class="text-xs px-2 py-0.5 rounded-full font-semibold '+cfg.cls+'">'+k+'</span></div></div>';
-    }).join('');
-  }
-
-  function renderProgress() {
-    const comps = M.components;
-    const assessed = comps.filter(c=>(c.threats||[]).length>0).length;
-    const pct = comps.length ? Math.round(assessed/comps.length*100) : 0;
-    document.getElementById('prog-text').textContent = `${assessed} of ${comps.length} assessed`;
-    document.getElementById('prog-bar').style.width = pct+'%';
-  }
-
-  function renderComponents() {
-    const c = document.getElementById('components-list');
-    c.innerHTML = '';
-    if (!M.components.length) {
-      c.innerHTML = '<div class="sf-card p-8 text-center text-gray-400 text-sm">No components yet. Click "+ Component" to add your first system component.</div>';
-      return;
-    }
-    M.components.forEach((comp, i) => {
-      const threats = comp.threats||[];
-      const scores = threats.map(t=>riskScore(t.likelihood||1,t.impact||1));
-      const maxScore = scores.length ? Math.max(...scores) : 0;
-      const el = document.createElement('div');
-      el.className = 'sf-card p-4 hover:shadow-md transition-shadow';
-      el.innerHTML = `
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center" style="width:36px;height:36px;border-radius:10px;background:#eff6ff;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg style="width:16px;height:16px;color:#2563eb" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
-            <div>
-              <div class="font-semibold text-gray-900 text-sm">${comp.name}</div>
-              <div class="text-xs text-gray-400 mt-0.5">${comp.type}${threats.length ? ` · ${threats.length} threat${threats.length>1?'s':''}` : ' · Not assessed'}${maxScore ? ` · <span class="${riskCls(maxScore)} font-semibold">${riskLevel(maxScore)}</span>` : ''}</div>
-            </div>
-          </div>
-          <button onclick="startStride(${i})" class="sf-btn-primary text-xs px-4 py-1.5">Assess →</button>
-        </div>
-        ${threats.length ? `<div class="mt-3 flex flex-wrap gap-1.5">${threats.slice(0,4).map(t=>`<span class="text-xs px-2 py-0.5 rounded-full ${riskBadgeCls(riskScore(t.likelihood||1,t.impact||1))}">${t.desc.substring(0,32)}${t.desc.length>32?'…':''}</span>`).join('')}${threats.length>4?`<span class="text-xs text-gray-400 py-0.5">+${threats.length-4} more</span>`:''}</div>` : ''}
-      `;
-      c.appendChild(el);
-    });
-  }
-
-  function addComponent() {
-    openModal('modal-comp');
-  }
-  function saveComponent() {
-    var name = document.getElementById('comp-name').value.trim();
-    if (!name || !M) return;
-    var type = document.getElementById('comp-type').value || 'Process';
-    M.components.push({id:Date.now(), name, type, threats:[], addedAt:new Date().toISOString()});
-    save(); renderComponents(); renderProgress(); renderHeatmap(); renderSidebar();
-    closeModal('modal-comp');
-    document.getElementById('comp-name').value = '';
-  }
-
-  function startStride(i) {
-    CI=i;
-    const comp = M.components[i];
-    document.getElementById('stride-title').textContent = comp.name;
-    showView('stride');
-    renderStrideCats(i);
-  }
-
-  function backToModel() { showView('model'); renderComponents(); renderRiskSummary(); renderProgress(); renderHeatmap(); renderSidebar(); }
-
-  function renderStrideCats(ci) {
-    var comp = M.components[ci];
-    // Update subtitle with methodology context
-    var methodDesc = document.getElementById('stride-method-desc');
-    if (methodDesc) {
-      var method = M.methodology || 'STRIDE';
-      var descs = {
-        'STRIDE': 'Security assessment — work through each category, add threats, set likelihood and impact.',
-        'LINDDUN': 'Privacy assessment — identify how personal data could be misused or exposed.'
-      };
-      methodDesc.textContent = descs[method] || 'Work through each category and record threats.';
-    }
-    var threats = comp.threats||[];
-    var method = M.methodology || 'STRIDE';
-    var cats = METHODS[method] || METHODS['STRIDE'];
-    document.getElementById('stride-count').textContent = threats.length + ' threat'+(threats.length!==1?'s':'')+' recorded';
-    var c = document.getElementById('stride-cats');
-    c.innerHTML = '';
-    var lastGroup = null;
-    cats.forEach(function(catDef) {
-      var cat = catDef.label;
-      var key = catDef.key;
-      var badgeCls = catDef.badgeCls || ('stride-' + key);
-      var examples = catDef.examples || [];
-      var catThreats = threats.filter(function(t) { return t.category === cat; });
-      var safeId = 'ex' + ci + key.replace(/[^a-zA-Z0-9]/g,'');
-      if (method === 'Hybrid' && catDef.group && catDef.group !== lastGroup) {
-        lastGroup = catDef.group;
-        var hdr = document.createElement('div');
-        hdr.className = 'px-2 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400';
-        hdr.textContent = catDef.group === 'STRIDE' ? 'STRIDE — Security Threats' : 'LINDDUN — Privacy Threats';
-        c.appendChild(hdr);
-      }
-      var optionsHtml = '<option value="">— Select example —</option>' + examples.map(function(e) { return '<option value="' + e.replace(/"/g,'&quot;') + '">' + e + '</option>'; }).join('');
-      var threatRowsHtml = catThreats.length === 0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map(function(t,ti) { return renderThreatRow(t,ci,ti); }).join('');
-      var countBadge = catThreats.length ? '<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">' + catThreats.length + '</span>' : '';
-      var div = document.createElement('div');
-            var catName = cat.split(' - ').slice(1).join(' - ');
-      div.className = 'sf-card overflow-hidden';
-      // v8 — minimal Apple-style row (no gray band, tight spacing)
-      div.innerHTML = '<div style="padding:13px 18px;border-bottom:1px solid #f5f5f7">'
-        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
-        + '<div style="display:flex;align-items:center;gap:10px">'
-        + '<span class="' + badgeCls + '" style="padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700;flex-shrink:0">' + key + '</span>'
-        + '<span style="font-weight:600;color:#1d1d1f;font-size:14px">' + catName + '</span>'
-        + (catThreats.length ? '<span style="font-size:11px;background:#e8e8ed;color:#6e6e73;padding:2px 8px;border-radius:980px;font-weight:600">' + catThreats.length + '</span>' : '')
-        + '</div>'
-        + '<button onclick="openThreatModal(' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\',\'\');" style="padding:5px 11px;background:#fff;border:1px solid #d2d2d7;border-radius:8px;font-size:12px;font-weight:500;color:#3a3a3c;cursor:pointer">+ Custom</button>'
-        + '</div>'
-        + '<div style="display:flex;gap:8px;align-items:center">'
-        + '<select id="' + safeId + '" style="background:#fff;border:1px solid #e5e5ea;border-radius:8px;padding:5px 9px;font-size:12px;color:#3a3a3c;outline:none;font-family:inherit;max-width:200px">' + optionsHtml + '</select>'
-        + '<button onclick="addExDyn(\'' + safeId + '\',' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\');" style="padding:5px 12px;background:#0071e3;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Add threat</button>'
-        + '</div>'
-        + '</div>'
-        + '<div id="tlist-' + safeId + '">' + threatRowsHtml + '</div>';
-      c.appendChild(div);
-    });
-  }
-
-  function addExDyn(safeId, ci, cat) {
-    var sel = document.getElementById(safeId);
-    if (!sel || !sel.value) { alert('Select an example first'); return; }
-    openThreatModal(ci, cat, sel.value);
-    sel.value = '';
-  }
-
-  function deleteThreat(ci, ti) {
-    if (!confirm('Delete this threat?')) return;
-    M.components[ci].threats.splice(ti, 1);
-    save(); renderStrideCats(ci); renderRiskSummary(); renderProgress(); renderHeatmap(); renderSidebar();
-  }
-
-  function renderThreatRow(t, ci, ti) {
-    const score = riskScore(t.likelihood||1, t.impact||1);
-    const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
-    return '<div class="px-5 py-3 border-t border-gray-100">'
-      + '<div class="flex items-start justify-between gap-3">'
-      + '<div class="flex-1">'
-      + '<div class="font-medium text-gray-900 text-sm mb-1.5">' + t.desc + '</div>'
-      + '<div class="flex flex-wrap gap-2 items-center">'
-      + '<span class="text-xs ' + riskBadgeCls(score) + ' px-2 py-0.5 rounded-full font-semibold">L' + (t.likelihood||1) + ' × I' + (t.impact||1) + ' = ' + score + ' ' + riskLevel(score) + '</span>'
-      + (t.treatment ? '<span class="treat-pill ' + (treatCls[t.treatment]||'') + '">' + t.treatment + '</span>' : '')
-      + (t.mitigation ? '<span class="text-xs text-gray-400 italic">' + t.mitigation + '</span>' : '')
-      + '</div></div>'
-      + '<button onclick="deleteThreat(' + ci + ',' + ti + ')" title="Delete threat" style="flex-shrink:0;padding:4px 8px;border-radius:8px;border:none;background:transparent;color:#d1d1d6;cursor:pointer;font-size:13px;line-height:1" onmouseover="this.style.color=\'#ff3b30\'" onmouseout="this.style.color=\'#d1d1d6\'">×</button>'
-      + '</div></div>';
-  }
-
-  function addFromExample(ci, cat) {
-    const key = `ex-${ci}-${cat.replace(/[\s-]/g,'')}`;
-    const sel = document.getElementById(key);
-    if (!sel||!sel.value) { alert('Select an example first'); return; }
-    openThreatModal(ci, cat, sel.value);
-    sel.value='';
-  }
-
-  function openThreatModal(ci, cat, prefill) {
-    tCat=cat; tCompIdx=ci; tL=3; tI=3; tTreatment='Mitigate';
-    document.getElementById('mt-cat').textContent = cat;
-    document.getElementById('mt-desc').value = prefill||'';
-    document.getElementById('mt-mitigation').value = '';
-    renderScoreBtns(); updateScore();
-    ['Mitigate','Transfer','Accept','Eliminate'].forEach(t => {
-      const b = document.getElementById('treat-'+t);
-      b.className = 'treatment-btn' + (t===tTreatment?' active':'');
-    });
-    openModal('modal-threat');
-  }
-
-  function renderScoreBtns() {
-    ['like','imp'].forEach(function(type) {
-      var c = document.getElementById(type+'-btns');
-      c.innerHTML='';
-      for (var n=1;n<=5;n++) {
-        var isL = type==='like';
-        var active = (isL?tL:tI)===n;
-        var btn = document.createElement('button');
-        btn.className = 'score-btn'+(active?' active':'');
-        btn.dataset.v = n;
-        btn.textContent = n;
-        (function(num, isLike) {
-          btn.onclick = function() { if(isLike)tL=num; else tI=num; renderScoreBtns(); updateScore(); };
-        })(n, isL);
-        c.appendChild(btn);
-      }
-    });
-  }
-
-  function updateScore() {
-    const s = riskScore(tL,tI);
-    const el = document.getElementById('mt-score');
-    el.textContent = s+' — '+riskLevel(s);
-    el.className = 'text-xl font-bold '+riskCls(s);
-  }
-
-  function setTreatment(t) {
-    tTreatment=t;
-    ['Mitigate','Transfer','Accept','Eliminate'].forEach(tr => {
-      const b = document.getElementById('treat-'+tr);
-      if(b) b.className = 'treatment-btn'+(tr===t?' active':'');
-    });
-  }
-
-  function saveThreat() {
-    const desc = document.getElementById('mt-desc').value.trim();
-    if (!desc) { alert('Describe the threat'); return; }
-    M.components[tCompIdx].threats.push({ id:Date.now(), category:tCat, desc, likelihood:tL, impact:tI, treatment:tTreatment, mitigation:document.getElementById('mt-mitigation').value.trim(), status:'Open', createdAt:new Date().toISOString() });
-    save(); closeModal('modal-threat');
-    renderStrideCats(tCompIdx);
-  }
-
-  function renderHeatmap() {
-    const grid = document.getElementById('heatmap-grid');
-    if (!grid) return;
-    const threats = M.components.flatMap(c=>(c.threats||[]).map(t=>({...t,compName:c.name})));
-    const cells = {};
-    threats.forEach(t => {
-      const key = `${t.likelihood||1}-${t.impact||1}`;
-      if (!cells[key]) cells[key]=[];
-      cells[key].push(t);
-    });
-
-    const cellBg = (l,i) => {
-      const s=l*i;
-      if(s>=17) return 'background:#fff0ef;border:1.5px solid #ffc9c6';
-      if(s>=10) return 'background:#fff8ef;border:1.5px solid #ffd9a0';
-      if(s>=5)  return 'background:#fffaed;border:1.5px solid #ffe066';
-      return 'background:#f0fbf4;border:1.5px solid #b7efc5';
-    };
-
-    const dotBg = (s) => s>=17?'#ff3b30':s>=10?'#ff9500':s>=5?'#ffcc00':'#34c759';
-
-    let html = '<div style="display:flex;flex-direction:column;gap:4px">';
-    for (let impact=5;impact>=1;impact--) {
-      html += `<div style="display:flex;gap:4px;align-items:center"><div style="width:20px;text-align:right;font-size:11px;color:#86868b;font-weight:600">${impact}</div>`;
-      for (let like=1;like<=5;like++) {
-        const key=`${like}-${impact}`;
-        const cellThreats=cells[key]||[];
-        const score=like*impact;
-        const tipContent = cellThreats.map(t=>`<div style="margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.15)"><div style="font-size:10px;color:rgba(255,255,255,0.5)">${t.compName} · ${t.category.split(' - ')[0]}</div><div style="font-size:11px">${t.desc.substring(0,50)}${t.desc.length>50?'…':''}</div></div>`).join('');
-        const dotsHtml = cellThreats.slice(0,4).map(t=>{
-          const sc=riskScore(t.likelihood||1,t.impact||1);
-          return `<div class="hm-dot" style="background:${dotBg(sc)};color:white;font-size:8px;font-weight:700">${t.category.split(' - ')[0]}</div>`;
-        }).join('');
-        const moreHtml = cellThreats.length>4?`<div style="font-size:9px;color:#86868b;font-weight:600">+${cellThreats.length-4}</div>`:'';
-
-        html += `<div class="hm-cell" style="${cellBg(like,impact)}">`;
-        if (cellThreats.length>0) html += `<div class="hm-tip"><div style="font-size:10px;font-weight:700;color:#6366f1;margin-bottom:6px">L:${like} × I:${impact} = ${score} ${riskLevel(score)}</div>${tipContent}</div>`;
-        html += dotsHtml+moreHtml;
-        if (!cellThreats.length) html += `<span style="font-size:10px;color:rgba(0,0,0,0.2);font-weight:600">${score}</span>`;
-        html += '</div>';
-      }
-      html += '</div>';
-    }
-    html += '</div>';
-    grid.innerHTML = html;
-  }
-
-  function exportJSON() {
-    if (!M) return;
-    const blob = new Blob([JSON.stringify(M,null,2)],{type:'application/json'});
-    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=M.name.replace(/\s/g,'_')+'.json'; a.click();
-  }
-
-  function exportCSV() {
-    if (!M) return;
-    const rows=[['Component','Type','STRIDE Category','Threat','Likelihood','Impact','Risk Score','Risk Level','Treatment','Mitigation','Status','Date']];
-    M.components.forEach(c=>(c.threats||[]).forEach(t=>{
-      const s=riskScore(t.likelihood||1,t.impact||1);
-      rows.push([c.name,c.type,t.category,t.desc,t.likelihood,t.impact,s,riskLevel(s),t.treatment||'',t.mitigation||'',t.status||'Open',t.createdAt?t.createdAt.split('T')[0]:'']);
-    }));
-    const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=M.name.replace(/\s/g,'_')+'.csv'; a.click();
-  }
-
-  function exportPDF() {
-    if (!M) return;
-    const {jsPDF} = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.setTextColor(29,29,31);
-    doc.text('STRIDE Threat Assessment', 14, 22);
-    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(110,110,115);
-    doc.text(`${M.name}`, 14, 30);
-    doc.text(`Assessor: ${M.assessor||'N/A'} · Created: ${M.created} · Generated: ${new Date().toLocaleDateString()}`, 14, 35);
-    doc.setTextColor(29,29,31);
-    const allThreats = M.components.flatMap(c=>(c.threats||[]).map(t=>({...t,compName:c.name})));
-    const counts={Critical:0,High:0,Medium:0,Low:0};
-    allThreats.forEach(t=>counts[riskLevel(riskScore(t.likelihood||1,t.impact||1))]++);
-    doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.text('Risk Summary', 14, 45);
-    doc.autoTable({ startY:49, head:[['Critical','High','Medium','Low','Total']], body:[[counts.Critical,counts.High,counts.Medium,counts.Low,allThreats.length]], styles:{fontSize:9}, headStyles:{fillColor:[0,113,227]}, margin:{left:14} });
-    let y=doc.lastAutoTable.finalY+10;
-    doc.setFont('helvetica','bold'); doc.text('Threat Register', 14, y);
-    doc.autoTable({ startY:y+4, head:[['Component','Category','Threat','L','I','Score','Level','Treatment','Status']], body:allThreats.map(t=>{const s=riskScore(t.likelihood||1,t.impact||1);return[t.compName,t.category.split(' - ')[0],t.desc.substring(0,40),t.likelihood,t.impact,s,riskLevel(s),t.treatment||'',t.status||'Open'];}), styles:{fontSize:7,cellPadding:2}, headStyles:{fillColor:[0,113,227]}, margin:{left:14} });
-    doc.save(M.name.replace(/\s/g,'_')+'_report.pdf');
-  }
-
-  // Init
-  renderSidebar();
-  setPage('dashboard');
+// Initial render
+function init() {
+  console.log('%c[STRIDE] Modern SaaS version loaded', 'color:#64748b');
+}
+init();
 </script>
 </body>
 </html>
