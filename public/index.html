@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>STRIDE Threat Modeler</title>
+<title>Threat Modeler</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -42,6 +42,15 @@
   .stride-D { background: #edfdf4; color: #1a7f37; border: 1px solid #b0efc5; }
   .stride-E { background: #fdf0f7; color: #c0177a; border: 1px solid #f5c0e0; }
 
+  /* LINDDUN badges */
+  .linddun-L  { background: #e8f8f7; color: #0e7c75; border: 1px solid #a0ddd8; }
+  .linddun-I  { background: #f0eaff; color: #5b21b6; border: 1px solid #c4b5fd; }
+  .linddun-N  { background: #fff1f9; color: #9d174d; border: 1px solid #fbcfe8; }
+  .linddun-D  { background: #e8f0ff; color: #1e40af; border: 1px solid #bfdbfe; }
+  .linddun-Di { background: #fef3e8; color: #92400e; border: 1px solid #fcd9b0; }
+  .linddun-U  { background: #f0fef0; color: #166534; border: 1px solid #bbf7d0; }
+  .linddun-Nc { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
   /* Treatment pills */
   .treat-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 980px; }
   .treat-Mitigate { background: #e8f0fe; color: #1558d6; }
@@ -72,7 +81,7 @@
 <nav class="sf-nav fixed top-0 left-0 right-0 z-40 h-12 flex items-center px-5 gap-4">
   <div class="flex items-center gap-2 mr-4">
     <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-    <span class="font-semibold text-sm text-gray-800">STRIDE Threat Modeler</span>
+    <span class="font-semibold text-sm text-gray-800">Threat Modeler</span>
   </div>
   <button onclick="setPage('dashboard')" id="nav-dashboard" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">Dashboard</button>
   <button onclick="setPage('howto')" id="nav-howto" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">How to Use</button>
@@ -167,7 +176,7 @@
     <div class="sf-card p-6 mb-6">
       <div class="flex items-center justify-between mb-5">
         <div>
-          <h3 class="font-semibold text-gray-900">Risk Heatmap</h3>
+          <h3 class="font-semibold text-gray-900">Risk Heatmap <span id="hm-method-badge" class="text-xs font-normal text-indigo-500 ml-2"></span></h3>
           <p class="text-xs text-gray-400 mt-0.5">Threats plotted by Likelihood × Impact — hover for details</p>
         </div>
         <div class="flex gap-4 text-xs text-gray-500">
@@ -222,6 +231,18 @@
   <h1 class="text-2xl font-semibold text-gray-900 tracking-tight mb-1">How to Use</h1>
   <p class="text-gray-400 text-sm mb-7">A practical guide to executing structured STRIDE threat assessments</p>
   <div class="space-y-4">
+
+    <div class="sf-card p-6">
+      <h2 class="font-semibold text-gray-900 mb-3">Supported Methodologies</h2>
+      <div class="space-y-3">
+        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-gray-800 text-sm mb-1">🔐 STRIDE <span class="text-xs font-normal text-gray-400 ml-2">Security-focused</span></div><p class="text-xs text-gray-500">Identifies 6 security threat categories: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege. Best for general security assessments of any system architecture.</p></div>
+        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-gray-800 text-sm mb-1">🛡 LINDDUN <span class="text-xs font-normal text-gray-400 ml-2">Privacy-focused</span></div><p class="text-xs text-gray-500">Focuses on 7 privacy threat categories ideal for GDPR/HIPAA compliance. Fully compatible with STRIDE — run both in parallel on the same system model for maximum coverage.</p></div>
+        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-gray-800 text-sm mb-1">📊 DREAD <span class="text-xs font-normal text-gray-400 ml-2">Quantitative scoring</span></div><p class="text-xs text-gray-500">Rates threats on 5 dimensions: Damage, Reproducibility, Exploitability, Affected Users, Discoverability. Produces a numeric risk score (1–5 each) — useful when you need to rank and prioritize threats quantitatively.</p></div>
+        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-gray-800 text-sm mb-1">🎯 PASTA <span class="text-xs font-normal text-gray-400 ml-2">7-step risk-centric</span></div><p class="text-xs text-gray-500">Process for Attack Simulation and Threat Analysis — a structured 7-stage methodology that integrates business objectives with technical requirements. Provides an attacker-centric, risk-driven view ideal for executive reporting.</p></div>
+        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-gray-800 text-sm mb-1">⚡ RaD-TM <span class="text-xs font-normal text-gray-400 ml-2">Developer-friendly</span></div><p class="text-xs text-gray-500">Rapid Developer-Driven Threat Modeling — lightweight and feature-focused using predefined risk templates. Perfect for agile teams assessing individual features rather than full systems.</p></div>
+        <div class="border border-gray-100 rounded-xl p-4"><div class="font-semibold text-gray-800 text-sm mb-1">🔀 Hybrid (STRIDE + LINDDUN) <span class="text-xs font-normal text-gray-400 ml-2">Combined</span></div><p class="text-xs text-gray-500">Runs both STRIDE security and LINDDUN privacy categories in one assessment on the same model. Maximizes ROI by covering security and privacy gaps simultaneously — recommended for systems handling sensitive personal data.</p></div>
+      </div>
+    </div>
 
     <div class="sf-card p-6">
       <h2 class="font-semibold text-gray-900 mb-3">What is STRIDE?</h2>
@@ -281,6 +302,17 @@
       <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API Assessment Q2 2026" class="sf-input"></div>
       <div><label class="sf-label">Scope / description</label><textarea id="inp-desc" rows="2" placeholder="What system are you assessing?" class="sf-input resize-none"></textarea></div>
       <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input"></div>
+      <div>
+        <label class="sf-label">Methodology</label>
+        <select id="inp-method" class="sf-input">
+          <option value="STRIDE">STRIDE — Security (Spoofing, Tampering, Repudiation, Info Disclosure, DoS, Elevation)</option>
+          <option value="LINDDUN">LINDDUN — Privacy (Linkability, Identifiability, Non-repudiation, Detectability...)</option>
+          <option value="DREAD">DREAD — Quantitative Risk Rating (Damage, Reproducibility, Exploitability...)</option>
+          <option value="PASTA">PASTA — 7-Step Risk-Centric (Process for Attack Simulation and Threat Analysis)</option>
+          <option value="RaD-TM">RaD-TM — Rapid Developer-Driven (Feature-based risk templates)</option>
+          <option value="Hybrid">Hybrid — STRIDE + LINDDUN (Security &amp; Privacy combined)</option>
+        </select>
+      </div>
     </div>
     <div class="flex gap-3 mt-5">
       <button onclick="closeModal('modal-model')" class="sf-btn-secondary flex-1">Cancel</button>
@@ -346,6 +378,97 @@
 
   const STRIDE_KEYS = ['S','T','R','I','D','E'];
 
+  const METHODS = {
+    STRIDE: [
+      { key:'S', label:'S - Spoofing',           desc:'Identity impersonation' },
+      { key:'T', label:'T - Tampering',           desc:'Unauthorized data/code modification' },
+      { key:'R', label:'R - Repudiation',         desc:'Denying performed actions' },
+      { key:'I', label:'I - Info Disclosure',     desc:'Unauthorized data exposure' },
+      { key:'D', label:'D - Denial of Service',   desc:'Availability attacks' },
+      { key:'E', label:'E - Elevation of Privilege', desc:'Unauthorized access escalation' }
+    ],
+    LINDDUN: [
+      { key:'L',  label:'L - Linkability',          desc:'Linking data/actions to individuals' },
+      { key:'I',  label:'I - Identifiability',       desc:'Identifying users from data' },
+      { key:'N',  label:'N - Non-repudiation',       desc:'Undeniable user actions' },
+      { key:'D',  label:'D - Detectability',         desc:'Observing that data exists' },
+      { key:'Di', label:'Di - Disclosure of Info',   desc:'Privacy leaks and data exposure' },
+      { key:'U',  label:'U - Unawareness',           desc:'User unaware of data processing' },
+      { key:'Nc', label:'Nc - Non-compliance',       desc:'GDPR, HIPAA, regulatory violations' }
+    ],
+    DREAD: [
+      { key:'S', label:'S - Spoofing',           desc:'DREAD scored' },
+      { key:'T', label:'T - Tampering',           desc:'DREAD scored' },
+      { key:'R', label:'R - Repudiation',         desc:'DREAD scored' },
+      { key:'I', label:'I - Info Disclosure',     desc:'DREAD scored' },
+      { key:'D', label:'D - Denial of Service',   desc:'DREAD scored' },
+      { key:'E', label:'E - Elevation of Privilege', desc:'DREAD scored' }
+    ],
+    PASTA: [
+      { key:'D1', label:'D1 - Define Objectives',         desc:'Business & security objectives' },
+      { key:'D2', label:'D2 - Technical Scope',           desc:'Define technical boundaries' },
+      { key:'D3', label:'D3 - Decompose Application',     desc:'DFDs, components, data flows' },
+      { key:'D4', label:'D4 - Analyze Threats',           desc:'Enumerate threats' },
+      { key:'D5', label:'D5 - Vulnerability Analysis',    desc:'Map vulnerabilities to threats' },
+      { key:'D6', label:'D6 - Attack Modeling',           desc:'Attack scenarios and trees' },
+      { key:'D7', label:'D7 - Risk & Impact Analysis',    desc:'Residual risk and business impact' }
+    ],
+    'RaD-TM': [
+      { key:'S', label:'S - Spoofing Template',           desc:'Feature risk template' },
+      { key:'T', label:'T - Tampering Template',          desc:'Feature risk template' },
+      { key:'R', label:'R - Repudiation Template',        desc:'Feature risk template' },
+      { key:'I', label:'I - Info Disclosure Template',    desc:'Feature risk template' },
+      { key:'D', label:'D - DoS Template',                desc:'Feature risk template' },
+      { key:'E', label:'E - Elevation Template',          desc:'Feature risk template' }
+    ],
+    Hybrid: [
+      { key:'S',  label:'S - Spoofing',           desc:'STRIDE - Security', group:'STRIDE' },
+      { key:'T',  label:'T - Tampering',           desc:'STRIDE - Security', group:'STRIDE' },
+      { key:'R',  label:'R - Repudiation',         desc:'STRIDE - Security', group:'STRIDE' },
+      { key:'I',  label:'I - Info Disclosure',     desc:'STRIDE - Security', group:'STRIDE' },
+      { key:'D',  label:'D - Denial of Service',   desc:'STRIDE - Security', group:'STRIDE' },
+      { key:'E',  label:'E - Elevation',           desc:'STRIDE - Security', group:'STRIDE' },
+      { key:'L',  label:'L - Linkability',         desc:'LINDDUN - Privacy', group:'LINDDUN' },
+      { key:'Di', label:'Di - Disclosure of Info', desc:'LINDDUN - Privacy', group:'LINDDUN' },
+      { key:'U',  label:'U - Unawareness',         desc:'LINDDUN - Privacy', group:'LINDDUN' },
+      { key:'Nc', label:'Nc - Non-compliance',     desc:'LINDDUN - Privacy', group:'LINDDUN' }
+    ]
+  };
+
+  const LINDDUN_EXAMPLES = {
+    'L - Linkability':        ['User browsing patterns linked across sessions','Transaction IDs correlated to identify user','Location data combined to profile movement'],
+    'I - Identifiability':    ['IP address identifies individual user','Device fingerprint uniquely identifies visitor','Name + DOB combination re-identifies pseudonymous user'],
+    'N - Non-repudiation':    ['User cannot deny submitting a form — log retained','Audit trail ties action to authenticated identity'],
+    'D - Detectability':      ['Third party can detect if user has an account','Metadata reveals existence of sensitive records'],
+    'Di - Disclosure of Info':['PII returned in API response unnecessarily','Sensitive data stored unencrypted in browser'],
+    'U - Unawareness':        ['User unaware data shared with third parties','No privacy notice before data collection','Consent buried in terms of service'],
+    'Nc - Non-compliance':    ['Data retained beyond GDPR retention limit','No right-to-erasure mechanism implemented','Missing data processing agreement with processor']
+  };
+
+  const PASTA_EXAMPLES = {
+    'D1 - Define Objectives': ['Protect customer PII per GDPR','Ensure 99.9% availability of payment service','Prevent unauthorized fund transfers'],
+    'D2 - Technical Scope':   ['Scope: Payment API, Auth service, Policy DB','External: Customer Portal, Third-party PSP','Trust boundaries: DMZ, internal network'],
+    'D3 - Decompose Application': ['DFD: Customer → Portal → Auth API → DB','Data flow: PII from registration to policy store'],
+    'D4 - Analyze Threats':   ['Credential stuffing against login endpoint','SQL injection in policy search parameter'],
+    'D5 - Vulnerability Analysis': ['CVE-2024-1234 in auth library (unpatched)','Missing input validation on API parameters'],
+    'D6 - Attack Modeling':   ['Attacker profile: external, financially motivated','Kill chain: recon → exploit → exfil'],
+    'D7 - Risk & Impact Analysis': ['Residual risk: High after planned controls','Business impact: €2M fine + reputational damage']
+  };
+
+  function getExamples(method, catLabel) {
+    if (method === 'LINDDUN') return LINDDUN_EXAMPLES[catLabel] || [];
+    if (method === 'PASTA') return PASTA_EXAMPLES[catLabel] || [];
+    return EXAMPLES[catLabel] || [];
+  }
+
+  function getCatBadgeCls(method, key) {
+    if (method === 'LINDDUN' || (method === 'Hybrid' && ['L','Di','U','Nc','N','D2'].includes(key))) {
+      return 'linddun-' + key;
+    }
+    if (method === 'PASTA') return 'stride-S';
+    return 'stride-' + key;
+  }
+
   function riskScore(l,i) { return l*i; }
   function riskLevel(s) { return s>=17?'Critical':s>=10?'High':s>=5?'Medium':'Low'; }
   function riskCls(s) { return s>=17?'risk-critical':s>=10?'risk-high':s>=5?'risk-medium':'risk-low'; }
@@ -370,7 +493,8 @@
   function createModel() {
     const name = document.getElementById('inp-name').value.trim();
     if (!name) return;
-    M = { id: Date.now(), name, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), created: new Date().toLocaleDateString('nl-NL'), components: [] };
+    const methodology = document.getElementById('inp-method').value || 'STRIDE';
+    M = { id: Date.now(), name, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), methodology, created: new Date().toLocaleDateString('nl-NL'), components: [] };
     models.push(M); save(); renderSidebar(); loadModel(M); closeModal('modal-model');
     ['inp-name','inp-desc','inp-assessor'].forEach(id => document.getElementById(id).value='');
   }
@@ -379,7 +503,7 @@
     M = m; showView('model');
     document.getElementById('mv-name').textContent = m.name;
     document.getElementById('mv-desc').textContent = m.desc || '';
-    document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created;
+    document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created+' · Methodology: '+(m.methodology||'STRIDE');
     renderRiskSummary(); renderComponents(); renderProgress(); renderHeatmap();
   }
 
@@ -390,7 +514,8 @@
       const total = m.components.flatMap(c=>c.threats||[]).length;
       const el = document.createElement('div');
       el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
-      el.innerHTML = `<span class="truncate text-sm">${m.name}</span><span class="text-xs text-gray-400 flex-shrink-0 ml-2">${total}</span>`;
+      const methodBadge = m.methodology && m.methodology !== 'STRIDE' ? `<span class="text-xs font-semibold px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 flex-shrink-0 ml-1">${m.methodology}</span>` : '';
+      el.innerHTML = `<span class="truncate text-sm flex-1">${m.name}</span>${methodBadge}<span class="text-xs text-gray-400 flex-shrink-0 ml-1">${total}</span>`;
       el.onclick = () => loadModel(m);
       c.appendChild(el);
     });
@@ -465,35 +590,64 @@
   function renderStrideCats(ci) {
     const comp = M.components[ci];
     const threats = comp.threats||[];
+    const method = M.methodology || 'STRIDE';
+    const cats = METHODS[method] || METHODS.STRIDE;
     document.getElementById('stride-count').textContent = threats.length + ' threat'+(threats.length!==1?'s':'')+' recorded';
     const c = document.getElementById('stride-cats');
     c.innerHTML = '';
-    Object.entries(EXAMPLES).forEach(([cat, examples]) => {
-      const key = cat.split(' - ')[0];
-      const catThreats = threats.filter(t=>t.category===cat);
+
+    // Group header for Hybrid
+    let lastGroup = null;
+
+    cats.forEach(cat => {
+      const catLabel = cat.label;
+      const catThreats = threats.filter(t=>t.category===catLabel);
+      const examples = getExamples(method, catLabel);
+      const badgeCls = getCatBadgeCls(method, cat.key);
+      const safeId = catLabel.replace(/[\s\-\/]/g,'');
+
+      // Hybrid group headers
+      if (method === 'Hybrid' && cat.group && cat.group !== lastGroup) {
+        lastGroup = cat.group;
+        const header = document.createElement('div');
+        header.className = 'text-xs font-bold uppercase tracking-wider text-gray-400 mt-4 mb-1 px-1';
+        header.textContent = cat.group === 'STRIDE' ? '🔒 STRIDE — Security Threats' : '🛡 LINDDUN — Privacy Threats';
+        c.appendChild(header);
+      }
+
       const div = document.createElement('div');
       div.className = 'sf-card overflow-hidden';
       div.innerHTML = `
         <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div class="flex items-center gap-2.5">
-            <span class="stride-${key} px-2.5 py-0.5 rounded-lg text-xs font-bold">${key}</span>
-            <span class="font-semibold text-gray-900 text-sm">${cat.split(' - ')[1]}</span>
+            <span class="${badgeCls} px-2.5 py-0.5 rounded-lg text-xs font-bold">${cat.key}</span>
+            <span class="font-semibold text-gray-900 text-sm">${catLabel.split(' - ').slice(1).join(' - ')}</span>
+            <span class="text-xs text-gray-400">${cat.desc}</span>
             ${catThreats.length ? `<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">${catThreats.length}</span>` : ''}
           </div>
           <div class="flex gap-2 items-center">
-            <select id="ex-${ci}-${cat.replace(/[\s-]/g,'')}" class="sf-input text-xs py-1.5 w-56">
-              <option value="">— Select example threat —</option>
+            ${examples.length ? `
+            <select id="ex-${ci}-${safeId}" class="sf-input text-xs py-1.5 w-56">
+              <option value="">— Select example —</option>
               ${examples.map(e=>`<option value="${e}">${e}</option>`).join('')}
             </select>
-            <button onclick="addFromExample(${ci},'${cat}')" class="sf-btn-primary text-xs px-3 py-1.5">Add</button>
-            <button onclick="openThreatModal(${ci},'${cat}','')" class="sf-btn-secondary text-xs px-3 py-1.5">Custom</button>
+            <button onclick="addFromExampleDyn(${ci},'${catLabel}','${safeId}')" class="sf-btn-primary text-xs px-3 py-1.5">Add</button>
+            ` : ''}
+            <button onclick="openThreatModal(${ci},'${catLabel}','')" class="sf-btn-secondary text-xs px-3 py-1.5">Custom</button>
           </div>
         </div>
-        <div id="tlist-${ci}-${cat.replace(/[\s-]/g,'')}">
+        <div id="tlist-${ci}-${safeId}">
           ${catThreats.length===0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map((t,ti)=>renderThreatRow(t,ci,ti)).join('')}
         </div>`;
       c.appendChild(div);
     });
+  }
+
+  function addFromExampleDyn(ci, cat, safeId) {
+    const sel = document.getElementById(`ex-${ci}-${safeId}`);
+    if (!sel||!sel.value) { alert('Select an example first'); return; }
+    openThreatModal(ci, cat, sel.value);
+    sel.value='';
   }
 
   function renderThreatRow(t, ci, ti) {
@@ -578,6 +732,8 @@
   function renderHeatmap() {
     const grid = document.getElementById('heatmap-grid');
     if (!grid) return;
+    const badge = document.getElementById('hm-method-badge');
+    if (badge && M) badge.textContent = '— ' + (M.methodology || 'STRIDE');
     const threats = M.components.flatMap(c=>(c.threats||[]).map(t=>({...t,compName:c.name})));
     const cells = {};
     threats.forEach(t => {

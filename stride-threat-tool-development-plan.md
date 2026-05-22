@@ -1,4 +1,4 @@
-# STRIDE Threat Model Assessment Tool - Development Plan
+# Threat Model Assessment Tool - Development Plan
 
 ## 1. MVP Scope (v1.0)
 
@@ -6,28 +6,30 @@
 - Create new threat model (name, description, scope)
 - Define system components (name, type, description, trust level)
 - Define data flows between components
-- Per component: structured STRIDE assessment
-- Record threats with: description, STRIDE category, likelihood, impact, notes/evidence
-- Basic risk scoring (Likelihood × Impact)
+- Methodology selector: STRIDE, LINDDUN, DREAD, PASTA, RaD-TM, Hybrid
+- Per component: guided assessment using selected methodology
+- Record threats with: description, category (per chosen model), likelihood, impact, notes/evidence
+- Dual scoring: Qualitative (Likelihood × Impact) + DREAD quantitative
+- Visual threat heat map (Likelihood vs Impact matrix)
 - Mitigation field per threat + status
 - Export: Full threat register (CSV + JSON)
-- Export: Summary report (Markdown / PDF)
+- Export: Summary report (Markdown / PDF) with multi-model support
 
 ### Nice to Have in MVP (if time allows)
-- Simple visual overview of components
-- Risk matrix visualization
-- Pre-filled example threats per STRIDE category
+- Side-by-side STRIDE vs LINDDUN comparison view
+- Pre-filled example threats per methodology
+- Simple data flow diagram visualization
 
 ## 2. Data Model (Simplified)
 
 - **ThreatModel**
-  - id, name, description, createdAt, updatedAt
+  - id, name, description, selectedMethodologies, createdAt, updatedAt
 - **Component**
   - id, modelId, name, type, description, trustBoundary
 - **DataFlow**
   - id, modelId, fromComponent, toComponent, dataType
 - **Threat**
-  - id, componentId, strideCategory, description, likelihood, impact, evidence, mitigation, status, createdAt
+  - id, componentId, methodology, category, description, likelihood, impact, dreadDamage, dreadReproducibility, dreadExploitability, dreadAffectedUsers, dreadDiscoverability, evidence, mitigation, status, createdAt
 
 ## 3. User Flow (MVP)
 
@@ -51,11 +53,24 @@
 
 1. Project setup + basic UI structure
 2. Threat model + component management
-3. STRIDE assessment interface (most important)
+3. Multi-methodology selector + assessment interface
 4. Threat recording + status tracking
-5. Risk scoring + overview
-6. Export functionality
-7. Polish + testing
+5. Risk scoring + visual heat map
+6. Export functionality (CSV/JSON + professional PDF)
+7. Presentation polish + demo data
+
+## 6. Presentation Polish (Senior Management Ready)
+
+These items are prioritized to make the tool look credible and impressive in a 10-15 minute demo:
+
+- Pre-loaded realistic demo model (e.g. Insurance Core System or Digital Banking Platform)
+- Executive summary page in PDF report (1-pager for senior audience)
+- High-contrast, readable threat heat map with clear risk quadrants
+- Side-by-side methodology comparison view (STRIDE vs LINDDUN)
+- Clean, professional PDF report template with logo placeholder, risk summary, and prioritized threats
+- Strong onboarding / first-run experience with guided tour
+- Consistent visual hierarchy, spacing and contrast (Apple-level polish)
+- One-click "Export for presentation" that generates a polished PDF + summary slide content
 
 ---
 
