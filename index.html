@@ -12,22 +12,22 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
   *, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-  body { background: #f5f5f7; color: #1d1d1f; }
+  body { background: #f8fafc; color: #0f172a; }
 
   /* Apple-style components — lighter, calmer */
-  .sf-card { background: #fff; border-radius: 12px; border: 1px solid #f0f0f3; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-  .sf-btn-primary { background: #0071e3; color: #fff; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
-  .sf-btn-primary:hover { background: #0077ed; }
-  .sf-btn-secondary { background: rgba(0,0,0,0.06); color: #1d1d1f; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
-  .sf-btn-secondary:hover { background: rgba(0,0,0,0.1); }
-  .sf-input { background: #fff; border: 1px solid #d2d2d7; border-radius: 10px; padding: 8px 12px; font-size: 13px; color: #1d1d1f; width: 100%; outline: none; transition: border-color 0.15s; text-align: left; }
-  .sf-input:focus { border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+  .sf-card { background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05); }
+  .sf-btn-primary { background: #2563eb; color: #fff; border-radius: 14px; font-weight: 700; font-size: 15px; padding: 14px 28px; border: none; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 15px -3px rgb(37 99 235 / 0.3); }
+  .sf-btn-primary:hover { background: #1e40af; transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgb(37 99 235 / 0.35); }
+  .sf-btn-secondary { background: #fff; color: #334155; border-radius: 14px; font-weight: 600; font-size: 15px; padding: 14px 28px; border: 2px solid #e2e8f0; cursor: pointer; transition: all 0.2s; }
+  .sf-btn-secondary:hover { background: #f8fafc; border-color: #94a3b8; }
+  .sf-input { background: #fff; border: 2px solid #e2e8f0; border-radius: 14px; padding: 14px 18px; font-size: 15px; transition: all 0.2s; }
+  .sf-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgb(37 99 235 / 0.1); outline: none; }
   .sf-label { font-size: 13px; font-weight: 500; color: #6e6e73; margin-bottom: 6px; display: block; }
-  .sf-nav { background: rgba(255,255,255,0.88); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,0.08); }
-  .sf-sidebar { background: #fff; border-right: 1px solid rgba(0,0,0,0.08); }
+  .sf-nav { background: #fff; border-bottom: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07); }
+  .sf-sidebar { background: #fff; border-right: 1px solid #cbd5e1; box-shadow: 4px 0 12px -2px rgb(0 0 0 / 0.06); }
   .sf-sidebar-item { padding: 8px 12px; border-radius: 8px; font-size: 14px; color: #3a3a3c; cursor: pointer; transition: background 0.1s; display: flex; justify-content: space-between; align-items: center; }
   .sf-sidebar-item:hover { background: #f5f5f7; }
-  .sf-sidebar-item.active { background: #e8f0fe; color: #0071e3; font-weight: 500; }
+  .sf-sidebar-item.active { background: #eff6ff; color: #1e40af; font-weight: 700; border-left: 3px solid #2563eb; }
 
   /* Risk colors (Apple HIG compliant) */
   .risk-critical { color: #ff3b30; } .risk-high { color: #ff9500; } .risk-medium { color: #ffcc00; } .risk-low { color: #34c759; }
