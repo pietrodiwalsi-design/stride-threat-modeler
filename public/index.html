@@ -34,6 +34,15 @@
   .risk-badge-medium { background: #fffaed; color: #7d5a00; border: 1px solid #ffe680; }
   .risk-badge-low { background: #f0fbf4; color: #1a7f37; border: 1px solid #b7efc5; }
 
+  /* LINDDUN badges */
+  .linddun-L  { background: #e6faf8; color: #0d7a72; border: 1px solid #9de8e0; }
+  .linddun-I  { background: #f0eaff; color: #5b21b6; border: 1px solid #c4b5fd; }
+  .linddun-N  { background: #fff0f8; color: #9d174d; border: 1px solid #fbcfe8; }
+  .linddun-D2 { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .linddun-Di { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+  .linddun-U  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .linddun-Nc { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
   /* STRIDE badges */
   .stride-S { background: #f0ebff; color: #6e3ff3; border: 1px solid #d9c8ff; }
   .stride-T { background: #fff0f0; color: #c0392b; border: 1px solid #ffd5d5; }
@@ -280,7 +289,20 @@
     <div class="space-y-4">
       <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API Assessment Q2 2026" class="sf-input"></div>
       <div><label class="sf-label">Scope / description</label><textarea id="inp-desc" rows="2" placeholder="What system are you assessing?" class="sf-input resize-none"></textarea></div>
-      <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input"></div>
+      <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input" autocomplete="off"></div>
+      <div>
+        <label class="sf-label">Methodology</label>
+        <div class="flex flex-wrap gap-2" id="method-btns">
+          <button type="button" onclick="selectMethod('STRIDE')" id="mb-STRIDE" class="method-btn active px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700">STRIDE</button>
+          <button type="button" onclick="selectMethod('LINDDUN')" id="mb-LINDDUN" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">LINDDUN</button>
+          <button type="button" onclick="selectMethod('DREAD')" id="mb-DREAD" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">DREAD</button>
+          <button type="button" onclick="selectMethod('PASTA')" id="mb-PASTA" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">PASTA</button>
+          <button type="button" onclick="selectMethod('RaD-TM')" id="mb-RaD-TM" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">RaD-TM</button>
+          <button type="button" onclick="selectMethod('Hybrid')" id="mb-Hybrid" class="method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600">Hybrid</button>
+        </div>
+        <input type="hidden" id="inp-method" value="STRIDE">
+        <p class="text-xs text-gray-400 mt-2">STRIDE = security &middot; LINDDUN = privacy &middot; Hybrid = both</p>
+      </div>
     </div>
     <div class="flex gap-3 mt-5">
       <button onclick="closeModal('modal-model')" class="sf-btn-secondary flex-1">Cancel</button>
@@ -346,6 +368,74 @@
 
   const STRIDE_KEYS = ['S','T','R','I','D','E'];
 
+  var selectedMethod = 'STRIDE';
+  function selectMethod(m) {
+    selectedMethod = m;
+    document.getElementById('inp-method').value = m;
+    document.querySelectorAll('.method-btn').forEach(function(b) {
+      b.className = 'method-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 bg-white text-gray-600';
+    });
+    var active = document.getElementById('mb-' + m);
+    if (active) active.className = 'method-btn active px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700';
+  }
+
+  const METHODS = {
+    'STRIDE': [
+      {key:'S', label:'S - Spoofing',              badgeCls:'stride-S', examples:['Attacker spoofs user identity using stolen credentials','Forged JWT token bypasses authentication','DNS spoofing redirects traffic to malicious server']},
+      {key:'T', label:'T - Tampering',             badgeCls:'stride-T', examples:['Attacker modifies transaction data in transit','Unauthorized write to configuration file','SQL injection alters database records']},
+      {key:'R', label:'R - Repudiation',           badgeCls:'stride-R', examples:['User denies placing fraudulent order — no audit trail','Admin action not logged — cannot prove who made the change','Missing timestamps on critical operations']},
+      {key:'I', label:'I - Info Disclosure',       badgeCls:'stride-I', examples:['Error messages expose internal stack traces','Sensitive data returned in API response unnecessarily','Unencrypted PII stored in browser localStorage']},
+      {key:'D', label:'D - Denial of Service',     badgeCls:'stride-D', examples:['DDoS floods login endpoint causing outage','Memory exhaustion via large payload in API request','Recursive query causes database timeout']},
+      {key:'E', label:'E - Elevation of Privilege',badgeCls:'stride-E', examples:['Regular user accesses admin endpoint via IDOR','Privilege escalation via JWT role claim manipulation','Broken access control allows horizontal privilege escalation']}
+    ],
+    'LINDDUN': [
+      {key:'L',  label:'L - Linkability',          badgeCls:'linddun-L',  examples:['User browsing patterns linked across sessions via tracking','Transaction IDs correlated to identify user behavior','Device fingerprint used to re-identify users across sites']},
+      {key:'I',  label:'I - Identifiability',      badgeCls:'linddun-I',  examples:['IP address uniquely identifies individual user','Name and DOB re-identifies pseudonymous user','ZIP code + birthdate + gender identifies individual']},
+      {key:'N',  label:'N - Non-repudiation',      badgeCls:'linddun-N',  examples:['Audit log prevents user denying consent withdrawal','System records undeniable proof of sensitive user actions','Activity log cannot be deleted — privacy concern']},
+      {key:'D',  label:'D - Detectability',        badgeCls:'linddun-D2', examples:['Third party detects if user has account via timing attack','Metadata reveals existence of sensitive medical record','Ciphertext length reveals nature of encrypted data']},
+      {key:'Di', label:'Di - Disclosure of Info',  badgeCls:'linddun-Di', examples:['PII returned in API response unnecessarily','Sensitive data cached in browser history','Health data visible to unauthorized third party']},
+      {key:'U',  label:'U - Unawareness',          badgeCls:'linddun-U',  examples:['User unaware data shared with analytics partners','No privacy notice before data collection','Consent buried in terms of service document']},
+      {key:'Nc', label:'Nc - Non-compliance',      badgeCls:'linddun-Nc', examples:['Personal data retained beyond GDPR retention limit','No right-to-erasure mechanism implemented','Missing data processing agreement with processor']}
+    ],
+    'DREAD': [
+      {key:'S', label:'S - Spoofing',              badgeCls:'stride-S', examples:['Identity spoofing — rate each DREAD dimension 1-5']},
+      {key:'T', label:'T - Tampering',             badgeCls:'stride-T', examples:['Data tampering — rate each DREAD dimension 1-5']},
+      {key:'R', label:'R - Repudiation',           badgeCls:'stride-R', examples:['Action denial — rate each DREAD dimension 1-5']},
+      {key:'I', label:'I - Info Disclosure',       badgeCls:'stride-I', examples:['Data exposure — rate each DREAD dimension 1-5']},
+      {key:'D', label:'D - Denial of Service',     badgeCls:'stride-D', examples:['Availability attack — rate each DREAD dimension 1-5']},
+      {key:'E', label:'E - Elevation of Privilege',badgeCls:'stride-E', examples:['Privilege escalation — rate each DREAD dimension 1-5']}
+    ],
+    'PASTA': [
+      {key:'P1', label:'P1 - Define Objectives',      badgeCls:'stride-S', examples:['Protect customer PII per GDPR','Ensure 99.9% availability of payment service','Prevent unauthorized access to policyholder data']},
+      {key:'P2', label:'P2 - Technical Scope',        badgeCls:'stride-T', examples:['In scope: Payment API, Auth service, Policy DB','External: PSP, Identity Provider, Actuarial system','Trust boundaries: DMZ, internal network, cloud']},
+      {key:'P3', label:'P3 - Decompose Application',  badgeCls:'stride-R', examples:['DFD: Customer Portal > Auth API > Policy DB','Data flow: PII from registration to underwriting','Encrypted column for PII in PostgreSQL']},
+      {key:'P4', label:'P4 - Analyze Threats',        badgeCls:'stride-I', examples:['Threat agent: External attacker, financially motivated','Credential stuffing against login endpoint','SQL injection in policy search parameter']},
+      {key:'P5', label:'P5 - Vulnerability Analysis', badgeCls:'stride-D', examples:['CVE-2024-1234 in auth library — unpatched','Missing input validation on API parameters','Overly permissive IAM roles on storage bucket']},
+      {key:'P6', label:'P6 - Attack Modeling',        badgeCls:'stride-E', examples:['Kill chain: Recon > Exploit auth > Pivot to DB > Exfil','Attack tree: Access policyholder PII','Supply chain attack via compromised npm package']},
+      {key:'P7', label:'P7 - Risk and Impact',        badgeCls:'stride-S', examples:['Residual risk: High after planned MFA implementation','Business impact: EUR 2M fine + reputational damage','Risk acceptance required for legacy system gap']}
+    ],
+    'RaD-TM': [
+      {key:'S', label:'S - Spoofing',              badgeCls:'stride-S', examples:['Feature risk: Authentication bypass via spoofed token']},
+      {key:'T', label:'T - Tampering',             badgeCls:'stride-T', examples:['Feature risk: Unauthorized modification of feature data']},
+      {key:'R', label:'R - Repudiation',           badgeCls:'stride-R', examples:['Feature risk: Missing audit trail for feature actions']},
+      {key:'I', label:'I - Info Disclosure',       badgeCls:'stride-I', examples:['Feature risk: PII exposed in feature API response']},
+      {key:'D', label:'D - Denial of Service',     badgeCls:'stride-D', examples:['Feature risk: Feature endpoint susceptible to DoS']},
+      {key:'E', label:'E - Elevation of Privilege',badgeCls:'stride-E', examples:['Feature risk: Feature grants unintended elevated access']}
+    ],
+    'Hybrid': [
+      {key:'S',  label:'S - Spoofing',             badgeCls:'stride-S',   group:'STRIDE',  examples:['Attacker spoofs user identity with stolen credentials']},
+      {key:'T',  label:'T - Tampering',            badgeCls:'stride-T',   group:'STRIDE',  examples:['Attacker modifies data in transit']},
+      {key:'R',  label:'R - Repudiation',          badgeCls:'stride-R',   group:'STRIDE',  examples:['User denies action — no audit trail']},
+      {key:'I',  label:'I - Info Disclosure',      badgeCls:'stride-I',   group:'STRIDE',  examples:['Sensitive data exposed in API response']},
+      {key:'D',  label:'D - Denial of Service',    badgeCls:'stride-D',   group:'STRIDE',  examples:['Service flooded causing outage']},
+      {key:'E',  label:'E - Elevation',            badgeCls:'stride-E',   group:'STRIDE',  examples:['User escalates to admin role']},
+      {key:'L',  label:'L - Linkability',          badgeCls:'linddun-L',  group:'LINDDUN', examples:['User behavior linked across sessions']},
+      {key:'Di', label:'Di - Disclosure of Info',  badgeCls:'linddun-Di', group:'LINDDUN', examples:['PII returned unnecessarily in response']},
+      {key:'U',  label:'U - Unawareness',          badgeCls:'linddun-U',  group:'LINDDUN', examples:['User unaware data shared with third parties']},
+      {key:'Nc', label:'Nc - Non-compliance',      badgeCls:'linddun-Nc', group:'LINDDUN', examples:['Data retained beyond GDPR limit']}
+    ]
+  };
+
   function riskScore(l,i) { return l*i; }
   function riskLevel(s) { return s>=17?'Critical':s>=10?'High':s>=5?'Medium':'Low'; }
   function riskCls(s) { return s>=17?'risk-critical':s>=10?'risk-high':s>=5?'risk-medium':'risk-low'; }
@@ -370,7 +460,9 @@
   function createModel() {
     const name = document.getElementById('inp-name').value.trim();
     if (!name) return;
-    M = { id: Date.now(), name, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), created: new Date().toLocaleDateString('nl-NL'), components: [] };
+    var methodology = document.getElementById('inp-method').value || 'STRIDE';
+    M = { id: Date.now(), name, methodology, desc: document.getElementById('inp-desc').value.trim(), assessor: document.getElementById('inp-assessor').value.trim(), created: new Date().toLocaleDateString('nl-NL'), components: [] };
+    selectMethod('STRIDE');
     models.push(M); save(); renderSidebar(); loadModel(M); closeModal('modal-model');
     ['inp-name','inp-desc','inp-assessor'].forEach(id => document.getElementById(id).value='');
   }
@@ -379,7 +471,7 @@
     M = m; showView('model');
     document.getElementById('mv-name').textContent = m.name;
     document.getElementById('mv-desc').textContent = m.desc || '';
-    document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created;
+    document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created+' · Method: '+(m.methodology||'STRIDE');
     renderRiskSummary(); renderComponents(); renderProgress(); renderHeatmap();
   }
 
@@ -463,37 +555,54 @@
   function backToModel() { showView('model'); renderComponents(); renderRiskSummary(); renderProgress(); renderHeatmap(); renderSidebar(); }
 
   function renderStrideCats(ci) {
-    const comp = M.components[ci];
-    const threats = comp.threats||[];
+    var comp = M.components[ci];
+    var threats = comp.threats||[];
+    var method = M.methodology || 'STRIDE';
+    var cats = METHODS[method] || METHODS['STRIDE'];
     document.getElementById('stride-count').textContent = threats.length + ' threat'+(threats.length!==1?'s':'')+' recorded';
-    const c = document.getElementById('stride-cats');
+    var c = document.getElementById('stride-cats');
     c.innerHTML = '';
-    Object.entries(EXAMPLES).forEach(([cat, examples]) => {
-      const key = cat.split(' - ')[0];
-      const catThreats = threats.filter(t=>t.category===cat);
-      const div = document.createElement('div');
+    var lastGroup = null;
+    cats.forEach(function(catDef) {
+      var cat = catDef.label;
+      var key = catDef.key;
+      var badgeCls = catDef.badgeCls || ('stride-' + key);
+      var examples = catDef.examples || [];
+      var catThreats = threats.filter(function(t) { return t.category === cat; });
+      var safeId = 'ex' + ci + key.replace(/[^a-zA-Z0-9]/g,'');
+      if (method === 'Hybrid' && catDef.group && catDef.group !== lastGroup) {
+        lastGroup = catDef.group;
+        var hdr = document.createElement('div');
+        hdr.className = 'px-2 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400';
+        hdr.textContent = catDef.group === 'STRIDE' ? 'STRIDE — Security Threats' : 'LINDDUN — Privacy Threats';
+        c.appendChild(hdr);
+      }
+      var optionsHtml = '<option value="">— Select example —</option>' + examples.map(function(e) { return '<option value="' + e.replace(/"/g,'&quot;') + '">' + e + '</option>'; }).join('');
+      var threatRowsHtml = catThreats.length === 0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map(function(t,ti) { return renderThreatRow(t,ci,ti); }).join('');
+      var countBadge = catThreats.length ? '<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">' + catThreats.length + '</span>' : '';
+      var div = document.createElement('div');
       div.className = 'sf-card overflow-hidden';
-      div.innerHTML = `
-        <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <div class="flex items-center gap-2.5">
-            <span class="stride-${key} px-2.5 py-0.5 rounded-lg text-xs font-bold">${key}</span>
-            <span class="font-semibold text-gray-900 text-sm">${cat.split(' - ')[1]}</span>
-            ${catThreats.length ? `<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">${catThreats.length}</span>` : ''}
-          </div>
-          <div class="flex gap-2 items-center">
-            <select id="ex-${ci}-${cat.replace(/[\s-]/g,'')}" class="sf-input text-xs py-1.5 w-56">
-              <option value="">— Select example threat —</option>
-              ${examples.map(e=>`<option value="${e}">${e}</option>`).join('')}
-            </select>
-            <button onclick="addFromExample(${ci},'${cat}')" class="sf-btn-primary text-xs px-3 py-1.5">Add</button>
-            <button onclick="openThreatModal(${ci},'${cat}','')" class="sf-btn-secondary text-xs px-3 py-1.5">Custom</button>
-          </div>
-        </div>
-        <div id="tlist-${ci}-${cat.replace(/[\s-]/g,'')}">
-          ${catThreats.length===0 ? '<div class="px-5 py-4 text-sm text-gray-400">No threats recorded for this category.</div>' : catThreats.map((t,ti)=>renderThreatRow(t,ci,ti)).join('')}
-        </div>`;
+      div.innerHTML = '<div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">'
+        + '<div class="flex items-center gap-2.5">'
+        + '<span class="' + badgeCls + ' px-2.5 py-0.5 rounded-lg text-xs font-bold">' + key + '</span>'
+        + '<span class="font-semibold text-gray-900 text-sm">' + cat.split(' - ').slice(1).join(' - ') + '</span>'
+        + countBadge
+        + '</div>'
+        + '<div class="flex gap-2 items-center">'
+        + '<select id="' + safeId + '" class="sf-input text-xs py-1.5 w-56">' + optionsHtml + '</select>'
+        + '<button onclick="addExDyn(\'' + safeId + '\',' + ci + ',\'' + cat.replace(/'/g,"\\'" ) + '\')" class="sf-btn-primary text-xs px-3 py-1.5">Add</button>'
+        + '<button onclick="openThreatModal(' + ci + ',\'' + cat.replace(/'/g,"\\'" ) + '\',\'\')" class="sf-btn-secondary text-xs px-3 py-1.5">Custom</button>'
+        + '</div></div>'
+        + '<div id="tlist-' + safeId + '">' + threatRowsHtml + '</div>';
       c.appendChild(div);
     });
+  }
+
+  function addExDyn(safeId, ci, cat) {
+    var sel = document.getElementById(safeId);
+    if (!sel || !sel.value) { alert('Select an example first'); return; }
+    openThreatModal(ci, cat, sel.value);
+    sel.value = '';
   }
 
   function renderThreatRow(t, ci, ti) {
