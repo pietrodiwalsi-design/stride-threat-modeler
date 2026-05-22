@@ -12,22 +12,22 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
   *, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-  body { background: #f8fafc; color: #0f172a; }
+  body { background: #f5f5f7; color: #1d1d1f; }
 
   /* Apple-style components — lighter, calmer */
-  .sf-card { background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05); }
-  .sf-btn-primary { background: #2563eb; color: #fff; border-radius: 14px; font-weight: 700; font-size: 15px; padding: 14px 28px; border: none; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 15px -3px rgb(37 99 235 / 0.3); }
-  .sf-btn-primary:hover { background: #1e40af; transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgb(37 99 235 / 0.35); }
-  .sf-btn-secondary { background: #fff; color: #334155; border-radius: 14px; font-weight: 600; font-size: 15px; padding: 14px 28px; border: 2px solid #e2e8f0; cursor: pointer; transition: all 0.2s; }
-  .sf-btn-secondary:hover { background: #f8fafc; border-color: #94a3b8; }
-  .sf-input { background: #fff; border: 2px solid #e2e8f0; border-radius: 14px; padding: 14px 18px; font-size: 15px; transition: all 0.2s; }
-  .sf-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgb(37 99 235 / 0.1); outline: none; }
+  .sf-card { background: #fff; border-radius: 12px; border: 1px solid #f0f0f3; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .sf-btn-primary { background: #0071e3; color: #fff; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
+  .sf-btn-primary:hover { background: #0077ed; }
+  .sf-btn-secondary { background: rgba(0,0,0,0.06); color: #1d1d1f; border-radius: 980px; font-weight: 500; font-size: 14px; padding: 8px 20px; border: none; cursor: pointer; transition: all 0.15s; }
+  .sf-btn-secondary:hover { background: rgba(0,0,0,0.1); }
+  .sf-input { background: #fff; border: 1px solid #d2d2d7; border-radius: 10px; padding: 10px 14px; font-size: 14px; color: #1d1d1f; width: 100%; outline: none; transition: border-color 0.15s; }
+  .sf-input:focus { border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
   .sf-label { font-size: 13px; font-weight: 500; color: #6e6e73; margin-bottom: 6px; display: block; }
-  .sf-nav { background: #fff; border-bottom: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07); }
-  .sf-sidebar { background: #fff; border-right: 1px solid #cbd5e1; box-shadow: 4px 0 12px -2px rgb(0 0 0 / 0.06); }
+  .sf-nav { background: rgba(255,255,255,0.88); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(0,0,0,0.08); }
+  .sf-sidebar { background: #fff; border-right: 1px solid rgba(0,0,0,0.08); }
   .sf-sidebar-item { padding: 8px 12px; border-radius: 8px; font-size: 14px; color: #3a3a3c; cursor: pointer; transition: background 0.1s; display: flex; justify-content: space-between; align-items: center; }
   .sf-sidebar-item:hover { background: #f5f5f7; }
-  .sf-sidebar-item.active { background: #eff6ff; color: #1e40af; font-weight: 700; border-left: 3px solid #2563eb; }
+  .sf-sidebar-item.active { background: #e8f0fe; color: #0071e3; font-weight: 500; }
 
   /* Risk colors (Apple HIG compliant) */
   .risk-critical { color: #ff3b30; } .risk-high { color: #ff9500; } .risk-medium { color: #ffcc00; } .risk-low { color: #34c759; }
@@ -619,13 +619,9 @@
       var el = document.createElement('div');
       el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
       el.style.cssText = 'padding:10px 12px;border-radius:10px;margin-bottom:2px;display:flex;flex-direction:column;gap:4px;cursor:pointer';
-      var mid = m.id;
       el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">'
-        + '<span style="font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">' + m.name + '</span>'
-        + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;margin-left:6px">'
-        + '<span style="font-size:11px;color:#86868b">' + total + ' threat' + (total!==1?'s':'') + '</span>'
-        + '<button onclick="event.stopPropagation();deleteModel(' + mid + ')" title="Delete model" style="border:none;background:transparent;color:#d1d1d6;cursor:pointer;font-size:15px;line-height:1;padding:0 2px" onmouseover="this.style.color=\'#ff3b30\'" onmouseout="this.style.color=\'#d1d1d6\'">×</button>'
-        + '</div>'
+        + '<span style="font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">' + m.name + '</span>'
+        + '<span style="font-size:11px;color:#86868b;flex-shrink:0;margin-left:6px">' + total + ' threat' + (total!==1?'s':'') + '</span>'
         + '</div>'
         + '<div>'
         + '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:980px" class="mb-' + method + '">' + method + '</span>'
@@ -633,18 +629,6 @@
       el.onclick = function() { loadModel(m); };
       c.appendChild(el);
     });
-  }
-
-  function deleteModel(id) {
-    if (!confirm('Delete this model? This cannot be undone.')) return;
-    models = models.filter(function(m){ return m.id !== id; });
-    save();
-    if (M && M.id === id) {
-      M = models.length ? models[0] : null;
-      if (M) { loadModel(M); } else { showView('home'); renderSidebar(); }
-    } else {
-      renderSidebar();
-    }
   }
 
   function renderRiskSummary() {
@@ -785,26 +769,23 @@
     sel.value = '';
   }
 
-  function deleteThreat(ci, ti) {
-    if (!confirm('Delete this threat?')) return;
-    M.components[ci].threats.splice(ti, 1);
-    save(); renderStrideCats(ci); renderRiskSummary(); renderProgress(); renderHeatmap(); renderSidebar();
-  }
-
   function renderThreatRow(t, ci, ti) {
     const score = riskScore(t.likelihood||1, t.impact||1);
     const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
-    return '<div class="px-5 py-3 border-t border-gray-100">'
-      + '<div class="flex items-start justify-between gap-3">'
-      + '<div class="flex-1">'
-      + '<div class="font-medium text-gray-900 text-sm mb-1.5">' + t.desc + '</div>'
-      + '<div class="flex flex-wrap gap-2 items-center">'
-      + '<span class="text-xs ' + riskBadgeCls(score) + ' px-2 py-0.5 rounded-full font-semibold">L' + (t.likelihood||1) + ' × I' + (t.impact||1) + ' = ' + score + ' ' + riskLevel(score) + '</span>'
-      + (t.treatment ? '<span class="treat-pill ' + (treatCls[t.treatment]||'') + '">' + t.treatment + '</span>' : '')
-      + (t.mitigation ? '<span class="text-xs text-gray-400 italic">' + t.mitigation + '</span>' : '')
-      + '</div></div>'
-      + '<button onclick="deleteThreat(' + ci + ',' + ti + ')" title="Delete threat" style="flex-shrink:0;padding:4px 8px;border-radius:8px;border:none;background:transparent;color:#d1d1d6;cursor:pointer;font-size:13px;line-height:1" onmouseover="this.style.color=\'#ff3b30\'" onmouseout="this.style.color=\'#d1d1d6\'">×</button>'
-      + '</div></div>';
+    const statCls = {Open:'text-red-500','In Progress':'text-orange-500',Done:'text-green-600'};
+    return `<div class="px-5 py-4 border-t border-gray-100">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex-1">
+          <div class="font-medium text-gray-900 text-sm mb-2">${t.desc}</div>
+          <div class="flex flex-wrap gap-2 items-center">
+            <span class="text-xs ${riskBadgeCls(score)} px-2 py-0.5 rounded-full font-semibold">L${t.likelihood} × I${t.impact} = ${score} ${riskLevel(score)}</span>
+            ${t.treatment ? `<span class="treat-pill ${treatCls[t.treatment]||''}">${t.treatment}</span>` : ''}
+            ${t.mitigation ? '<span class="text-xs text-gray-400 italic">' + t.mitigation + '</span>' : ''}
+          </div>
+        </div>
+        <span class="text-xs font-medium ${statCls[t.status]||'text-gray-400'} whitespace-nowrap">${t.status||'Open'}</span>
+      </div>
+    </div>`;
   }
 
   function addFromExample(ci, cat) {
