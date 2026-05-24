@@ -38,8 +38,10 @@
 - [ ] CSV export
 - [ ] JSON export (full model)
 - [ ] Basic PDF report (summary + threats)
+- [ ] **Actionable tickets export** (Jira-ready format or structured ticket list per threat)
+- [ ] Model versioning / change log support (living document)
 
-**Deliverable**: User can export professional output from the assessment.
+**Deliverable**: User can export professional output from the assessment, including actionable development tickets.
 
 ## Phase 4: Polish & Visualization (Week 3)
 

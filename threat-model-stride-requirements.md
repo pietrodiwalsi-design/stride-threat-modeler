@@ -4,8 +4,25 @@
 **Version**: 1.0 MVP  
 **Purpose**: Structured threat modeling tool based on STRIDE methodology for security assessments.
 
+**Foundations**: Incorporates key principles from Continuous Threat Modeling best practices (living document, 4 fundamental questions, collaborative assessment, risk response lifecycle, and actionable outcomes).
+
 ## 1. Core Objective
 Support the structured execution of STRIDE threat modeling assessments. Focus on guided recording, analysis and documentation of threats during the assessment process.
+
+## 1.1 Foundations of Continuous Threat Modeling (Incorporated)
+The tool is designed around these core principles:
+
+- **Four Fundamental Questions**: The workflow guides users through: *What are we working on?*, *What can go wrong?*, *What are we going to do about it?*, and *Did we do a good enough job?*
+- **Continuous / Living Document Approach**: Models are treated as living documents. The tool supports versioning, updates for architectural changes, and easy iteration.
+- **When to Execute**: Built-in guidance prompts users at design phase, major changes, new dependencies, or integrated into Definition of Done.
+- **Collaborative Assessment**: Supports multi-role input (Developers, Architects, Product Owners, QA, Security Engineers, DPOs/privacy champions).
+- **Repeatable Structure**: Enforces the 4-step loop: Define Scope & Decompose (DFD + trust boundaries), Identify Threats (STRIDE/LINDDUN), Assess Risk & Mitigate, Validate & Iterate.
+- **Key Results Focus**: Outputs include DFDs, crown jewels mapping, prioritized threat register with risk scores, and **actionable tickets** (export to Jira/bug tracker).
+- **Pro Tips Enforced**:
+  - Incremental modeling support (focus on new features/changes)
+  - Brevity emphasis (attack surfaces, trust boundaries, malicious actors)
+  - Standardized methodology (STRIDE primary, with LINDDUN option)
+  - Model validation step to keep models alive and current
 
 ## 2. STRIDE Categories (Core Engine)
 The tool must support all six STRIDE threat categories:

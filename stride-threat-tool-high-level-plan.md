@@ -9,6 +9,14 @@ Build a practical tool that supports security professionals in executing structu
 - Useful output: Good reporting and export options for real assessments
 - Visuals only for presentation: Fancy diagrams are secondary (for final reporting)
 
+## Continuous Threat Modeling Foundations (Incorporated)
+- **Living Document**: Tool supports model updates, versioning, and iteration as systems evolve
+- **Four Questions Workflow**: Interface guides users through "What are we working on?", "What can go wrong?", "What are we going to do about it?", "Did we do a good enough job?"
+- **Collaborative**: Designed for multi-role participation (Dev, Architects, PO, QA, Security, DPO)
+- **Actionable Outcomes**: Strong emphasis on exporting threats as tickets (Jira/bug tracker ready)
+- **Incremental & Focused**: Supports modeling new features/changes rather than full legacy systems at once
+- **Validation Step**: Built-in review/quality check before finalizing models
+
 ## High Level Phases
 
 ### Phase 1: Core Assessment Engine (MVP)
