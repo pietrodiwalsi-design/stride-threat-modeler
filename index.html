@@ -248,13 +248,6 @@
     <button onclick="backToModel()" class="flex items-center gap-1.5 text-sm font-medium mb-5 transition" style="color:#22d3ee">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>Back to model
     </button>
-
-    <div id="comp-nav" class="flex items-center gap-3 mb-3">
-      <button onclick="navigateComp(-1)" id="btn-prev" class="px-3 py-1 text-sm rounded-lg border border-white/10 text-gray-400 hover:text-white disabled:opacity-40" style="background:#1e293b">← Prev</button>
-      <span id="comp-indicator" class="text-sm px-3 py-1 rounded-full" style="background:#1e293b;color:#64748b"></span>
-      <button onclick="navigateComp(1)" id="btn-next" class="px-3 py-1 text-sm rounded-lg border border-white/10 text-gray-400 hover:text-white disabled:opacity-40" style="background:#1e293b">Next →</button>
-    </div>
-
     <div class="flex items-center justify-between mb-2">
       <h2 id="stride-title" class="text-xl font-semibold tracking-tight" style="color:#e2e8f0"></h2>
       <div style="display:flex;align-items:center;gap:10px">
@@ -317,38 +310,6 @@
       </div>
     </div>
 
-  </div>
-</div>
-
-<div id="page-register" class="hidden p-8" style="display:none">
-  <div class="mb-6">
-    <h1 class="text-2xl font-semibold tracking-tight" style="color:#e2e8f0">Threat Register</h1>
-    <p class="text-sm mt-1" style="color:#64748b">All recorded threats across the model — sortable and filterable</p>
-  </div>
-
-  <div class="sf-card p-4 mb-4">
-    <div class="flex flex-wrap gap-3 items-center">
-      <div class="flex-1 min-w-[240px]">
-        <input id="reg-search" type="text" placeholder="Search threats..." class="sf-input" oninput="renderRegister()">
-      </div>
-      <select id="reg-risk" class="sf-input" style="max-width:160px" onchange="renderRegister()">
-        <option value="">All Risk Levels</option>
-        <option value="Critical">Critical</option>
-        <option value="High">High</option>
-        <option value="Medium">Medium</option>
-        <option value="Low">Low</option>
-      </select>
-      <select id="reg-comp" class="sf-input" style="max-width:200px" onchange="renderRegister()">
-        <option value="">All Components</option>
-      </select>
-      <button onclick="resetRegisterFilters()" class="sf-btn-secondary text-sm px-4 py-2">Reset</button>
-    </div>
-  </div>
-
-  <div class="sf-card p-4 mb-4" id="reg-summary"></div>
-
-  <div class="sf-card overflow-hidden">
-    <div id="reg-table-wrap" style="overflow-x:auto"></div>
   </div>
 </div>
 
@@ -453,7 +414,6 @@
   let models = JSON.parse(localStorage.getItem('stride-v3') || '[]');
   let M = null, CI = null;
   let tL = 3, tI = 3, tTreatment = 'Mitigate', tCat = '', tCompIdx = 0;
-  let regSort = { col: 'score', dir: 'desc' };
 
   const EXAMPLES = {
     'S - Spoofing':        ['Attacker spoofs user identity via stolen credentials','Fake login page harvests credentials','DNS spoofing redirects to malicious server','API caller impersonates trusted service','Session token theft via XSS'],
@@ -524,8 +484,7 @@
 
   function save() { localStorage.setItem('stride-v3', JSON.stringify(models)); }
   function setPage(p) {
-    const pages = ['dashboard','howto','register'];
-    pages.forEach(function(n) {
+    ['dashboard','howto','register'].forEach(function(n) {
       var el = document.getElementById('page-'+n);
       if (n === p) { el.classList.remove('hidden'); el.style.display = ''; }
       else { el.classList.add('hidden'); el.style.display = 'none'; }
@@ -574,14 +533,12 @@
     showView('stride');
     renderStrideCats(0);
     renderRiskSummary(); renderProgress(); renderHeatmap();
-    updateNavState();
   }
 
   function loadModel(m) {
     M = m;
     renderSidebar();
     renderRiskSummary(); renderProgress(); renderHeatmap();
-    updateNavState();
     if (m.components.length === 1) {
       CI = 0;
       document.getElementById('stride-title').textContent = m.components[0].name;
@@ -594,13 +551,6 @@
       document.getElementById('mv-meta').textContent = (m.assessor?'Assessor: '+m.assessor+' · ':'')+'Created: '+m.created+' · Method: '+(m.methodology||'STRIDE');
       renderComponents();
     }
-  }
-
-  function updateNavState() {
-    const regBtn = document.getElementById('nav-register');
-    if (!regBtn) return;
-    if (M) regBtn.classList.remove('hidden');
-    else regBtn.classList.add('hidden');
   }
 
   function renderSidebar() {
@@ -700,55 +650,58 @@
 
   function backToModel() { showView('model'); renderComponents(); renderRiskSummary(); renderProgress(); renderHeatmap(); renderSidebar(); }
 
-  function navigateComp(dir) {
-    if (!M || CI === null) return;
-    const newIdx = CI + dir;
-    if (newIdx < 0 || newIdx >= M.components.length) return;
-    CI = newIdx;
-    const comp = M.components[CI];
-    document.getElementById('stride-title').textContent = comp.name;
-    renderStrideCats(CI);
-  }
-
   function renderStrideCats(ci) {
-    const container = document.getElementById('stride-cats');
-    container.innerHTML = '';
-    const comp = M.components[ci];
-    const method = M.methodology || 'STRIDE';
-    const cats = METHODS[method] || METHODS.STRIDE;
-    document.getElementById('stride-count').textContent = (comp.threats||[]).length + ' threats';
-    document.getElementById('stride-method-desc').textContent = method === 'STRIDE' ? 'Security threat categories' : method === 'LINDDUN' ? 'Privacy threat categories' : 'Security + Privacy categories';
-
-    // update comp nav
-    const prevBtn = document.getElementById('btn-prev');
-    const nextBtn = document.getElementById('btn-next');
-    const ind = document.getElementById('comp-indicator');
-    if (prevBtn && nextBtn && ind) {
-      prevBtn.disabled = ci === 0;
-      nextBtn.disabled = ci === M.components.length-1;
-      ind.textContent = `Component ${ci+1} of ${M.components.length}`;
+    var comp = M.components[ci];
+    var methodDesc = document.getElementById('stride-method-desc');
+    if (methodDesc) {
+      var method = M.methodology || 'STRIDE';
+      var descs = {
+        'STRIDE': 'Security assessment — work through each category, add threats, set likelihood and impact.',
+        'LINDDUN': 'Privacy assessment — identify how personal data could be misused or exposed.',
+        'Hybrid': 'Hybrid assessment — security + privacy threats combined.'
+      };
+      methodDesc.textContent = descs[method] || 'Work through each category and record threats.';
     }
-
-    cats.forEach(cat => {
-      const threats = (comp.threats||[]).filter(t => t.category === cat.label);
-      let threatRowsHtml = '';
-      threats.forEach((t, ti) => {
-        const globalTi = (comp.threats||[]).findIndex(x => x.id === t.id);
-        threatRowsHtml += renderThreatRow(t, ci, globalTi);
-      });
-
-      const safeId = 'ex-' + ci + '-' + cat.key;
-      let optionsHtml = '<option value="">Select example...</option>';
-      (cat.examples||[]).forEach(ex => { optionsHtml += `<option value="${ex.replace(/"/g,'"')}">${ex.length>70?ex.substring(0,67)+'...':ex}</option>`; });
-
-      const div = document.createElement('div');
-      div.className = 'sf-card';
-      div.innerHTML = '<div class="px-5 pt-4 pb-2 flex items-center justify-between">'
-        + '<div class="flex items-center gap-3"><span class="' + cat.badgeCls + ' px-2.5 py-0.5 rounded text-xs font-bold">' + cat.label.split(' - ')[0] + '</span>'
-        + '<span class="font-semibold text-sm" style="color:#e2e8f0">' + cat.label.split(' - ')[1] + '</span></div>'
+    var threats = comp.threats||[];
+    var method = M.methodology || 'STRIDE';
+    var cats = METHODS[method] || METHODS['STRIDE'];
+    document.getElementById('stride-count').textContent = threats.length + ' threat'+(threats.length!==1?'s':'')+' recorded';
+    var c = document.getElementById('stride-cats');
+    c.innerHTML = '';
+    var lastGroup = null;
+    cats.forEach(function(catDef) {
+      var cat = catDef.label;
+      var key = catDef.key;
+      var badgeCls = catDef.badgeCls || ('stride-' + key);
+      var examples = catDef.examples || [];
+      var catThreats = threats.filter(function(t) { return t.category === cat; });
+      var safeId = 'ex' + ci + key.replace(/[^a-zA-Z0-9]/g,'');
+      if (method === 'Hybrid' && catDef.group && catDef.group !== lastGroup) {
+        lastGroup = catDef.group;
+        var hdr = document.createElement('div');
+        hdr.className = 'px-2 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider';
+        hdr.style.color = '#475569';
+        hdr.textContent = catDef.group === 'STRIDE' ? 'STRIDE — Security Threats' : 'LINDDUN — Privacy Threats';
+        c.appendChild(hdr);
+      }
+      var optionsHtml = '<option value="">— Select example —</option>' + examples.map(function(e) { return '<option value="' + e.replace(/"/g,'"') + '">' + e + '</option>'; }).join('');
+      var threatRowsHtml = catThreats.length === 0 ? '<div class="px-5 py-4 text-sm" style="color:#475569">No threats recorded for this category.</div>' : catThreats.map(function(t,ti) { return renderThreatRow(t,ci,ti); }).join('');
+      var countBadge = catThreats.length ? '<span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1e293b;color:#64748b">' + catThreats.length + '</span>' : '';
+      var div = document.createElement('div');
+      var catName = cat.split(' - ').slice(1).join(' - ');
+      div.className = 'sf-card overflow-hidden';
+      div.innerHTML = '<div style="padding:13px 18px;border-bottom:1px solid rgba(255,255,255,0.06)">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        + '<span class="' + badgeCls + '" style="padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700;flex-shrink:0">' + key + '</span>'
+        + '<span style="font-weight:600;font-size:14px;color:#e2e8f0">' + catName + '</span>'
+        + (catThreats.length ? '<span style="font-size:11px;background:#1e293b;color:#64748b;padding:2px 8px;border-radius:980px;font-weight:600">' + catThreats.length + '</span>' : '')
+        + '</div>'
+        + '<button onclick="openThreatModal(' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\',\'\');" style="padding:5px 11px;background:#1e293b;border:1px solid rgba(34,211,238,0.2);border-radius:8px;font-size:12px;font-weight:500;color:#94a3b8;cursor:pointer">+ Custom</button>'
+        + '</div>'
         + '<div style="display:flex;gap:8px;align-items:center">'
         + '<select id="' + safeId + '" style="background:#1e293b;border:1px solid rgba(34,211,238,0.2);border-radius:8px;padding:5px 9px;font-size:12px;color:#e2e8f0;outline:none;font-family:inherit;max-width:200px">' + optionsHtml + '</select>'
-        + '<button onclick="addExDyn(\'' + safeId + '\',' + ci + ',\'' + cat.label.replace(/\'/g,"\\'") + '\');" style="padding:5px 12px;background:#22d3ee;color:#0a0f1e;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Add threat</button>'
+        + '<button onclick="addExDyn(\'' + safeId + '\',' + ci + ',\'' + cat.replace(/\'/g,"\\'") + '\');" style="padding:5px 12px;background:#22d3ee;color:#0a0f1e;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Add threat</button>'
         + '</div>'
         + '</div>'
         + '<div id="tlist-' + safeId + '">' + threatRowsHtml + '</div>';
@@ -766,8 +719,7 @@
   function renderThreatRow(t, ci, ti) {
     const score = riskScore(t.likelihood||1, t.impact||1);
     const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
-    const status = t.status || 'Open';
-    const statusColor = status === 'Open' ? '#ff4d4f' : status === 'In Progress' ? '#ff9500' : '#34d399';
+    const statCls = {Open:'text-red-500','In Progress':'text-orange-500',Done:'text-green-600'};
     return `<div class="px-5 py-4 border-t border-white/10">
       <div class="flex items-start justify-between gap-3">
         <div class="flex-1">
@@ -778,36 +730,9 @@
             ${t.mitigation ? '<span class="text-xs italic" style="color:#475569">' + t.mitigation + '</span>' : ''}
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span onclick="cycleThreatStatus(${ci},${ti});event.stopImmediatePropagation();" class="text-xs font-medium px-2.5 py-0.5 rounded-full cursor-pointer flex items-center gap-1" style="background:rgba(255,255,255,0.06);color:${statusColor};border:1px solid ${statusColor}30">
-            ${status} <span style="font-size:10px">↻</span>
-          </span>
-          <button onclick="deleteThreat(${ci},${ti});event.stopImmediatePropagation();" style="width:22px;height:22px;border-radius:9999px;background:rgba(255,77,79,0.1);color:#ff4d4f;border:none;cursor:pointer;font-size:14px;line-height:1">×</button>
-        </div>
+        <span class="text-xs font-medium ${statCls[t.status]||'text-gray-400'} whitespace-nowrap">${t.status||'Open'}</span>
       </div>
     </div>`;
-  }
-
-  function cycleThreatStatus(ci, ti) {
-    const statuses = ['Open','In Progress','Done'];
-    const comp = M.components[ci];
-    const t = comp.threats[ti];
-    const idx = statuses.indexOf(t.status || 'Open');
-    t.status = statuses[(idx + 1) % 3];
-    save();
-    renderStrideCats(ci);
-    renderSidebar(); renderRiskSummary(); renderProgress(); renderHeatmap();
-    if (!document.getElementById('page-register').classList.contains('hidden')) renderRegister();
-  }
-
-  function deleteThreat(ci, ti) {
-    if (!confirm('Delete this threat?')) return;
-    const comp = M.components[ci];
-    comp.threats.splice(ti, 1);
-    save();
-    renderStrideCats(ci);
-    renderSidebar(); renderRiskSummary(); renderProgress(); renderHeatmap();
-    if (!document.getElementById('page-register').classList.contains('hidden')) renderRegister();
   }
 
   function addFromExample(ci, cat) {
@@ -871,134 +796,6 @@
     M.components[tCompIdx].threats.push({ id:Date.now(), category:tCat, desc, likelihood:tL, impact:tI, treatment:tTreatment, mitigation:document.getElementById('mt-mitigation').value.trim(), status:'Open', createdAt:new Date().toISOString() });
     save(); closeModal('modal-threat');
     renderStrideCats(tCompIdx);
-    renderSidebar(); renderRiskSummary(); renderProgress(); renderHeatmap();
-    if (!document.getElementById('page-register').classList.contains('hidden')) renderRegister();
-  }
-
-  function renderRegister() {
-    if (!M) return;
-    const wrap = document.getElementById('reg-table-wrap');
-    const allThreats = [];
-    M.components.forEach((c,ci) => {
-      (c.threats||[]).forEach((t,ti) => {
-        allThreats.push({...t, compName: c.name, compIdx: ci, threatIdx: ti});
-      });
-    });
-
-    // filters
-    const q = (document.getElementById('reg-search')||{value:''}).value.toLowerCase();
-    const riskF = (document.getElementById('reg-risk')||{value:''}).value;
-    const compF = (document.getElementById('reg-comp')||{value:''}).value;
-
-    let filtered = allThreats.filter(t => {
-      const s = riskScore(t.likelihood||1,t.impact||1);
-      const lvl = riskLevel(s);
-      const matchQ = !q || t.desc.toLowerCase().includes(q) || t.compName.toLowerCase().includes(q);
-      const matchR = !riskF || lvl === riskF;
-      const matchC = !compF || t.compName === compF;
-      return matchQ && matchR && matchC;
-    });
-
-    // sort
-    filtered.sort((a,b) => {
-      const sa = riskScore(a.likelihood||1,a.impact||1);
-      const sb = riskScore(b.likelihood||1,b.impact||1);
-      let va = sa, vb = sb;
-      if (regSort.col === 'comp') { va = a.compName; vb = b.compName; }
-      else if (regSort.col === 'cat') { va = a.category; vb = b.category; }
-      else if (regSort.col === 'status') { va = a.status||'Open'; vb = b.status||'Open'; }
-      const res = va > vb ? 1 : va < vb ? -1 : 0;
-      return regSort.dir === 'asc' ? res : -res;
-    });
-
-    // summary
-    const crit = filtered.filter(t=>riskLevel(riskScore(t.likelihood||1,t.impact||1))==='Critical').length;
-    const high = filtered.filter(t=>riskLevel(riskScore(t.likelihood||1,t.impact||1))==='High').length;
-    const open = filtered.filter(t=>(t.status||'Open')==='Open').length;
-    document.getElementById('reg-summary').innerHTML = `
-      <div style="display:flex;gap:24px;align-items:center">
-        <div><span style="font-size:11px;color:#64748b">TOTAL</span><div style="font-size:22px;font-weight:700;color:#e2e8f0">${filtered.length}</div></div>
-        <div><span style="font-size:11px;color:#64748b">CRITICAL</span><div style="font-size:22px;font-weight:700;color:#ff4d4f">${crit}</div></div>
-        <div><span style="font-size:11px;color:#64748b">HIGH</span><div style="font-size:22px;font-weight:700;color:#ff9500">${high}</div></div>
-        <div><span style="font-size:11px;color:#64748b">OPEN</span><div style="font-size:22px;font-weight:700;color:#e2e8f0">${open}</div></div>
-      </div>`;
-
-    // populate comp filter if empty
-    const compSel = document.getElementById('reg-comp');
-    if (compSel && compSel.options.length <= 1) {
-      const names = [...new Set(M.components.map(c=>c.name))];
-      names.forEach(n => {
-        const o = document.createElement('option'); o.value = n; o.textContent = n;
-        compSel.appendChild(o);
-      });
-    }
-
-    // table
-    let html = `<table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead><tr style="background:#1e293b;border-bottom:1px solid rgba(255,255,255,0.1)">
-        <th onclick="sortRegister('idx')" style="padding:10px 12px;text-align:left;cursor:pointer;color:#94a3b8">#</th>
-        <th onclick="sortRegister('comp')" style="padding:10px 12px;text-align:left;cursor:pointer;color:#94a3b8">Component</th>
-        <th onclick="sortRegister('cat')" style="padding:10px 12px;text-align:left;cursor:pointer;color:#94a3b8">Category</th>
-        <th onclick="sortRegister('desc')" style="padding:10px 12px;text-align:left;cursor:pointer;color:#94a3b8">Threat</th>
-        <th onclick="sortRegister('score')" style="padding:10px 12px;text-align:center;cursor:pointer;color:#94a3b8">L × I = Score</th>
-        <th onclick="sortRegister('risk')" style="padding:10px 12px;text-align:center;cursor:pointer;color:#94a3b8">Risk</th>
-        <th onclick="sortRegister('treat')" style="padding:10px 12px;text-align:center;cursor:pointer;color:#94a3b8">Treatment</th>
-        <th onclick="sortRegister('status')" style="padding:10px 12px;text-align:center;cursor:pointer;color:#94a3b8">Status</th>
-        <th style="padding:10px 12px;width:40px"></th>
-      </tr></thead><tbody>`;
-    filtered.forEach((t,i) => {
-      const s = riskScore(t.likelihood||1,t.impact||1);
-      const lvl = riskLevel(s);
-      const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
-      const statusColor = (t.status||'Open')==='Open'?'#ff4d4f':(t.status||'Open')==='In Progress'?'#ff9500':'#34d399';
-      const rowBorder = lvl==='Critical'?'#ff4d4f':lvl==='High'?'#ff9500':lvl==='Medium'?'#fbbf24':'#34d399';
-      html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.08);background:${i%2?'#0f172a':'#111827'}">
-        <td style="padding:10px 12px;color:#64748b">${i+1}</td>
-        <td style="padding:10px 12px;font-weight:500;color:#e2e8f0">${t.compName}</td>
-        <td style="padding:10px 12px"><span class="${t.category.includes('S -')?'stride-S':t.category.includes('T -')?'stride-T':t.category.includes('R -')?'stride-R':t.category.includes('I -')?'stride-I':t.category.includes('D -')?'stride-D':'stride-E'} px-2 py-0.5 rounded text-xs font-bold">${t.category.split(' - ')[0]}</span></td>
-        <td style="padding:10px 12px;color:#e2e8f0">${t.desc}</td>
-        <td style="padding:10px 12px;text-align:center"><span class="text-xs ${riskBadgeCls(s)} px-2 py-0.5 rounded-full font-semibold">L${t.likelihood}×I${t.impact}=${s}</span></td>
-        <td style="padding:10px 12px;text-align:center"><span class="risk-badge-${lvl.toLowerCase()} px-2 py-0.5 rounded-full text-xs font-semibold" style="border-left:3px solid ${rowBorder}">${lvl}</span></td>
-        <td style="padding:10px 12px;text-align:center">${t.treatment?`<span class="treat-pill ${treatCls[t.treatment]||''}">${t.treatment}</span>`:''}</td>
-        <td style="padding:10px 12px;text-align:center"><span onclick="cycleRegStatus(${t.compIdx},${t.threatIdx});event.stopImmediatePropagation()" class="px-2.5 py-0.5 rounded-full cursor-pointer text-xs" style="background:rgba(255,255,255,0.06);color:${statusColor};border:1px solid ${statusColor}30">${t.status||'Open'}</span></td>
-        <td style="padding:10px 12px"><button onclick="deleteRegThreat(${t.compIdx},${t.threatIdx});event.stopImmediatePropagation()" style="width:22px;height:22px;border-radius:9999px;background:rgba(255,77,79,0.1);color:#ff4d4f;border:none;cursor:pointer;font-size:14px">×</button></td>
-      </tr>`;
-    });
-    if (!filtered.length) html += `<tr><td colspan="9" style="padding:40px 20px;text-align:center;color:#64748b">No threats recorded yet. Start assessing components.</td></tr>`;
-    html += '</tbody></table>';
-    wrap.innerHTML = html;
-  }
-
-  function sortRegister(col) {
-    if (regSort.col === col) regSort.dir = regSort.dir === 'asc' ? 'desc' : 'asc';
-    else { regSort.col = col; regSort.dir = col === 'score' || col === 'risk' ? 'desc' : 'asc'; }
-    renderRegister();
-  }
-
-  function cycleRegStatus(ci, ti) {
-    const statuses = ['Open','In Progress','Done'];
-    const comp = M.components[ci];
-    const t = comp.threats[ti];
-    const idx = statuses.indexOf(t.status || 'Open');
-    t.status = statuses[(idx + 1) % 3];
-    save();
-    renderRegister();
-    renderStrideCats(ci); renderSidebar(); renderRiskSummary(); renderProgress(); renderHeatmap();
-  }
-
-  function deleteRegThreat(ci, ti) {
-    if (!confirm('Delete this threat?')) return;
-    M.components[ci].threats.splice(ti,1);
-    save();
-    renderRegister();
-    renderStrideCats(ci); renderSidebar(); renderRiskSummary(); renderProgress(); renderHeatmap();
-  }
-
-  function resetRegisterFilters() {
-    document.getElementById('reg-search').value = '';
-    document.getElementById('reg-risk').value = '';
-    document.getElementById('reg-comp').value = '';
-    renderRegister();
   }
 
   function renderHeatmap() {
@@ -1086,10 +883,112 @@
     doc.save(M.name.replace(/\s/g,'_')+'_report.pdf');
   }
 
-  // init
   renderSidebar();
+
+  // Register filter state
+  let regSortCol = 'risk';
+  let regSortDir = 'desc';
+
+  function renderRegister() {
+    const tbody = document.getElementById('register-tbody');
+    const compSel = document.getElementById('reg-comp');
+    if (!tbody) return;
+
+    // populate component filter if needed
+    if (compSel && compSel.options.length <= 1) {
+      const comps = new Set();
+      (models||[]).forEach(m => (m.components||[]).forEach(c => comps.add(c.name)));
+      Array.from(comps).sort().forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        compSel.appendChild(opt);
+      });
+    }
+
+    const q = (document.getElementById('reg-search')?.value || '').toLowerCase();
+    const riskF = document.getElementById('reg-risk')?.value || '';
+    const compF = document.getElementById('reg-comp')?.value || '';
+
+    let rows = [];
+    (models||[]).forEach((m, mi) => {
+      (m.components||[]).forEach((c, ci) => {
+        (c.threats||[]).forEach((t, ti) => {
+          const score = riskScore(t.likelihood||1, t.impact||1);
+          const risk = riskLevel(score);
+          if (q && !((t.desc||'').toLowerCase()+ (c.name||'').toLowerCase() + (t.category||'').toLowerCase()).includes(q)) return;
+          if (riskF && risk !== riskF) return;
+          if (compF && c.name !== compF) return;
+          rows.push({m, mi, c, ci, t, ti, score, risk, compIdx: ci, threatIdx: ti});
+        });
+      });
+    });
+
+    // sort
+    rows.sort((a,b) => {
+      let va, vb;
+      if (regSortCol === 'idx') { va = a.mi*1000+a.ci*100+a.ti; vb = b.mi*1000+b.ci*100+b.ti; }
+      else if (regSortCol === 'comp') { va = (a.c.name||'').toLowerCase(); vb = (b.c.name||'').toLowerCase(); }
+      else if (regSortCol === 'cat') { va = (a.t.category||'').toLowerCase(); vb = (b.t.category||'').toLowerCase(); }
+      else if (regSortCol === 'desc') { va = (a.t.desc||'').toLowerCase(); vb = (b.t.desc||'').toLowerCase(); }
+      else if (regSortCol === 'score') { va = a.score; vb = b.score; }
+      else if (regSortCol === 'risk') { const order={Critical:4,High:3,Medium:2,Low:1}; va=order[a.risk]||0; vb=order[b.risk]||0; }
+      else if (regSortCol === 'treat') { va=(a.t.treatment||'').toLowerCase(); vb=(b.t.treatment||'').toLowerCase(); }
+      else if (regSortCol === 'status') { va=(a.t.status||'Open').toLowerCase(); vb=(b.t.status||'Open').toLowerCase(); }
+      else { va = a.score; vb = b.score; }
+      if (va < vb) return regSortDir === 'asc' ? -1 : 1;
+      if (va > vb) return regSortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    tbody.innerHTML = rows.map(t => {
+      const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
+      const statusColor = t.t.status === 'Done' ? '#34d399' : t.t.status === 'In Progress' ? '#fbbf24' : '#f87171';
+      return `<tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+        <td style="padding:10px 12px;color:#64748b">${t.mi+1}.${t.ci+1}.${t.ti+1}</td>
+        <td style="padding:10px 12px">${t.c.name}</td>
+        <td style="padding:10px 12px"><span class="stride-${(t.t.category||'S')[0]} px-2 py-0.5 rounded text-xs font-semibold">${t.t.category||''}</span></td>
+        <td style="padding:10px 12px">${t.t.desc}</td>
+        <td style="padding:10px 12px;text-align:center"><span class="${riskCls(t.score)}">${t.t.likelihood} × ${t.t.impact} = ${t.score}</span></td>
+        <td style="padding:10px 12px;text-align:center"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${riskBadgeCls(t.score)}">${t.risk}</span></td>
+        <td style="padding:10px 12px;text-align:center">${t.t.treatment ? `<span class="treat-pill ${treatCls[t.t.treatment]||''}">${t.t.treatment}</span>` : ''}</td>
+        <td style="padding:10px 12px;text-align:center"><span onclick="cycleRegStatus(${t.compIdx},${t.threatIdx});event.stopImmediatePropagation()" class="px-2.5 py-0.5 rounded-full cursor-pointer text-xs" style="background:rgba(255,255,255,0.06);color:${statusColor};border:1px solid ${statusColor}30">${t.t.status||'Open'}</span></td>
+        <td style="padding:10px 12px"><button onclick="deleteRegThreat(${t.compIdx},${t.threatIdx});event.stopImmediatePropagation()" style="width:22px;height:22px;border-radius:9999px;background:rgba(255,77,79,0.1);color:#ff4d4f;border:none;cursor:pointer;font-size:14px">×</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function sortRegister(col) {
+    if (regSortCol === col) regSortDir = regSortDir === 'asc' ? 'desc' : 'asc';
+    else { regSortCol = col; regSortDir = col === 'risk' || col === 'score' ? 'desc' : 'asc'; }
+    renderRegister();
+  }
+
+  function cycleRegStatus(ci, ti) {
+    const m = models[0];
+    if (!m || !m.components[ci] || !m.components[ci].threats[ti]) return;
+    const st = m.components[ci].threats[ti].status || 'Open';
+    m.components[ci].threats[ti].status = st === 'Open' ? 'In Progress' : st === 'In Progress' ? 'Done' : 'Open';
+    save();
+    renderRegister();
+  }
+
+  function deleteRegThreat(ci, ti) {
+    if (!confirm('Delete this threat?')) return;
+    const m = models[0];
+    if (!m || !m.components[ci]) return;
+    m.components[ci].threats.splice(ti, 1);
+    save();
+    renderRegister();
+    if (typeof renderModel === 'function') renderModel();
+  }
+
+  function resetRegisterFilters() {
+    const s = document.getElementById('reg-search'); if (s) s.value = '';
+    const r = document.getElementById('reg-risk'); if (r) r.value = '';
+    const c = document.getElementById('reg-comp'); if (c) c.value = '';
+    renderRegister();
+  }
   setPage('dashboard');
-  updateNavState();
 </script>
 </body>
 </html>
