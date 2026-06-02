@@ -125,8 +125,8 @@
   </div>
   <button onclick="setPage('dashboard')" id="nav-dashboard" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">Dashboard</button>
   <button onclick="setPage('howto')" id="nav-howto" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">How to Use</button>
-  <button onclick="setPage('register')" id="nav-register" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium hidden">Register</button>
-  <button onclick="setPage('priority')" id="nav-priority" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium hidden">Priority</button>
+  <button onclick="setPage('register')" id="nav-register" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">Register</button>
+  <button onclick="setPage('priority')" id="nav-priority" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">Priority</button>
 </nav>
 
 <div class="pt-12 flex" style="min-height:100vh">
@@ -987,14 +987,23 @@
   }
 
   function exportCSV() {
-    if (!M) return;
-    const rows=[['Component','Type','STRIDE Category','Threat','Likelihood','Impact','Risk Score','Risk Level','Treatment','Mitigation','Status','Date']];
-    M.components.forEach(c=>(c.threats||[]).forEach(t=>{
+    const src = M || (models.length ? models[0] : null);
+    if (!src) { alert('No model to export.'); return; }
+    const rows=[['Model','Component','Type','Category','Threat','Likelihood','Impact','Risk Score','Risk Level','Treatment','Mitigation','Status','Date']];
+    src.components.forEach(c=>(c.threats||[]).forEach(t=>{
       const s=riskScore(t.likelihood||1,t.impact||1);
-      rows.push([c.name,c.type,t.category,t.desc,t.likelihood,t.impact,s,riskLevel(s),t.treatment||'',t.mitigation||'',t.status||'Open',t.createdAt?t.createdAt.split('T')[0]:'']);
+      rows.push([src.name,c.name,c.type||'',t.category||'',t.desc||'',t.likelihood||1,t.impact||1,s,riskLevel(s),t.treatment||'',t.mitigation||'',t.status||'Open',t.createdAt?t.createdAt.split('T')[0]:'']);
     }));
-    const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=M.name.replace(/\s/g,'_')+'.csv'; a.click();
+    if (rows.length===1) { alert('No threats recorded yet.'); return; }
+    // UTF-8 BOM ensures Excel opens it correctly without encoding issues
+    const BOM = '\uFEFF';
+    const csv = BOM + rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = src.name.replace(/\s/g,'_')+'_threats.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
 
   function exportPDF() {
@@ -1024,12 +1033,19 @@
   const regSort = { col: 'risk', dir: 'desc' };
 
   function renderRegister() {
-    if (!M) return;
     const wrap = document.getElementById('reg-table-wrap');
+    // Use active model if available, else aggregate all models
+    const sourceModels = M ? [M] : models;
+    if (!sourceModels.length) {
+      wrap.innerHTML = '<div style="padding:40px 20px;text-align:center;color:#64748b">No models yet. Create a threat model to get started.</div>';
+      return;
+    }
     const allThreats = [];
-    M.components.forEach((c,ci) => {
-      (c.threats||[]).forEach((t,ti) => {
-        allThreats.push({...t, compName: c.name, compIdx: ci, threatIdx: ti});
+    sourceModels.forEach(mdl => {
+      (mdl.components||[]).forEach((c,ci) => {
+        (c.threats||[]).forEach((t,ti) => {
+          allThreats.push({...t, compName: c.name, compIdx: ci, threatIdx: ti, modelName: mdl.name});
+        });
       });
     });
 
@@ -1165,12 +1181,18 @@
   }
 
   function renderPriority() {
-    if (!M) return;
     const container = document.getElementById('priority-content');
+    const sourceModels = M ? [M] : models;
+    if (!sourceModels.length) {
+      container.innerHTML = '<div style="padding:40px 20px;text-align:center;color:#64748b">No models yet. Create a threat model to get started.</div>';
+      return;
+    }
     const all = [];
-    M.components.forEach((c,ci) => {
-      (c.threats||[]).forEach((t,ti) => {
-        all.push({...t, compName:c.name, compIdx:ci, threatIdx:ti, score: riskScore(t.likelihood||1,t.impact||1)});
+    sourceModels.forEach(mdl => {
+      (mdl.components||[]).forEach((c,ci) => {
+        (c.threats||[]).forEach((t,ti) => {
+          all.push({...t, compName:c.name, compIdx:ci, threatIdx:ti, score: riskScore(t.likelihood||1,t.impact||1), modelName: mdl.name});
+        });
       });
     });
     all.sort((a,b)=>b.score-a.score);
