@@ -313,6 +313,35 @@
   </div>
 </div>
 
+<div id="page-register" class="hidden p-8" style="display:none">
+  <div class="mb-6">
+    <h1 class="text-2xl font-semibold tracking-tight" style="color:#e2e8f0">Threat Register</h1>
+    <p class="text-sm mt-1" style="color:#64748b">All recorded threats across the model — sortable and filterable</p>
+  </div>
+  <div class="sf-card p-4 mb-4">
+    <div class="flex flex-wrap gap-3 items-center">
+      <div class="flex-1 min-w-[240px]">
+        <input id="reg-search" type="text" placeholder="Search threats..." class="sf-input" oninput="renderRegister()">
+      </div>
+      <select id="reg-risk" class="sf-input" style="max-width:160px" onchange="renderRegister()">
+        <option value="">All Risk Levels</option>
+        <option value="Critical">Critical</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+      <select id="reg-comp" class="sf-input" style="max-width:200px" onchange="renderRegister()">
+        <option value="">All Components</option>
+      </select>
+      <button onclick="resetRegisterFilters()" class="sf-btn-secondary text-sm px-4 py-2">Reset</button>
+    </div>
+  </div>
+  <div class="sf-card p-4 mb-4" id="reg-summary"></div>
+  <div class="sf-card overflow-hidden">
+    <div id="reg-table-wrap" style="overflow-x:auto"></div>
+  </div>
+</div>
+
 </main>
 </div>
 
@@ -592,6 +621,9 @@
   function loadModel(m) {
     M = m;
     renderSidebar();
+    // Show Register tab whenever a model is active
+    var regBtn = document.getElementById('nav-register');
+    if (regBtn) { regBtn.classList.remove('hidden'); }
     renderRiskSummary(); renderProgress(); renderHeatmap();
     if (m.components.length === 1) {
       CI = 0;
@@ -999,16 +1031,16 @@
 
     tbody.innerHTML = rows.map(t => {
       const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
-      const statusColor = t.t.status === 'Done' ? '#34d399' : t.t.status === 'In Progress' ? '#fbbf24' : '#f87171';
+      const statusColor = t.status === 'Done' ? '#34d399' : t.status === 'In Progress' ? '#fbbf24' : '#f87171';
       return `<tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
         <td style="padding:10px 12px;color:#64748b">${t.mi+1}.${t.ci+1}.${t.ti+1}</td>
         <td style="padding:10px 12px">${t.c.name}</td>
-        <td style="padding:10px 12px"><span class="stride-${(t.t.category||'S')[0]} px-2 py-0.5 rounded text-xs font-semibold">${t.t.category||''}</span></td>
-        <td style="padding:10px 12px">${t.t.desc}</td>
-        <td style="padding:10px 12px;text-align:center"><span class="${riskCls(t.score)}">${t.t.likelihood} × ${t.t.impact} = ${t.score}</span></td>
+        <td style="padding:10px 12px"><span class="stride-${(t.category||'S')[0]} px-2 py-0.5 rounded text-xs font-semibold">${t.category||''}</span></td>
+        <td style="padding:10px 12px">${t.desc}</td>
+        <td style="padding:10px 12px;text-align:center"><span class="${riskCls(t.score)}">${t.likelihood} × ${t.impact} = ${t.score}</span></td>
         <td style="padding:10px 12px;text-align:center"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${riskBadgeCls(t.score)}">${t.risk}</span></td>
-        <td style="padding:10px 12px;text-align:center">${t.t.treatment ? `<span class="treat-pill ${treatCls[t.t.treatment]||''}">${t.t.treatment}</span>` : ''}</td>
-        <td style="padding:10px 12px;text-align:center"><span onclick="cycleRegStatus(${t.compIdx},${t.threatIdx});event.stopImmediatePropagation()" class="px-2.5 py-0.5 rounded-full cursor-pointer text-xs" style="background:rgba(255,255,255,0.06);color:${statusColor};border:1px solid ${statusColor}30">${t.t.status||'Open'}</span></td>
+        <td style="padding:10px 12px;text-align:center">${t.treatment ? `<span class="treat-pill ${treatCls[t.treatment]||''}">${t.treatment}</span>` : ''}</td>
+        <td style="padding:10px 12px;text-align:center"><span onclick="cycleRegStatus(${t.compIdx},${t.threatIdx});event.stopImmediatePropagation()" class="px-2.5 py-0.5 rounded-full cursor-pointer text-xs" style="background:rgba(255,255,255,0.06);color:${statusColor};border:1px solid ${statusColor}30">${t.status||'Open'}</span></td>
         <td style="padding:10px 12px"><button onclick="deleteRegThreat(${t.compIdx},${t.threatIdx});event.stopImmediatePropagation()" style="width:22px;height:22px;border-radius:9999px;background:rgba(255,77,79,0.1);color:#ff4d4f;border:none;cursor:pointer;font-size:14px">×</button></td>
       </tr>`;
     }).join('');
