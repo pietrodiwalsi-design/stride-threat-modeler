@@ -186,13 +186,13 @@
       <div class="flex items-center gap-2">
         <button onclick="addComponent()" class="sf-btn-secondary">+ Component</button>
         <button onclick="openHistory()" class="sf-btn-secondary text-sm px-3 py-1.5">History</button>
-        <div class="relative group">
-          <button class="sf-btn-primary flex items-center gap-1.5">Export <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg></button>
-          <div class="absolute right-0 mt-2 w-36 bg-[#0f172a] border border-white/10 rounded-xl shadow-xl hidden group-hover:block z-50 overflow-hidden py-1">
-            <button onclick="exportPDF()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">PDF Report</button>
-            <button onclick="exportCSV()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">CSV Export</button>
-            <button onclick="exportJSON()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">JSON Export</button>
-            <button onclick="exportJira()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">Jira Tickets</button>
+        <div class="relative" id="export-dropdown-wrap">
+          <button onclick="toggleExportMenu(event)" class="sf-btn-primary flex items-center gap-1.5">Export <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg></button>
+          <div id="export-menu" class="absolute right-0 mt-2 w-36 bg-[#0f172a] border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden py-1" style="display:none">
+            <button onclick="exportPDF();closeExportMenu()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">PDF Report</button>
+            <button onclick="exportCSV();closeExportMenu()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">CSV Export</button>
+            <button onclick="exportJSON();closeExportMenu()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">JSON Export</button>
+            <button onclick="exportJira();closeExportMenu()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">Jira Tickets</button>
           </div>
         </div>
       </div>
@@ -979,6 +979,20 @@
     html += '</div>';
     grid.innerHTML = html;
   }
+
+  function toggleExportMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('export-menu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  }
+  function closeExportMenu() {
+    const menu = document.getElementById('export-menu');
+    if (menu) menu.style.display = 'none';
+  }
+  document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('export-dropdown-wrap');
+    if (wrap && !wrap.contains(e.target)) closeExportMenu();
+  });
 
   function exportJSON() {
     if (!M) return;
