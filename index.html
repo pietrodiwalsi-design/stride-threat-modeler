@@ -974,107 +974,121 @@
 
   renderSidebar();
 
-  // Register filter state
-  let regSortCol = 'risk';
-  let regSortDir = 'desc';
+  // Register sort state
+  const regSort = { col: 'risk', dir: 'desc' };
 
   function renderRegister() {
-    const tbody = document.getElementById('register-tbody');
-    const compSel = document.getElementById('reg-comp');
-    if (!tbody) return;
-
-    // populate component filter if needed
-    if (compSel && compSel.options.length <= 1) {
-      const comps = new Set();
-      (models||[]).forEach(m => (m.components||[]).forEach(c => comps.add(c.name)));
-      Array.from(comps).sort().forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c; opt.textContent = c;
-        compSel.appendChild(opt);
+    if (!M) return;
+    const wrap = document.getElementById('reg-table-wrap');
+    const allThreats = [];
+    M.components.forEach((c,ci) => {
+      (c.threats||[]).forEach((t,ti) => {
+        allThreats.push({...t, compName: c.name, compIdx: ci, threatIdx: ti});
       });
+    });
+
+    const q = (document.getElementById('reg-search')||{value:''}).value.toLowerCase();
+    const riskF = (document.getElementById('reg-risk')||{value:''}).value;
+    const compF = (document.getElementById('reg-comp')||{value:''}).value;
+
+    let filtered = allThreats.filter(t => {
+      const s = riskScore(t.likelihood||1,t.impact||1);
+      const lvl = riskLevel(s);
+      const matchQ = !q || (t.desc||'').toLowerCase().includes(q) || t.compName.toLowerCase().includes(q) || (t.category||'').toLowerCase().includes(q);
+      const matchR = !riskF || lvl === riskF;
+      const matchC = !compF || t.compName === compF;
+      return matchQ && matchR && matchC;
+    });
+
+    filtered.sort((a,b) => {
+      const sa = riskScore(a.likelihood||1,a.impact||1);
+      const sb = riskScore(b.likelihood||1,b.impact||1);
+      let va = sa, vb = sb;
+      if (regSort.col === 'comp') { va = a.compName; vb = b.compName; }
+      else if (regSort.col === 'cat') { va = a.category||''; vb = b.category||''; }
+      else if (regSort.col === 'status') { va = a.status||'Open'; vb = b.status||'Open'; }
+      else if (regSort.col === 'treat') { va = a.treatment||''; vb = b.treatment||''; }
+      const res = va > vb ? 1 : va < vb ? -1 : 0;
+      return regSort.dir === 'asc' ? res : -res;
+    });
+
+    const crit = filtered.filter(t=>riskLevel(riskScore(t.likelihood||1,t.impact||1))==='Critical').length;
+    const high = filtered.filter(t=>riskLevel(riskScore(t.likelihood||1,t.impact||1))==='High').length;
+    const open = filtered.filter(t=>(t.status||'Open')==='Open').length;
+    document.getElementById('reg-summary').innerHTML = `
+      <div style="display:flex;gap:24px;align-items:center">
+        <div><span style="font-size:11px;color:#64748b">TOTAL</span><div style="font-size:22px;font-weight:700;color:#e2e8f0">${filtered.length}</div></div>
+        <div><span style="font-size:11px;color:#64748b">CRITICAL</span><div style="font-size:22px;font-weight:700;color:#ff4d4f">${crit}</div></div>
+        <div><span style="font-size:11px;color:#64748b">HIGH</span><div style="font-size:22px;font-weight:700;color:#ff9500">${high}</div></div>
+        <div><span style="font-size:11px;color:#64748b">OPEN</span><div style="font-size:22px;font-weight:700;color:#e2e8f0">${open}</div></div>
+      </div>`;
+
+    const compSel = document.getElementById('reg-comp');
+    if (compSel && compSel.options.length <= 1) {
+      const names = [...new Set(M.components.map(c=>c.name))];
+      names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; compSel.appendChild(o); });
     }
 
-    const q = (document.getElementById('reg-search')?.value || '').toLowerCase();
-    const riskF = document.getElementById('reg-risk')?.value || '';
-    const compF = document.getElementById('reg-comp')?.value || '';
-
-    let rows = [];
-    (models||[]).forEach((m, mi) => {
-      (m.components||[]).forEach((c, ci) => {
-        (c.threats||[]).forEach((t, ti) => {
-          const score = riskScore(t.likelihood||1, t.impact||1);
-          const risk = riskLevel(score);
-          if (q && !((t.desc||'').toLowerCase()+ (c.name||'').toLowerCase() + (t.category||'').toLowerCase()).includes(q)) return;
-          if (riskF && risk !== riskF) return;
-          if (compF && c.name !== compF) return;
-          rows.push({m, mi, c, ci, t, ti, score, risk, compIdx: ci, threatIdx: ti});
-        });
-      });
-    });
-
-    // sort
-    rows.sort((a,b) => {
-      let va, vb;
-      if (regSortCol === 'idx') { va = a.mi*1000+a.ci*100+a.ti; vb = b.mi*1000+b.ci*100+b.ti; }
-      else if (regSortCol === 'comp') { va = (a.c.name||'').toLowerCase(); vb = (b.c.name||'').toLowerCase(); }
-      else if (regSortCol === 'cat') { va = (a.t.category||'').toLowerCase(); vb = (b.t.category||'').toLowerCase(); }
-      else if (regSortCol === 'desc') { va = (a.t.desc||'').toLowerCase(); vb = (b.t.desc||'').toLowerCase(); }
-      else if (regSortCol === 'score') { va = a.score; vb = b.score; }
-      else if (regSortCol === 'risk') { const order={Critical:4,High:3,Medium:2,Low:1}; va=order[a.risk]||0; vb=order[b.risk]||0; }
-      else if (regSortCol === 'treat') { va=(a.t.treatment||'').toLowerCase(); vb=(b.t.treatment||'').toLowerCase(); }
-      else if (regSortCol === 'status') { va=(a.t.status||'Open').toLowerCase(); vb=(b.t.status||'Open').toLowerCase(); }
-      else { va = a.score; vb = b.score; }
-      if (va < vb) return regSortDir === 'asc' ? -1 : 1;
-      if (va > vb) return regSortDir === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    tbody.innerHTML = rows.map(t => {
-      const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
-      const statusColor = t.status === 'Done' ? '#34d399' : t.status === 'In Progress' ? '#fbbf24' : '#f87171';
-      return `<tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
-        <td style="padding:10px 12px;color:#64748b">${t.mi+1}.${t.ci+1}.${t.ti+1}</td>
-        <td style="padding:10px 12px">${t.c.name}</td>
-        <td style="padding:10px 12px"><span class="stride-${(t.category||'S')[0]} px-2 py-0.5 rounded text-xs font-semibold">${t.category||''}</span></td>
-        <td style="padding:10px 12px">${t.desc}</td>
-        <td style="padding:10px 12px;text-align:center"><span class="${riskCls(t.score)}">${t.likelihood} × ${t.impact} = ${t.score}</span></td>
-        <td style="padding:10px 12px;text-align:center"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${riskBadgeCls(t.score)}">${t.risk}</span></td>
-        <td style="padding:10px 12px;text-align:center">${t.treatment ? `<span class="treat-pill ${treatCls[t.treatment]||''}">${t.treatment}</span>` : ''}</td>
+    const treatCls = {Mitigate:'treat-Mitigate',Transfer:'treat-Transfer',Accept:'treat-Accept',Eliminate:'treat-Eliminate'};
+    let html = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="background:#1e293b;border-bottom:1px solid rgba(255,255,255,0.1)">
+        <th onclick="sortRegister('idx')" style="padding:10px 12px;text-align:left;cursor:pointer;color:#94a3b8">#</th>
+        <th onclick="sortRegister('comp')" style="padding:10px 12px;text-align:left;cursor:pointer;color:#94a3b8">Component</th>
+        <th onclick="sortRegister('cat')" style="padding:10px 12px;text-align:left;cursor:pointer;color:#94a3b8">Category</th>
+        <th onclick="sortRegister('desc')" style="padding:10px 12px;text-align:left;cursor:pointer;color:#94a3b8">Threat</th>
+        <th onclick="sortRegister('score')" style="padding:10px 12px;text-align:center;cursor:pointer;color:#94a3b8">L × I = Score</th>
+        <th onclick="sortRegister('risk')" style="padding:10px 12px;text-align:center;cursor:pointer;color:#94a3b8">Risk</th>
+        <th onclick="sortRegister('treat')" style="padding:10px 12px;text-align:center;cursor:pointer;color:#94a3b8">Treatment</th>
+        <th onclick="sortRegister('status')" style="padding:10px 12px;text-align:center;cursor:pointer;color:#94a3b8">Status</th>
+        <th style="padding:10px 12px;width:40px"></th>
+      </tr></thead><tbody>`;
+    filtered.forEach((t,i) => {
+      const s = riskScore(t.likelihood||1,t.impact||1);
+      const lvl = riskLevel(s);
+      const statusColor = (t.status||'Open')==='Open'?'#ff4d4f':(t.status||'Open')==='In Progress'?'#ff9500':'#34d399';
+      const rowBorder = lvl==='Critical'?'#ff4d4f':lvl==='High'?'#ff9500':lvl==='Medium'?'#fbbf24':'#34d399';
+      const catLetter = (t.category||'S').split(' - ')[0].trim() || 'S';
+      html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.08);background:${i%2?'#0f172a':'#111827'}">
+        <td style="padding:10px 12px;color:#64748b">${i+1}</td>
+        <td style="padding:10px 12px;font-weight:500;color:#e2e8f0">${t.compName}</td>
+        <td style="padding:10px 12px"><span class="stride-${catLetter} px-2 py-0.5 rounded text-xs font-bold">${catLetter}</span></td>
+        <td style="padding:10px 12px;color:#e2e8f0">${t.desc}</td>
+        <td style="padding:10px 12px;text-align:center"><span class="text-xs px-2 py-0.5 rounded-full font-semibold ${riskBadgeCls(s)}">L${t.likelihood||1}×I${t.impact||1}=${s}</span></td>
+        <td style="padding:10px 12px;text-align:center"><span class="risk-badge-${lvl.toLowerCase()} px-2 py-0.5 rounded-full text-xs font-semibold" style="border-left:3px solid ${rowBorder}">${lvl}</span></td>
+        <td style="padding:10px 12px;text-align:center">${t.treatment?`<span class="treat-pill ${treatCls[t.treatment]||''}">${t.treatment}</span>`:''}</td>
         <td style="padding:10px 12px;text-align:center"><span onclick="cycleRegStatus(${t.compIdx},${t.threatIdx});event.stopImmediatePropagation()" class="px-2.5 py-0.5 rounded-full cursor-pointer text-xs" style="background:rgba(255,255,255,0.06);color:${statusColor};border:1px solid ${statusColor}30">${t.status||'Open'}</span></td>
         <td style="padding:10px 12px"><button onclick="deleteRegThreat(${t.compIdx},${t.threatIdx});event.stopImmediatePropagation()" style="width:22px;height:22px;border-radius:9999px;background:rgba(255,77,79,0.1);color:#ff4d4f;border:none;cursor:pointer;font-size:14px">×</button></td>
       </tr>`;
-    }).join('');
+    });
+    if (!filtered.length) html += `<tr><td colspan="9" style="padding:40px 20px;text-align:center;color:#64748b">No threats match the current filter.</td></tr>`;
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
   }
 
   function sortRegister(col) {
-    if (regSortCol === col) regSortDir = regSortDir === 'asc' ? 'desc' : 'asc';
-    else { regSortCol = col; regSortDir = col === 'risk' || col === 'score' ? 'desc' : 'asc'; }
+    if (regSort.col === col) regSort.dir = regSort.dir === 'asc' ? 'desc' : 'asc';
+    else { regSort.col = col; regSort.dir = col === 'score' || col === 'risk' ? 'desc' : 'asc'; }
     renderRegister();
   }
 
   function cycleRegStatus(ci, ti) {
-    const m = models[0];
-    if (!m || !m.components[ci] || !m.components[ci].threats[ti]) return;
-    const st = m.components[ci].threats[ti].status || 'Open';
-    m.components[ci].threats[ti].status = st === 'Open' ? 'In Progress' : st === 'In Progress' ? 'Done' : 'Open';
-    save();
-    renderRegister();
+    if (!M || !M.components[ci] || !M.components[ci].threats[ti]) return;
+    const st = M.components[ci].threats[ti].status || 'Open';
+    M.components[ci].threats[ti].status = st === 'Open' ? 'In Progress' : st === 'In Progress' ? 'Done' : 'Open';
+    save(); renderRegister();
   }
 
   function deleteRegThreat(ci, ti) {
     if (!confirm('Delete this threat?')) return;
-    const m = models[0];
-    if (!m || !m.components[ci]) return;
-    m.components[ci].threats.splice(ti, 1);
-    save();
-    renderRegister();
-    if (typeof renderModel === 'function') renderModel();
+    if (!M || !M.components[ci]) return;
+    M.components[ci].threats.splice(ti, 1);
+    save(); renderRegister(); renderRiskSummary(); renderProgress();
   }
 
   function resetRegisterFilters() {
     const s = document.getElementById('reg-search'); if (s) s.value = '';
     const r = document.getElementById('reg-risk'); if (r) r.value = '';
-    const c = document.getElementById('reg-comp'); if (c) c.value = '';
+    const c = document.getElementById('reg-comp'); if (c) c.value = '', c.options.length = 1;
     renderRegister();
   }
   setPage('dashboard');
