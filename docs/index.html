@@ -318,7 +318,7 @@
 
 <div id="modal-model" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop" style="display:none">
   <div class="rounded-2xl p-6 w-full max-w-md shadow-2xl" style="background:#0f172a;border:1px solid rgba(34,211,238,0.2)">
-    <h3 class="text-lg font-semibold mb-4" style="color:#e2e8f0">New Threat Model</h3>
+    <h3 class="text-lg font-semibold mb-4" id="modal-model-title" style="color:#e2e8f0">New Threat Model</h3>
     <div class="space-y-4">
       <div><label class="sf-label">Model name *</label><input id="inp-name" type="text" placeholder="e.g. Payment API, Customer Portal, Auth Service" class="sf-input" autocomplete="off"></div>
       <div><label class="sf-label">Assessor</label><input id="inp-assessor" type="text" placeholder="Your name" class="sf-input" autocomplete="off"></div>
@@ -343,7 +343,7 @@
     </div>
     <div class="flex gap-3 mt-5">
       <button onclick="closeModal('modal-model')" class="sf-btn-secondary flex-1">Cancel</button>
-      <button onclick="createModel()" class="sf-btn-primary flex-1">Create Model</button>
+      <button onclick="saveModel()" id="btn-save-model" class="sf-btn-primary flex-1">Create Model</button>
     </div>
   </div>
 </div>
@@ -515,9 +515,63 @@
     el.style.display = 'none';
   }
 
-  function openNewModel() { openModal('modal-model'); }
+  let _editModelId = null;
 
-  function createModel() {
+  function openNewModel() {
+    _editModelId = null;
+    document.getElementById('modal-model-title').textContent = 'New Threat Model';
+    document.getElementById('btn-save-model').textContent = 'Create Model';
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-assessor').value = '';
+    selectMethod('STRIDE');
+    openModal('modal-model');
+  }
+
+  function openEditModel(id, e) {
+    e.stopPropagation();
+    const m = models.find(x => x.id === id);
+    if (!m) return;
+    _editModelId = id;
+    document.getElementById('modal-model-title').textContent = 'Edit Threat Model';
+    document.getElementById('btn-save-model').textContent = 'Save Changes';
+    document.getElementById('inp-name').value = m.name;
+    document.getElementById('inp-assessor').value = m.assessor || '';
+    selectMethod(m.methodology || 'STRIDE');
+    openModal('modal-model');
+  }
+
+  function deleteModel(id, e) {
+    e.stopPropagation();
+    if (!confirm('Delete this threat model and all its threats? This cannot be undone.')) return;
+    models = models.filter(x => x.id !== id);
+    if (M && M.id === id) { M = models[0] || null; }
+    save(); renderSidebar();
+    if (M) { loadModel(M); } else { showView('welcome'); }
+  }
+
+  function saveModel() {
+    var name = document.getElementById('inp-name').value.trim();
+    if (!name) { document.getElementById('inp-name').focus(); return; }
+    var methodology = document.getElementById('inp-method').value || 'STRIDE';
+    var assessor = document.getElementById('inp-assessor').value.trim();
+    if (_editModelId) {
+      const idx = models.findIndex(x => x.id === _editModelId);
+      if (idx !== -1) {
+        models[idx].name = name;
+        models[idx].assessor = assessor;
+        models[idx].methodology = methodology;
+        if (M && M.id === _editModelId) {
+          M.name = name; M.assessor = assessor; M.methodology = methodology;
+          document.getElementById('stride-title').textContent = name;
+        }
+        save(); renderSidebar(); closeModal('modal-model');
+      }
+    } else {
+      createModel();
+    }
+  }
+
+  function createModel() { // called by saveModel() for new models only
     var name = document.getElementById('inp-name').value.trim();
     if (!name) { document.getElementById('inp-name').focus(); return; }
     var methodology = document.getElementById('inp-method').value || 'STRIDE';
@@ -567,11 +621,14 @@
       el.className = 'sf-sidebar-item' + (M && M.id===m.id ? ' active' : '');
       el.style.cssText = 'padding:10px 12px;border-radius:10px;margin-bottom:2px;display:flex;flex-direction:column;gap:4px;cursor:pointer';
       el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">'
-        + '<span style="font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">' + m.name + '</span>'
-        + '<span style="font-size:11px;color:#475569;flex-shrink:0;margin-left:6px">' + total + ' threat' + (total!==1?'s':'') + '</span>'
-        + '</div>'
-        + '<div>'
+        + '<span style="font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">' + m.name + '</span>'
+        + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
+        + '<button onclick="openEditModel(' + m.id + ',event)" title="Edit" style="width:20px;height:20px;border-radius:6px;background:rgba(34,211,238,0.1);color:#22d3ee;border:none;cursor:pointer;font-size:12px;line-height:1">✎</button>'
+        + '<button onclick="deleteModel(' + m.id + ',event)" title="Delete" style="width:20px;height:20px;border-radius:6px;background:rgba(255,77,79,0.1);color:#ff4d4f;border:none;cursor:pointer;font-size:14px;line-height:1">×</button>'
+        + '</div></div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center">'
         + '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:980px" class="mb-' + method + '">' + method + '</span>'
+        + '<span style="font-size:11px;color:#475569">' + total + ' threat' + (total!==1?'s':'') + '</span>'
         + '</div>';
       el.onclick = function() { loadModel(m); };
       c.appendChild(el);
