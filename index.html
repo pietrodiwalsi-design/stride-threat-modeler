@@ -126,6 +126,7 @@
   <button onclick="setPage('dashboard')" id="nav-dashboard" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">Dashboard</button>
   <button onclick="setPage('howto')" id="nav-howto" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium">How to Use</button>
   <button onclick="setPage('register')" id="nav-register" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium hidden">Register</button>
+  <button onclick="setPage('priority')" id="nav-priority" class="nav-btn text-sm px-3 py-1 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-black/5 transition font-medium hidden">Priority</button>
 </nav>
 
 <div class="pt-12 flex" style="min-height:100vh">
@@ -184,12 +185,14 @@
       </div>
       <div class="flex items-center gap-2">
         <button onclick="addComponent()" class="sf-btn-secondary">+ Component</button>
+        <button onclick="openHistory()" class="sf-btn-secondary text-sm px-3 py-1.5">History</button>
         <div class="relative group">
           <button class="sf-btn-primary flex items-center gap-1.5">Export <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg></button>
           <div class="absolute right-0 mt-2 w-36 bg-[#0f172a] border border-white/10 rounded-xl shadow-xl hidden group-hover:block z-50 overflow-hidden py-1">
             <button onclick="exportPDF()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">PDF Report</button>
             <button onclick="exportCSV()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">CSV Export</button>
             <button onclick="exportJSON()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">JSON Export</button>
+            <button onclick="exportJira()" class="w-full text-left px-4 py-2 text-sm hover:bg-white/5 text-gray-200">Jira Tickets</button>
           </div>
         </div>
       </div>
@@ -342,6 +345,14 @@
   </div>
 </div>
 
+<div id="page-priority" class="hidden p-8" style="display:none">
+  <div class="mb-6">
+    <h1 class="text-2xl font-semibold tracking-tight" style="color:#e2e8f0">Risk Prioritization</h1>
+    <p class="text-sm mt-1" style="color:#64748b">Threats ranked by risk score (Likelihood × Impact)</p>
+  </div>
+  <div id="priority-content"></div>
+</div>
+
 </main>
 </div>
 
@@ -395,6 +406,19 @@
     <div class="flex gap-3 mt-5">
       <button onclick="closeModal('modal-comp')" class="sf-btn-secondary flex-1">Cancel</button>
       <button onclick="saveComponent()" class="sf-btn-primary flex-1">Add Component</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-history" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop" style="display:none">
+  <div class="rounded-2xl p-6 w-full max-w-2xl shadow-2xl" style="background:#0f172a;border:1px solid rgba(34,211,238,0.2);max-height:80vh;overflow:auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold" style="color:#e2e8f0">Model History</h3>
+      <button onclick="closeModal('modal-history')" class="text-gray-400 hover:text-white">✕</button>
+    </div>
+    <div id="history-list"></div>
+    <div class="mt-4 flex justify-end">
+      <button onclick="closeModal('modal-history')" class="sf-btn-secondary">Close</button>
     </div>
   </div>
 </div>
@@ -511,9 +535,17 @@
   function riskCls(s) { return s>=17?'risk-critical':s>=10?'risk-high':s>=5?'risk-medium':'risk-low'; }
   function riskBadgeCls(s) { return `risk-badge-${riskLevel(s).toLowerCase()}`; }
 
-  function save() { localStorage.setItem('stride-v3', JSON.stringify(models)); }
+  function save() {
+    if (M) {
+      if (!M.versions) M.versions = [];
+      const snap = { ts: Date.now(), label: 'Auto-save', snapshot: JSON.stringify(M) };
+      M.versions.unshift(snap);
+      if (M.versions.length > 20) M.versions.length = 20;
+    }
+    localStorage.setItem('stride-v3', JSON.stringify(models));
+  }
   function setPage(p) {
-    ['dashboard','howto','register'].forEach(function(n) {
+    ['dashboard','howto','register','priority'].forEach(function(n) {
       var el = document.getElementById('page-'+n);
       if (n === p) { el.classList.remove('hidden'); el.style.display = ''; }
       else { el.classList.add('hidden'); el.style.display = 'none'; }
@@ -522,6 +554,7 @@
     var btn = document.getElementById('nav-'+p);
     if (btn) { btn.style.color='#22d3ee'; btn.style.fontWeight='600'; }
     if (p === 'register') renderRegister();
+    if (p === 'priority') renderPriority();
   }
   function showView(v) {
     ['welcome','model','stride'].forEach(function(n) {
@@ -621,9 +654,11 @@
   function loadModel(m) {
     M = m;
     renderSidebar();
-    // Show Register tab whenever a model is active
+    // Show Register and Priority tabs whenever a model is active
     var regBtn = document.getElementById('nav-register');
     if (regBtn) { regBtn.classList.remove('hidden'); }
+    var priBtn = document.getElementById('nav-priority');
+    if (priBtn) { priBtn.classList.remove('hidden'); }
     renderRiskSummary(); renderProgress(); renderHeatmap();
     if (m.components.length === 1) {
       CI = 0;
@@ -1091,6 +1126,121 @@
     const c = document.getElementById('reg-comp'); if (c) c.value = '', c.options.length = 1;
     renderRegister();
   }
+
+  function exportJira() {
+    if (!M) return;
+    const rows = [['Summary','Issue Type','Priority','Labels','Description','Acceptance Criteria']];
+    M.components.forEach(c => {
+      (c.threats||[]).forEach(t => {
+        const score = riskScore(t.likelihood||1, t.impact||1);
+        const lvl = riskLevel(score);
+        const prio = lvl==='Critical'?'Highest':lvl==='High'?'High':lvl==='Medium'?'Medium':'Low';
+        const catLetter = (t.category||'S').split(' - ')[0].trim();
+        const compSlug = c.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+        const labels = ['threat-model', (M.methodology||'STRIDE').toLowerCase(), compSlug, catLetter].join(',');
+        const summary = '[THREAT] ' + t.desc.substring(0,80);
+        const desc = `Component: ${c.name} (${c.type})\nCategory: ${t.category}\n\n${t.desc}\n\nMitigation: ${t.mitigation||'N/A'}`;
+        const ac = `Verify ${t.treatment||'Mitigate'} implemented. Risk score: ${t.likelihood||1}×${t.impact||1}=${score}. Status: ${t.status||'Open'}`;
+        rows.push([summary, 'Security', prio, labels, desc, ac]);
+      });
+    });
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (M.name||'model').replace(/\s/g,'_') + '_jira_tickets.csv';
+    a.click();
+  }
+
+  function renderPriority() {
+    if (!M) return;
+    const container = document.getElementById('priority-content');
+    const all = [];
+    M.components.forEach((c,ci) => {
+      (c.threats||[]).forEach((t,ti) => {
+        all.push({...t, compName:c.name, compIdx:ci, threatIdx:ti, score: riskScore(t.likelihood||1,t.impact||1)});
+      });
+    });
+    all.sort((a,b)=>b.score-a.score);
+
+    const groups = {
+      critical: all.filter(t=>t.score>=17),
+      high: all.filter(t=>t.score>=10&&t.score<=16),
+      medium: all.filter(t=>t.score>=5&&t.score<=9),
+      low: all.filter(t=>t.score<5)
+    };
+
+    let html = '';
+    const swim = [
+      {key:'critical', title:'🔴 CRITICAL', cls:'risk-badge-critical', min:17},
+      {key:'high', title:'🟠 HIGH', cls:'risk-badge-high', min:10},
+      {key:'medium', title:'🟡 MEDIUM', cls:'risk-badge-medium', min:5},
+      {key:'low', title:'🟢 LOW', cls:'risk-badge-low', min:0}
+    ];
+    swim.forEach(g => {
+      const items = groups[g.key];
+      html += `<div class="sf-card p-4 mb-4"><div class="flex items-center gap-3 mb-3"><span class="text-lg">${g.title}</span><span class="text-xs px-2 py-0.5 rounded-full ${g.cls}">${items.length} threats</span></div>`;
+      if (!items.length) { html += `<div class="text-sm text-gray-500 px-2">No threats in this band.</div>`; }
+      else {
+        items.forEach((t,i) => {
+          const catLetter = (t.category||'S').split(' - ')[0].trim();
+          html += `<div class="flex items-center justify-between px-3 py-2 border-t border-white/10 text-sm">
+            <div class="flex items-center gap-3 flex-1">
+              <span class="text-gray-500 w-6">#${i+1}</span>
+              <span class="font-medium">${t.compName}</span>
+              <span class="stride-${catLetter} px-1.5 py-0.5 rounded text-xs font-bold">${catLetter}</span>
+              <span class="flex-1 truncate">${t.desc}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-0.5 rounded-full font-semibold ${riskBadgeCls(t.score)}">L${t.likelihood}×I${t.impact}=${t.score}</span>
+              ${t.treatment?`<span class="treat-pill treat-${t.treatment}">${t.treatment}</span>`:''}
+              <button onclick="openThreatModal(${t.compIdx},'${t.category.replace(/'/g,"\'")}', '${t.desc.replace(/'/g,"\'")}')" class="text-xs px-3 py-1 rounded border border-cyan-400/30 hover:bg-cyan-400/10">Edit</button>
+            </div>
+          </div>`;
+        });
+      }
+      html += `</div>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function openHistory() {
+    if (!M || !M.versions || !M.versions.length) {
+      alert('No history yet. Save the model to create snapshots.');
+      return;
+    }
+    const list = document.getElementById('history-list');
+    let h = '';
+    M.versions.forEach((v,i) => {
+      let snap;
+      try { snap = JSON.parse(v.snapshot); } catch(e){ snap = null; }
+      const threatCount = snap ? snap.components.reduce((s,c)=>s+(c.threats||[]).length,0) : '?';
+      const date = new Date(v.ts).toLocaleString();
+      h += `<div class="flex items-center justify-between py-2 border-b border-white/10">
+        <div>
+          <div class="text-sm font-medium">${date}</div>
+          <div class="text-xs text-gray-500">${v.label} · ${threatCount} threats</div>
+        </div>
+        <button onclick="restoreVersion(${i})" class="text-xs px-3 py-1 rounded border border-cyan-400/30 hover:bg-cyan-400/10">Restore</button>
+      </div>`;
+    });
+    list.innerHTML = h;
+    openModal('modal-history');
+  }
+
+  function restoreVersion(idx) {
+    if (!M || !M.versions || !M.versions[idx]) return;
+    if (!confirm('Restore this version? Current changes will be lost.')) return;
+    try {
+      const snap = JSON.parse(M.versions[idx].snapshot);
+      Object.assign(M, snap);
+      save();
+      closeModal('modal-history');
+      loadModel(M);
+      alert('Version restored.');
+    } catch(e) { alert('Failed to restore snapshot'); }
+  }
+
   setPage('dashboard');
 </script>
 </body>
