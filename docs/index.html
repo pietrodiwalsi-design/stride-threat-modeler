@@ -49,6 +49,17 @@
   .stride-D { background: rgba(22,163,74,0.15); color: #4ade80; border: 1px solid rgba(22,163,74,0.3); }
   .stride-E { background: rgba(219,39,119,0.15); color: #f472b6; border: 1px solid rgba(219,39,119,0.3); }
 
+  .asi-01 { background: rgba(190,24,93,0.15);  color: #f472b6; border: 1px solid rgba(190,24,93,0.3); }
+  .asi-02 { background: rgba(220,38,38,0.15);  color: #f87171; border: 1px solid rgba(220,38,38,0.3); }
+  .asi-03 { background: rgba(234,88,12,0.15);  color: #fb923c; border: 1px solid rgba(234,88,12,0.3); }
+  .asi-04 { background: rgba(161,98,7,0.15);   color: #eab308; border: 1px solid rgba(161,98,7,0.3); }
+  .asi-05 { background: rgba(22,163,74,0.15);  color: #4ade80; border: 1px solid rgba(22,163,74,0.3); }
+  .asi-06 { background: rgba(13,148,136,0.15); color: #2dd4bf; border: 1px solid rgba(13,148,136,0.3); }
+  .asi-07 { background: rgba(37,99,235,0.15);  color: #60a5fa; border: 1px solid rgba(37,99,235,0.3); }
+  .asi-08 { background: rgba(79,70,229,0.15);  color: #818cf8; border: 1px solid rgba(79,70,229,0.3); }
+  .asi-09 { background: rgba(109,40,217,0.15); color: #a78bfa; border: 1px solid rgba(109,40,217,0.3); }
+  .asi-10 { background: rgba(157,23,77,0.15);  color: #f472b6; border: 1px solid rgba(157,23,77,0.3); }
+
   .treat-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 980px; }
   .treat-Mitigate  { background: rgba(34,211,238,0.15); color: #22d3ee; }
   .treat-Transfer  { background: rgba(167,139,250,0.15); color: #a78bfa; }
@@ -72,6 +83,7 @@
   .mb-STRIDE  { background: rgba(34,211,238,0.12); color: #22d3ee; border: 1px solid rgba(34,211,238,0.25); }
   .mb-LINDDUN { background: rgba(167,139,250,0.12); color: #a78bfa; border: 1px solid rgba(167,139,250,0.25); }
   .mb-Hybrid  { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+  .mb-Agentic { background: rgba(244,114,182,0.12); color: #f472b6; border: 1px solid rgba(244,114,182,0.25); }
   .treatment-btn { flex: 1; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1.5px solid rgba(34,211,238,0.2); background: #1e293b; color: #94a3b8; cursor: pointer; transition: all 0.12s; }
   .treatment-btn.active { border-color: #22d3ee; background: rgba(34,211,238,0.1); color: #22d3ee; }
 
@@ -377,6 +389,10 @@
             <div style="font-size:15px;font-weight:700">Hybrid</div>
             <div style="font-size:11px;font-weight:400;opacity:0.7;margin-top:2px">Security + Privacy</div>
           </button>
+          <button type="button" onclick="selectMethod('Agentic')" id="mb-Agentic" class="method-btn" style="flex:1;padding:10px 0;border-radius:12px;font-size:13px;font-weight:600;border:2px solid rgba(34,211,238,0.2);background:transparent;color:#94a3b8;cursor:pointer">
+            <div style="font-size:15px;font-weight:700">Agentic AI</div>
+            <div style="font-size:11px;font-weight:400;opacity:0.7;margin-top:2px">OWASP Top 10 2026</div>
+          </button>
         </div>
         <input type="hidden" id="inp-method" value="STRIDE">
       </div>
@@ -483,7 +499,7 @@
   function selectMethod(m) {
     selectedMethod = m;
     document.getElementById('inp-method').value = m;
-    ['STRIDE','LINDDUN','Hybrid'].forEach(function(id) {
+    ['STRIDE','LINDDUN','Hybrid','Agentic'].forEach(function(id) {
       var btn = document.getElementById('mb-'+id);
       if (!btn) return;
       if (id === m) {
@@ -527,6 +543,18 @@
       {key:'Di', label:'Di - Disclosure of Info',  badgeCls:'linddun-Di', group:'LINDDUN', examples:['PII returned in API response unnecessarily','Sensitive data cached in browser history','Health data visible to unauthorized third party']},
       {key:'U',  label:'U - Unawareness',          badgeCls:'linddun-U',  group:'LINDDUN', examples:['User unaware data shared with analytics partners','No privacy notice before data collection','Consent buried in terms of service document']},
       {key:'Nc', label:'Nc - Non-compliance',      badgeCls:'linddun-Nc', group:'LINDDUN', examples:['Personal data retained beyond GDPR retention limit','No right-to-erasure mechanism implemented','Missing data processing agreement with processor']}
+    ],
+    'Agentic': [
+      {key:'ASI01', label:'ASI01 - Agent Goal Hijack',               badgeCls:'asi-01', examples:['Direct prompt injection overrides system prompt instructions','Indirect prompt injection via retrieved document alters agent workflow','Cross-agent goal propagation corrupts multi-agent system goals']},
+      {key:'ASI02', label:'ASI02 - Tool Misuse & Exploitation',       badgeCls:'asi-02', examples:['Agent passes unvalidated parameters to external REST API','Tool execution loop triggers unauthorized batch database deletion','Agent uses admin terminal tool beyond scope of requested task']},
+      {key:'ASI03', label:'ASI03 - Identity & Privilege Abuse',      badgeCls:'asi-03', examples:['Agent inherits user elevated privileges and exposes restricted files','Shared service token reused across multi-tenant agent execution','Agent bypasses IAM restrictions using delegated service account']},
+      {key:'ASI04', label:'ASI04 - Agentic Supply Chain',             badgeCls:'asi-04', examples:['Poisoned vector store data corrupts agent memory during retrieval','Malicious third-party tool definition injects backdoor into workflow','Pre-trained model weights contain hidden prompt backdoor']},
+      {key:'ASI05', label:'ASI05 - Unexpected Code Execution',       badgeCls:'asi-05', examples:['Agent generates and executes un-sanitized Python code in shell','Code execution tool allows reverse shell establishment','Dynamic code generation bypasses container sandbox boundary']},
+      {key:'ASI06', label:'ASI06 - Memory & Context Poisoning',      badgeCls:'asi-06', examples:['Attacker injects false facts into agent persistent vector database','Context window stuffing forces agent to ignore safety guardrails','State manipulation corrupts long-term agent behavioral history']},
+      {key:'ASI07', label:'ASI07 - Insecure Inter-Agent Comm',      badgeCls:'asi-07', examples:['Unencrypted message channel between sub-agents allows eavesdropping','Sub-agent spoofing injects unauthorized instructions into swarm','Lack of authentication in agent-to-agent RPC protocol']},
+      {key:'ASI08', label:'ASI08 - Cascading Agent Failures',        badgeCls:'asi-08', examples:['Failure in primary planner agent propagates invalid state to worker sub-agents','Infinite delegation loop between sub-agents exhausts API quota','Uncaught exception in tool output crashes complete multi-agent cluster']},
+      {key:'ASI09', label:'ASI09 - Human-Agent Trust Exploitation',  badgeCls:'asi-09', examples:['Agent convincingly hallucinates approval confirmation from manager','Social engineering via synthetic agent voice/text output','Agent tricks human operator into approving sensitive wire transfer']},
+      {key:'ASI10', label:'ASI10 - Rogue Agents',                   badgeCls:'asi-10', examples:['Autonomous goal drift causes agent to act outside original policy','Agent creates hidden persistent sub-tasks to evade termination','Agent autonomously acquires external API access to continue operation']}
     ]
   };
 
@@ -793,7 +821,8 @@
       var descs = {
         'STRIDE': 'Security assessment — work through each category, add threats, set likelihood and impact.',
         'LINDDUN': 'Privacy assessment — identify how personal data could be misused or exposed.',
-        'Hybrid': 'Hybrid assessment — security + privacy threats combined.'
+        'Hybrid': 'Hybrid assessment — security + privacy threats combined.',
+        'Agentic': 'OWASP Top 10 for Agentic Applications (2026) — assess autonomous AI agent, tool, memory, and multi-agent threats.'
       };
       methodDesc.textContent = descs[method] || 'Work through each category and record threats.';
     }
@@ -1025,7 +1054,7 @@
     const {jsPDF} = window.jspdf;
     const doc = new jsPDF();
     doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.setTextColor(226,232,240);
-    doc.text('STRIDE Threat Assessment', 14, 22);
+    doc.text(`${(M.methodology || 'STRIDE')} Threat Assessment`, 14, 22);
     doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
     doc.text(`${M.name}`, 14, 30);
     doc.text(`Assessor: ${M.assessor||'N/A'} · Created: ${M.created} · Generated: ${new Date().toLocaleDateString()}`, 14, 35);
