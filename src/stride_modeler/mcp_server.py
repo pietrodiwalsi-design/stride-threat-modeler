@@ -213,6 +213,29 @@ TOOLS = [
             "properties": {}
         }
     },
+    {
+        "name": "export_assessment",
+        "description": "Exports the complete assessment into the shared JSON format v1.0 (with library/rules/matrix versions, components, facts, vulnerabilities with lineage, and decisions).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "assessment_id": {"type": "string"}
+            },
+            "required": ["assessment_id"]
+        }
+    },
+    {
+        "name": "generate_assessment_report",
+        "description": "Renders the interactive HTML threat model report for an assessment, including proposal vs rating comparisons, LLM provenance, and mandatory decisions table.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "assessment_id": {"type": "string"},
+                "output_path": {"type": "string", "description": "Optional local file path to save HTML"}
+            },
+            "required": ["assessment_id"]
+        }
+    },
     # -------------------------------------------------------------------------
     # LEGACY / BATCH COMPATIBILITY TOOLS
     # -------------------------------------------------------------------------
@@ -493,6 +516,20 @@ def handle_request(req):
                 for cat_enum, mits in DORA_MITIGATION_CATALOG.items():
                     catalog[cat_enum.value] = [m.model_dump() for m in mits]
                 return {"jsonrpc": "2.0", "id": req_id, "result": {"content": [{"type": "text", "text": _compact_json(catalog)}], "isError": False}}
+
+            # 14. export_assessment
+            elif tool_name == "export_assessment":
+                aid = args.get("assessment_id")
+                from stride_modeler.exporter import AssessmentExporter
+                export_data = AssessmentExporter.export_assessment(aid, storage=_storage, evaluator=_evaluator)
+                return {"jsonrpc": "2.0", "id": req_id, "result": {"content": [{"type": "text", "text": _compact_json(export_data)}], "isError": False}}
+
+            # 15. generate_assessment_report
+            elif tool_name == "generate_assessment_report":
+                aid = args.get("assessment_id")
+                output_path = args.get("output_path")
+                html_out = STRIDEDashboardGenerator.generate_assessment_html(aid, storage=_storage, evaluator=_evaluator, out_path=output_path)
+                return {"jsonrpc": "2.0", "id": req_id, "result": {"content": [{"type": "text", "text": f"HTML assessment report generated for {aid}"}], "html": html_out[:500] + "...", "isError": False}}
 
             # -----------------------------------------------------------------
             # LEGACY TOOLS

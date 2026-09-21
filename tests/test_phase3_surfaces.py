@@ -30,6 +30,7 @@ def test_mcp_tools_list_contains_stateful_suite():
         "derive_vulnerabilities", "get_rating_proposal", "set_rating",
         "add_llm_finding", "confirm_finding", "check_completeness",
         "get_assessment", "get_risk_matrix", "get_mitigation_catalog",
+        "export_assessment", "generate_assessment_report",
         "generate_stride_threat_model", "suggest_dora_mitigations", "generate_threat_model_html_report"
     }
     assert expected_tools.issubset(tools)

@@ -190,6 +190,42 @@ def cmd_show(args):
     }, indent=2, ensure_ascii=False))
 
 
+def cmd_report(args):
+    storage, evaluator, sm = get_cli_engine()
+    out_path = args.output or f"rapport_{args.assessment_id}.html"
+    try:
+        html_out = STRIDEDashboardGenerator.generate_assessment_html(
+            assessment_id=args.assessment_id,
+            storage=storage,
+            evaluator=evaluator,
+            out_path=out_path
+        )
+        print(f"✅ HTML Rapport gegenereerd voor {args.assessment_id}: {out_path}")
+    except ValueError as ve:
+        print(f"❌ Fout: {ve}")
+        sys.exit(1)
+
+
+def cmd_export(args):
+    storage, evaluator, sm = get_cli_engine()
+    from stride_modeler.exporter import AssessmentExporter
+    try:
+        data = AssessmentExporter.export_assessment(
+            assessment_id=args.assessment_id,
+            storage=storage,
+            evaluator=evaluator
+        )
+        if args.output:
+            with open(args.output, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            print(f"✅ Assessment geëxporteerd naar {args.output} (Schema v1.0)")
+        else:
+            print(json.dumps(data, indent=2, ensure_ascii=False))
+    except ValueError as ve:
+        print(f"❌ Fout: {ve}")
+        sys.exit(1)
+
+
 def _print_step(step: dict):
     fase = step.get("fase", "")
     print(f"\n👉 [Stap: {fase.upper()}] (rev {step.get('rev', 1)} | Resterend: {step.get('resterend', 0)})")
