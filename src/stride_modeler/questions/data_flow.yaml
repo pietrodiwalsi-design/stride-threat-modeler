@@ -57,3 +57,43 @@ questions:
       - nr: 4
         label: "Weet ik niet"
         facts: { message_integrity: unknown }
+
+  - id: df-protocol-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Welk netwerkprotocol wordt gebruikt voor transport over deze flow?"
+    bron: "ASVS V9.2.1"
+    opties:
+      - nr: 1
+        label: "HTTPS / gRPC over HTTP/2 met gestandaardiseerde REST/Protobuf schema's"
+        facts: { flow_protocol: modern_structured_http }
+      - nr: 2
+        label: "Oude binaire RPC / SOAP / RMI / Corba"
+        facts: { flow_protocol: legacy_binary_rpc }
+      - nr: 3
+        label: "Directe message queue koppeling (Kafka / RabbitMQ met TLS + auth)"
+        facts: { flow_protocol: authenticated_message_broker }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { flow_protocol: unknown }
+
+  - id: df-seg-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Is er firewalling / network segmentation actief op deze specifieke flow?"
+    bron: "DORA art. 9(3)"
+    opties:
+      - nr: 1
+        label: "Ja, micro-segmentatie / Dedicated Security Group & egress filtering"
+        facts: { network_segmentation: microsegmented_strict }
+      - nr: 2
+        label: "Alleen grove netwerkfirewall (vrij verkeer binnen subnet)"
+        facts: { network_segmentation: coarse_subnet }
+      - nr: 3
+        label: "Geen segmentatie / Flat network"
+        facts: { network_segmentation: flat_network }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { network_segmentation: unknown }

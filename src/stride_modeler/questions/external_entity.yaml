@@ -63,3 +63,43 @@ questions:
       - nr: 4
         label: "Weet ik niet"
         facts: { session_management: unknown }
+
+  - id: ee-ip-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Wordt IP-allowlisting of mTLS afgedwongen voor inkomend partnerverkeer?"
+    bron: "ASVS V1.1.5"
+    opties:
+      - nr: 1
+        label: "Ja, strikte IP allowlist en wederzijdse mTLS certificaten"
+        facts: { ingress_restriction: ip_mtls_enforced }
+      - nr: 2
+        label: "Alleen IP allowlist of alleen mTLS"
+        facts: { ingress_restriction: single_restriction }
+      - nr: 3
+        label: "Geen netwerkrestricties (openbaar bereikbaar)"
+        facts: { ingress_restriction: none }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { ingress_restriction: unknown }
+
+  - id: ee-rot-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Hoe vaak worden API-credentials en certificaten van deze entiteit geroteerd?"
+    bron: "ASVS V2.10.4"
+    opties:
+      - nr: 1
+        label: "Geautomatiseerd met een maximale levensduur van 90 dagen"
+        facts: { credential_rotation: automated_90d }
+      - nr: 2
+        label: "Jaarlijks handmatig of alleen bij incidenten"
+        facts: { credential_rotation: annual_or_incident }
+      - nr: 3
+        label: "Nooit / Statische onbeperkte sleutels"
+        facts: { credential_rotation: never }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { credential_rotation: unknown }

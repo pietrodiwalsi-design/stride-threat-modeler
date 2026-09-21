@@ -100,3 +100,63 @@ questions:
       - nr: 4
         label: "Weet ik niet"
         facts: { process_logging: unknown }
+
+  - id: pr-secrets-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Hoe beheert het proces runtime secrets (API keys, DB tokens, private keys)?"
+    bron: "ASVS V14.2.1"
+    opties:
+      - nr: 1
+        label: "Geheugeninjectie via KMS / HashiCorp Vault / Cloud Secret Manager met rotatie"
+        facts: { secret_management: vault_injected }
+      - nr: 2
+        label: "Statische omgevingsvariabelen (.env / config files)"
+        facts: { secret_management: static_env }
+      - nr: 3
+        label: "Hardcoded in broncode / container image"
+        facts: { secret_management: hardcoded }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { secret_management: unknown }
+
+  - id: pr-dep-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Hoe worden third-party software dependencies en kwetsbaarheden gemonitord?"
+    bron: "DORA art. 28(2)"
+    opties:
+      - nr: 1
+        label: "Geautomatiseerde CI/CD SCA scanning (Snyk/Trivy) met build blocking bij High/Crit"
+        facts: { dependency_sca: automated_blocking }
+      - nr: 2
+        label: "Periodieke handmatige review / Geen automatische blokkades"
+        facts: { dependency_sca: manual_periodic }
+      - nr: 3
+        label: "Geen dependency scanning ingericht"
+        facts: { dependency_sca: none }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { dependency_sca: unknown }
+
+  - id: pr-memory-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Is de runtime memory-safe of beschermd tegen buffer overflows / memory leaks?"
+    bron: "ASVS V14.1.2"
+    opties:
+      - nr: 1
+        label: "Memory-safe taal / Runtime (Rust, Python, Java, Go, C#) met runtime hardening"
+        facts: { memory_safety: memory_safe_runtime }
+      - nr: 2
+        label: "C/C++ legacy code met ASLR/DEP/stack canaries actief"
+        facts: { memory_safety: legacy_compiled_hardened }
+      - nr: 3
+        label: "C/C++ legacy code zonder specifieke compiler hardening"
+        facts: { memory_safety: unhardened_native }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { memory_safety: unknown }
