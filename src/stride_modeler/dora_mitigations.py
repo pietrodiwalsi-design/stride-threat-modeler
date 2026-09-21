@@ -1,5 +1,5 @@
 """
-DORA & NIST CSF 2.0 Mitigations mapping for STRIDE categories.
+DORA & NIST CSF 2.0 / ISO 27001:2022 Mitigations mapping for STRIDE categories.
 """
 
 from typing import Dict, List
@@ -15,7 +15,7 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             framework_mapping={
                 "DORA": "Art. 9(2) - Identification & Authentication Controls",
                 "NIST_CSF": "PR.AA-01 / PR.AA-05",
-                "ISO27001": "A.9.4.2"
+                "ISO27001": "A.8.5"
             },
             status="Open"
         ),
@@ -26,7 +26,7 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             framework_mapping={
                 "DORA": "Art. 9(2) - Access Rights & Identity Management",
                 "NIST_CSF": "PR.AA-02",
-                "ISO27001": "A.9.4.3"
+                "ISO27001": "A.8.5"
             },
             status="Open"
         )
@@ -39,7 +39,7 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             framework_mapping={
                 "DORA": "Art. 9(4)(b) - Data Integrity & Cryptographic Protection",
                 "NIST_CSF": "PR.DS-01 / PR.DS-02",
-                "ISO27001": "A.10.1.1"
+                "ISO27001": "A.8.24"
             },
             status="Open"
         ),
@@ -48,9 +48,9 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             title="Immutable Audit Logging & File Integrity Monitoring (FIM)",
             description="Employ write-once-read-many (WORM) storage and runtime FIM for sensitive code and configurations.",
             framework_mapping={
-                "DORA": "Art. 12(1) - ICT Incident Recording & Logging",
+                "DORA": "Art. 10(2)-(3), plus art. 9(4)(b)",
                 "NIST_CSF": "PR.PS-04 / DE.CM-01",
-                "ISO27001": "A.12.4.1"
+                "ISO27001": "A.8.15"
             },
             status="Open"
         )
@@ -61,9 +61,9 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             title="Centralized Non-Repudiation Audit Logs with NTP Sync",
             description="Sign and timestamp transactions with synchronized Stratum-1 time servers to ensure non-repudiation.",
             framework_mapping={
-                "DORA": "Art. 12(2) - Reliable Log Collection & Time Synchronization",
+                "DORA": "Art. 10(3), plus art. 17(1)",
                 "NIST_CSF": "PR.PS-04 / DE.AE-03",
-                "ISO27001": "A.12.4.4"
+                "ISO27001": "A.8.17"
             },
             status="Open"
         )
@@ -76,7 +76,7 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             framework_mapping={
                 "DORA": "Art. 9(4)(c) - Encryption of Data in Transit and at Rest",
                 "NIST_CSF": "PR.DS-01 / PR.DS-02",
-                "ISO27001": "A.10.1.2"
+                "ISO27001": "A.8.24"
             },
             status="Open"
         ),
@@ -87,7 +87,7 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             framework_mapping={
                 "DORA": "Art. 9(4)(a) - Data Protection & Access Segregation",
                 "NIST_CSF": "PR.DS-05",
-                "ISO27001": "A.13.2.1"
+                "ISO27001": "A.5.14"
             },
             status="Open"
         )
@@ -100,7 +100,7 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             framework_mapping={
                 "DORA": "Art. 11(1) - ICT Business Continuity Policy & Resiliency",
                 "NIST_CSF": "PR.IR-01 / PR.PS-02",
-                "ISO27001": "A.17.1.1"
+                "ISO27001": "A.5.29 / A.5.30"
             },
             status="Open"
         ),
@@ -111,7 +111,7 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             framework_mapping={
                 "DORA": "Art. 11(2) - Redundancy & Capacity Planning",
                 "NIST_CSF": "PR.IR-02",
-                "ISO27001": "A.12.1.3"
+                "ISO27001": "A.8.6"
             },
             status="Open"
         )
@@ -124,7 +124,7 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             framework_mapping={
                 "DORA": "Art. 9(1) - Access Control & Privilege Management",
                 "NIST_CSF": "PR.AA-05",
-                "ISO27001": "A.9.1.2"
+                "ISO27001": "A.5.15 / A.8.3"
             },
             status="Open"
         ),
@@ -135,7 +135,7 @@ DORA_MITIGATION_CATALOG: Dict[STRIDECategory, List[Mitigation]] = {
             framework_mapping={
                 "DORA": "Art. 9(3) - Secure System Architecture & Isolation",
                 "NIST_CSF": "PR.PS-01",
-                "ISO27001": "A.14.2.5"
+                "ISO27001": "A.8.27"
             },
             status="Open"
         )

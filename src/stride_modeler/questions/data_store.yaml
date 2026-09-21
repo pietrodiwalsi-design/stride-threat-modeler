@@ -1,0 +1,203 @@
+library_version: "1.0.0"
+component_type: data_store
+questions:
+  - id: ds-class-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Welke datasoort staat erin?"
+    bron: "ASVS V1.8.1"
+    opties:
+      - nr: 1
+        label: "Openbare data / Publiek"
+        facts: { data_class: public }
+      - nr: 2
+        label: "Interne bedrijfsdata"
+        facts: { data_class: internal }
+      - nr: 3
+        label: "Vertrouwelijke persoonsgegevens (PII)"
+        facts: { data_class: pii }
+      - nr: 4
+        label: "Bijzondere categorie persoonsgegevens / Medisch / Financieel"
+        facts: { data_class: special_category }
+      - nr: 5
+        label: "Weet ik niet"
+        facts: { data_class: unknown }
+
+  - id: ds-reach-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Vanaf welk netwerk is de store bereikbaar?"
+    bron: "ASVS V1.1.4"
+    opties:
+      - nr: 1
+        label: "Uitsluitend intern / Geïsoleerd backend netwerk"
+        facts: { network_exposure: internal_isolated }
+      - nr: 2
+        label: "Intern bedrijfsnetwerk / DMZ"
+        facts: { network_exposure: internal_dmz }
+      - nr: 3
+        label: "Direct vanaf internet (met authenticatie)"
+        facts: { network_exposure: internet_auth }
+      - nr: 4
+        label: "Publiek internet zonder netwerkrestricties"
+        facts: { network_exposure: internet_public }
+      - nr: 5
+        label: "Weet ik niet"
+        facts: { network_exposure: unknown }
+
+  - id: ds-access-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Wie kan deze datastore rechtstreeks benaderen buiten de applicatie om?"
+    bron: "ASVS V1.2.2"
+    opties:
+      - nr: 1
+        label: "Alleen de applicatie"
+        facts: { direct_access: app_only }
+      - nr: 2
+        label: "Applicatie + DBA's / Beheerders"
+        facts: { direct_access: privileged_humans }
+      - nr: 3
+        label: "Meerdere systemen / Koppelingen"
+        facts: { direct_access: multiple_systems }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { direct_access: unknown }
+
+  - id: ds-authn-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Hoe bewijst de applicatie wie zij is tegenover deze store?"
+    bron: "ASVS V2.10"
+    opties:
+      - nr: 1
+        label: "mTLS certificaten / Cloud IAM IAM-rollen (zonder hardcoded secrets)"
+        facts: { db_auth: strong_iam_mtls }
+      - nr: 2
+        label: "Dedicated service account met uniek wachtwoord uit secret vault"
+        facts: { db_auth: vault_credentials }
+      - nr: 3
+        label: "Gedeeld wachtwoord / Hardcoded connection string"
+        facts: { db_auth: shared_secret }
+      - nr: 4
+        label: "Geen authenticatie vereist"
+        facts: { db_auth: none }
+      - nr: 5
+        label: "Weet ik niet"
+        facts: { db_auth: unknown }
+
+  - id: ds-attrib-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Kan achteraf worden vastgesteld wíe een record wijzigde?"
+    bron: "ASVS V7.1"
+    opties:
+      - nr: 1
+        label: "Ja, volledige audit trail met gebruikers-ID en timestamp in onafhankelijke log"
+        facts: { change_audit: full_immutable }
+      - nr: 2
+        label: "Deels, alleen applicatie-level logging (niet bij directe DB toegang)"
+        facts: { change_audit: partial_app_only }
+      - nr: 3
+        label: "Nee, wijzigingen worden overschreven zonder wie/wanneer historie"
+        facts: { change_audit: none }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { change_audit: unknown }
+
+  - id: ds-logint-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Kan degene die records wijzigt ook het audit logboek aanpassen of wissen?"
+    bron: "ASVS V7.3.1"
+    geldt_voor: "change_audit in [full_immutable, partial_app_only]"
+    opties:
+      - nr: 1
+        label: "Nee, logs gaan real-time naar centrale WORM / SIEM opslag"
+        facts: { log_integrity: worm_siem }
+      - nr: 2
+        label: "Ja, DBA's / beheerders hebben schrijfrechten op logs"
+        facts: { log_integrity: mutable_by_admins }
+      - nr: 3
+        label: "Weet ik niet"
+        facts: { log_integrity: unknown }
+
+  - id: ds-copies-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Staan er kopieën van deze store buiten productie, zoals in test of analyse?"
+    bron: "ASVS V1.8.2"
+    opties:
+      - nr: 1
+        label: "Nee, alleen synthetische/geanonimiseerde data buiten productie"
+        facts: { nonprod_copies: no_synthetic_only }
+      - nr: 2
+        label: "Ja, volledige of gedeeltelijke productie-dumps in niet-productie"
+        facts: { nonprod_copies: yes }
+      - nr: 3
+        label: "Weet ik niet"
+        facts: { nonprod_copies: unknown }
+
+  - id: ds-egress-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Welke gegevens verlaten deze store richting externe derden of SaaS?"
+    bron: "ASVS V1.8.1"
+    opties:
+      - nr: 1
+        label: "Geen, strikt intern binnen het applicatiedomein"
+        facts: { egress_third_party: none }
+      - nr: 2
+        label: "Geminimaliseerde en geaggregeerde rapportagedata"
+        facts: { egress_third_party: aggregated }
+      - nr: 3
+        label: "Directe datastroom met PII of transactionele data naar externe partij"
+        facts: { egress_third_party: raw_pii_external }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { egress_third_party: unknown }
+
+  - id: ds-avail-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Wat gebeurt er met het bedrijfsproces als deze store een dag uitvalt?"
+    bron: "DORA art. 11"
+    opties:
+      - nr: 1
+        label: "Weinig impact, proces loopt offline door (RTO > 24u)"
+        facts: { availability_need: low_days }
+      - nr: 2
+        label: "Merkbare vertraging, maar geen directe klant- of financiële schade"
+        facts: { availability_need: medium_hours }
+      - nr: 3
+        label: "Kritieke processtilstand, acute financiële schade of toezichthouder-escalatie"
+        facts: { availability_need: critical_minutes }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { availability_need: unknown }
+
+  - id: ds-retention-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Hoe lang blijven de gegevens bewaard in deze store?"
+    bron: "AVG art. 5(1)(e)"
+    opties:
+      - nr: 1
+        label: "Conform wettelijke bewaartermijn met automatische purge/verwijdering"
+        facts: { retention_policy: automated_purge }
+      - nr: 2
+        label: "Onbepaalde tijd / Geen actieve opschoning ingericht"
+        facts: { retention_policy: indefinite_no_purge }
+      - nr: 3
+        label: "Weet ik niet"
+        facts: { retention_policy: unknown }

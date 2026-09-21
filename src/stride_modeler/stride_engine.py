@@ -3,7 +3,7 @@ Core STRIDE Threat Modeling Engine with Continuous Threat Modeling workflow.
 """
 
 from typing import List, Dict, Any, Optional
-import uuid
+import hashlib
 from stride_modeler.models import (
     Component, ComponentType, DataFlow, Threat, Mitigation,
     STRIDECategory, RiskLevel, ThreatModelReport
@@ -43,6 +43,12 @@ STRIDE_APPLICABILITY: Dict[ComponentType, List[STRIDECategory]] = {
 }
 
 
+def generate_deterministic_threat_id(component_id: str, category: STRIDECategory, rule_id: str = "GENERIC", lib_version: str = "1.0.0") -> str:
+    """Generates a deterministic 8-char hex threat ID based on sha256 hash."""
+    raw = f"{component_id}:{category.value}:{rule_id}:{lib_version}".encode("utf-8")
+    return f"THR-{hashlib.sha256(raw).hexdigest()[:8].upper()}"
+
+
 class STRIDEThreatEngine:
     """
     Continuous STRIDE Threat Modeling Engine.
@@ -68,7 +74,7 @@ class STRIDEThreatEngine:
         applicable_categories = STRIDE_APPLICABILITY.get(component.type, [])
 
         for cat in applicable_categories:
-            threat_id = f"THR-{component.id[:8]}-{cat.name[:3]}-{uuid.uuid4().hex[:4].upper()}"
+            threat_id = generate_deterministic_threat_id(component.id, cat, f"RULE-{cat.name[:3]}")
             title = f"{cat.value} Threat on {component.name}"
             
             # Base likelihood & impact
@@ -118,7 +124,7 @@ class STRIDEThreatEngine:
         flow_label = f"Flow {source_name} -> {target_name}"
 
         for cat in applicable_categories:
-            threat_id = f"THR-FLOW-{flow.id[:8]}-{cat.name[:3]}-{uuid.uuid4().hex[:4].upper()}"
+            threat_id = generate_deterministic_threat_id(flow.id, cat, f"RULE-FLOW-{cat.name[:3]}")
             title = f"{cat.value} on {flow_label}"
             
             likelihood = 3

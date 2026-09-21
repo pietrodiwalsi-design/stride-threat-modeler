@@ -1,0 +1,102 @@
+library_version: "1.0.0"
+component_type: process
+questions:
+  - id: pr-priv-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Onder welke privileges / identity draait dit proces?"
+    bron: "ASVS V1.1.1"
+    opties:
+      - nr: 1
+        label: "Strikt unprivileged dedicated service-account (Least Privilege / Sandboxed)"
+        facts: { execution_privilege: unprivileged_least_privilege }
+      - nr: 2
+        label: "Standaard gebruiker / Gedeelde runtime"
+        facts: { execution_privilege: standard_user }
+      - nr: 3
+        label: "Root / Administrator / Volledige cluster admin rechten"
+        facts: { execution_privilege: root_admin }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { execution_privilege: unknown }
+
+  - id: pr-input-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Hoe wordt invoer vanuit externe aanroepers of dataflows gevalideerd?"
+    bron: "ASVS V5.1.1"
+    opties:
+      - nr: 1
+        label: "Strikte schema-validatie (allow-list, type/length checking vóór parsing)"
+        facts: { input_validation: strict_allowlist_schema }
+      - nr: 2
+        label: "Basale validatie / Framework defaults (geen allow-list)"
+        facts: { input_validation: basic_framework }
+      - nr: 3
+        label: "Geen gestructureerde validatie (direct doorgeven aan runtime/query)"
+        facts: { input_validation: none }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { input_validation: unknown }
+
+  - id: pr-authz-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Hoe controleert het proces autorisaties bij elke individuele actie?"
+    bron: "ASVS V4.1.1"
+    opties:
+      - nr: 1
+        label: "Centraal afgedwongen policy engine / ABAC per object (IDOR-preventie)"
+        facts: { authz_enforcement: object_level_abac }
+      - nr: 2
+        label: "Alleen op perimeter / role-check bij endpoint binnenkomst"
+        facts: { authz_enforcement: endpoint_perimeter_only }
+      - nr: 3
+        label: "Geen autorisatiecontrole na binnenkomst"
+        facts: { authz_enforcement: none }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { authz_enforcement: unknown }
+
+  - id: pr-ratelimit-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Zijn er rate limiting en concurrency-beperkingen actief op dit proces?"
+    bron: "DORA art. 11(2)"
+    opties:
+      - nr: 1
+        label: "Ja, gedistribueerde token bucket per IP/gebruiker + circuit breakers"
+        facts: { rate_limiting: distributed_circuit_breaker }
+      - nr: 2
+        label: "Eenvoudige rate limit op web gateway (geen interne backpressure)"
+        facts: { rate_limiting: gateway_only }
+      - nr: 3
+        label: "Geen rate limiting / Ongelimiteerde verwerking"
+        facts: { rate_limiting: none }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { rate_limiting: unknown }
+
+  - id: pr-log-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Wat logt dit proces bij security-gebeurtenissen en mislukte acties?"
+    bron: "ASVS V7.1.1"
+    opties:
+      - nr: 1
+        label: "Gestructureerde audit events met correlatie-ID en actor (zonder secrets/PII)"
+        facts: { process_logging: structured_sanitized }
+      - nr: 2
+        label: "Ongefilterde debug logs (mogelijke secret/PII logging)"
+        facts: { process_logging: unfiltered_debug }
+      - nr: 3
+        label: "Geen of minimale logging"
+        facts: { process_logging: minimal_none }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { process_logging: unknown }

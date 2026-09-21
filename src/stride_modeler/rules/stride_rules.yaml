@@ -1,0 +1,285 @@
+rules_version: "1.0.0"
+library_version: "1.0.0"
+rules:
+  # ==========================================
+  # DATA STORE RULES (Repudiation, Information Disclosure, Tampering, DoS)
+  # ==========================================
+  - id: R-DS-REPUD-01
+    component_type: data_store
+    when: "direct_access in [privileged_humans, multiple_systems] and change_audit in [none, partial_app_only]"
+    stride: Repudiation
+    titel: "Wijzigingen in {component} zijn niet herleidbaar tot een individu"
+    toelichting: >
+      Bevoorrechte gebruikers of externe systemen kunnen records wijzigen zonder dat achteraf
+      onafhankelijk kan worden vastgesteld wie dat deed.
+    bron: "ASVS V7.1.3"
+    mitigaties: [MIT-DORA-NONREP-01, MIT-DORA-INT-02]
+    likelihood_base: 4
+    impact_modifier: "data_class"
+
+  - id: R-DS-INFO-01
+    component_type: data_store
+    when: "network_exposure in [internet_public, internet_auth] and data_class in [pii, special_category]"
+    stride: "Information Disclosure"
+    titel: "Vertrouwelijke persoonsgegevens in {component} zijn extern blootgesteld"
+    toelichting: >
+      De datastore met gevoelige persoonsgegevens is direct bereikbaar vanaf het internet,
+      wat het aanvalsoppervlak voor datalekken significant vergroot.
+    bron: "ASVS V1.1.4"
+    mitigaties: [MIT-DORA-CONF-01, MIT-DORA-CONF-02]
+    likelihood_base: 4
+    impact_modifier: "data_class"
+
+  - id: R-DS-INFO-02
+    component_type: data_store
+    when: "nonprod_copies == yes and data_class in [pii, special_category]"
+    stride: "Information Disclosure"
+    titel: "Productie-persoonsgegevens staan ongefilterd in niet-productieomgevingen"
+    toelichting: >
+      Kopieën van de datastore bevinden zich in test- of analyseomgevingen met minder strikte toegangscontrole.
+    bron: "ASVS V1.8.2"
+    mitigaties: [MIT-DORA-CONF-02]
+    likelihood_base: 4
+    impact_modifier: "data_class"
+
+  - id: R-DS-TAMP-01
+    component_type: data_store
+    when: "db_auth in [shared_secret, none]"
+    stride: Tampering
+    titel: "Zwakke of ontbrekende authenticatie maakt ongeautoriseerde datamanipulatie mogelijk in {component}"
+    toelichting: >
+      De store gebruikt gedeelde wachtwoorden of vereist geen authenticatie, waardoor integriteit niet gewaarborgd is.
+    bron: "ASVS V2.10"
+    mitigaties: [MIT-DORA-AUTH-01, MIT-DORA-INT-01]
+    likelihood_base: 4
+    impact_modifier: "data_class"
+
+  - id: R-DS-DOS-01
+    component_type: data_store
+    when: "availability_need in [critical_minutes, medium_hours] and network_exposure in [internet_public, internet_auth]"
+    stride: "Denial of Service"
+    titel: "Kritieke afhankelijkheid van {component} met direct extern aanvalsoppervlak"
+    toelichting: >
+      Uitval van de datastore veroorzaakt directe processtilstand terwijl de component blootgesteld is aan netwerkaanvallen.
+    bron: "DORA art. 11(1)"
+    mitigaties: [MIT-DORA-RES-01, MIT-DORA-RES-02]
+    likelihood_base: 3
+    impact_modifier: "availability_need"
+
+  - id: R-DS-PRIV-RET-01
+    component_type: data_store
+    when: "retention_policy == indefinite_no_purge and data_class in [pii, special_category]"
+    stride: "Information Disclosure"
+    titel: "Overschrijding bewaartermijnen persoonsgegevens in {component}"
+    toelichting: >
+      Er is geen geautomatiseerd opschoonproces ingericht voor verlopen persoonsgegevens.
+    bron: "AVG art. 5(1)(e)"
+    mitigaties: [MIT-DORA-CONF-02]
+    likelihood_base: 3
+    impact_modifier: "data_class"
+
+  - id: R-DS-UNKNOWN-01
+    component_type: data_store
+    when: "direct_access == unknown"
+    stride: Repudiation
+    titel: "Toegangspad en beheerstructuur tot {component} is onbekend"
+    toelichting: >
+      Het is onduidelijk wie buiten de applicatie om direct toegang heeft tot de data.
+    status: onbekend
+    bron: "Eigen risicoanalyse"
+    mitigaties: [MIT-DORA-NONREP-01]
+    likelihood_base: 3
+    impact_modifier: "data_class"
+
+  - id: R-DS-UNKNOWN-02
+    component_type: data_store
+    when: "data_class == unknown"
+    stride: "Information Disclosure"
+    titel: "Dataclassificatie van {component} is niet vastgesteld"
+    toelichting: >
+      De gevoeligheid van de opgeslagen data is onbekend, waardoor adequate beschermingsmaatregelen niet getoetst kunnen worden.
+    status: onbekend
+    bron: "Eigen risicoanalyse"
+    mitigaties: [MIT-DORA-CONF-01]
+    likelihood_base: 3
+    impact_modifier: "default"
+
+  # ==========================================
+  # PROCESS RULES (Spoofing, Tampering, Elevation, DoS)
+  # ==========================================
+  - id: R-PR-ELEV-01
+    component_type: process
+    when: "execution_privilege == root_admin"
+    stride: "Elevation of Privilege"
+    titel: "Proces {component} draait met buitensporige root/beheerdersrechten"
+    toelichting: >
+      Bij compromittering van de applicatie verkrijgt een aanvaller direct volledige host/cluster-controle.
+    bron: "ASVS V1.1.1"
+    mitigaties: [MIT-DORA-RBAC-01, MIT-DORA-RBAC-02]
+    likelihood_base: 4
+    impact_modifier: "is_crown_jewel"
+
+  - id: R-PR-TAMP-01
+    component_type: process
+    when: "input_validation in [none, basic_framework]"
+    stride: Tampering
+    titel: "Onvoldoende invoervalidatie in {component} maakt injectie en state-manipulatie mogelijk"
+    toelichting: >
+      Invoer van externe bronnen wordt zonder strikte allow-list verwerkt.
+    bron: "ASVS V5.1.1"
+    mitigaties: [MIT-DORA-INT-01]
+    likelihood_base: 4
+    impact_modifier: "is_crown_jewel"
+
+  - id: R-PR-ELEV-02
+    component_type: process
+    when: "authz_enforcement in [none, endpoint_perimeter_only]"
+    stride: "Elevation of Privilege"
+    titel: "Ontbreken van object-level autorisatiecontroles (BOLA/IDOR) in {component}"
+    toelichting: >
+      Het proces valideert rechten alleen op de perimeter en controleert objecteigenaarschap niet per individuele actie.
+    bron: "ASVS V4.1.1"
+    mitigaties: [MIT-DORA-RBAC-01]
+    likelihood_base: 4
+    impact_modifier: "is_crown_jewel"
+
+  - id: R-PR-DOS-01
+    component_type: process
+    when: "rate_limiting == none"
+    stride: "Denial of Service"
+    titel: "Ontbreken van rate limiting en concurrency-beperkingen op {component}"
+    toelichting: >
+      Het proces kan worden uitgeput door een hoog volume aan gelijktijdige verzoeken of zware payloads.
+    bron: "DORA art. 11(2)"
+    mitigaties: [MIT-DORA-RES-01, MIT-DORA-RES-02]
+    likelihood_base: 4
+    impact_modifier: "is_crown_jewel"
+
+  - id: R-PR-INFO-01
+    component_type: process
+    when: "process_logging == unfiltered_debug"
+    stride: "Information Disclosure"
+    titel: "Gevoelige gegevens of geheimen lekken via applicatie-debuglogs in {component}"
+    toelichting: >
+      Het proces logt ongefilterde payload-data inclusief potentiële tokens, wachtwoorden of PII.
+    bron: "ASVS V7.1.1"
+    mitigaties: [MIT-DORA-CONF-02]
+    likelihood_base: 3
+    impact_modifier: "data_class"
+
+  - id: R-PR-UNKNOWN-01
+    component_type: process
+    when: "input_validation == unknown"
+    stride: Tampering
+    titel: "Invoervalidatieregime van {component} is onbekend"
+    toelichting: >
+      Er is geen zekerheid over hoe het proces omgaat met malafide invoer.
+    status: onbekend
+    bron: "Eigen risicoanalyse"
+    mitigaties: [MIT-DORA-INT-01]
+    likelihood_base: 3
+    impact_modifier: "default"
+
+  # ==========================================
+  # EXTERNAL ENTITY RULES (Spoofing, Repudiation)
+  # ==========================================
+  - id: R-EE-SPOOF-01
+    component_type: external_entity
+    when: "entity_auth in [anonymous_none, static_key_single_factor]"
+    stride: Spoofing
+    titel: "Authenticatie van externe entiteit {component} is kwetsbaar voor identiteitsfraude"
+    toelichting: >
+      De externe entiteit gebruikt geen sterke phishing-resistente MFA of mTLS, waardoor credentials eenvoudig misbruikt kunnen worden.
+    bron: "ASVS V2.1.1"
+    mitigaties: [MIT-DORA-AUTH-01, MIT-DORA-AUTH-02]
+    likelihood_base: 4
+    impact_modifier: "entity_trust_tier"
+
+  - id: R-EE-SPOOF-02
+    component_type: external_entity
+    when: "session_management in [permanent_tokens, long_lived_no_revocation]"
+    stride: Spoofing
+    titel: "Tokens van {component} hebben onbeperkte levensduur zonder actieve revocatiemogelijkheid"
+    toelichting: >
+      Gecompromitteerde tokens blijven langdurig geldig en kunnen niet centraal ongeldig worden gemaakt.
+    bron: "ASVS V3.1.1"
+    mitigaties: [MIT-DORA-AUTH-02]
+    likelihood_base: 4
+    impact_modifier: "entity_trust_tier"
+
+  - id: R-EE-REPUD-01
+    component_type: external_entity
+    when: "entity_trust_tier == public_untrusted and entity_auth in [anonymous_none, static_key_single_factor]"
+    stride: Repudiation
+    titel: "Acties van ongetoetste externe partij {component} zijn niet herleidbaar"
+    toelichting: >
+      Transacties vanuit deze externe entiteit kunnen achteraf niet met zekerheid aan een rechtspersoon worden gekoppeld.
+    bron: "DORA art. 28"
+    mitigaties: [MIT-DORA-NONREP-01]
+    likelihood_base: 4
+    impact_modifier: "is_crown_jewel"
+
+  - id: R-EE-UNKNOWN-01
+    component_type: external_entity
+    when: "entity_auth == unknown"
+    stride: Spoofing
+    titel: "Authenticatiemechanisme van externe entiteit {component} is onbekend"
+    toelichting: >
+      Het is niet geverifieerd hoe externe gebruikers of partners worden geïdentificeerd.
+    status: onbekend
+    bron: "Eigen risicoanalyse"
+    mitigaties: [MIT-DORA-AUTH-01]
+    likelihood_base: 3
+    impact_modifier: "default"
+
+  # ==========================================
+  # DATA FLOW RULES (Tampering, Information Disclosure, DoS)
+  # ==========================================
+  - id: R-DF-INFO-01
+    component_type: data_flow
+    when: "transit_encryption == plaintext_none"
+    stride: "Information Disclosure"
+    titel: "Onversleuteld netwerktransport op dataflow {component}"
+    toelichting: >
+      Verkeer over deze flow wordt in plaintext verzonden en is kwetsbaar voor afluisteren en man-in-the-middle aanvallen.
+    bron: "ASVS V9.1.1"
+    mitigaties: [MIT-DORA-CONF-01]
+    likelihood_base: 5
+    impact_modifier: "data_class"
+
+  - id: R-DF-TAMP-01
+    component_type: data_flow
+    when: "crosses_trust_boundary == true and message_integrity in [none, transport_only]"
+    stride: Tampering
+    titel: "Ontbreken van end-to-end payload signing op trust boundary overgang {component}"
+    toelichting: >
+      Berichten die een vertrouwensgrens overschrijden worden niet individueel cryptografisch ondertekend tegen manipulatie.
+    bron: "ASVS V8.3.4"
+    mitigaties: [MIT-DORA-INT-01]
+    likelihood_base: 4
+    impact_modifier: "is_crown_jewel"
+
+  - id: R-DF-INFO-02
+    component_type: data_flow
+    when: "crosses_trust_boundary == true and transit_encryption in [tls_standard, plaintext_none] and data_class in [pii, special_category]"
+    stride: "Information Disclosure"
+    titel: "Gevoelige data passeert trust boundary zonder wederzijdse TLS authenticatie (mTLS)"
+    toelichting: >
+      De dataflow vervoert vertrouwelijke gegevens over een vertrouwensgrens zonder dat beide endpoints cryptografisch geauthenticeerd zijn.
+    bron: "ASVS V9.1.1"
+    mitigaties: [MIT-DORA-CONF-01, MIT-DORA-AUTH-01]
+    likelihood_base: 4
+    impact_modifier: "data_class"
+
+  - id: R-DF-UNKNOWN-01
+    component_type: data_flow
+    when: "transit_encryption == unknown"
+    stride: "Information Disclosure"
+    titel: "Transportencryptie van dataflow {component} is onbekend"
+    toelichting: >
+      Het is niet vastgesteld of data over de lijn versleuteld is.
+    status: onbekend
+    bron: "Eigen risicoanalyse"
+    mitigaties: [MIT-DORA-CONF-01]
+    likelihood_base: 3
+    impact_modifier: "default"

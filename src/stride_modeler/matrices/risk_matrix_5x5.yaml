@@ -1,0 +1,12 @@
+matrix_version: "1.0.0"
+description: "5x5 Risk Matrix mapping Exposure (rows 1-5) and Impact (columns 1-5) to Qualitative Risk Levels"
+
+# Row index = Exposure (1-5)
+# Column index = Impact (1-5)
+# Output levels: Laag, Midden, Hoog, Kritiek
+matrix:
+  1: [Laag, Laag, Laag, Midden, Midden]
+  2: [Laag, Laag, Midden, Midden, Hoog]
+  3: [Laag, Midden, Midden, Hoog, Hoog]
+  4: [Midden, Midden, Hoog, Hoog, Kritiek]
+  5: [Midden, Hoog, Hoog, Kritiek, Kritiek]

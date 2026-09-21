@@ -1,0 +1,59 @@
+library_version: "1.0.0"
+component_type: data_flow
+questions:
+  - id: df-cross-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Kruist deze dataflow een trust boundary (bijv. internet naar DMZ, of DMZ naar backend)?"
+    bron: "ASVS V1.1.2"
+    opties:
+      - nr: 1
+        label: "Nee, strikt binnen dezelfde geïsoleerde trust zone"
+        facts: { crosses_trust_boundary: false }
+      - nr: 2
+        label: "Ja, van lagere trust zone (internet/partner) naar hogere trust zone"
+        facts: { crosses_trust_boundary: true }
+      - nr: 3
+        label: "Weet ik niet"
+        facts: { crosses_trust_boundary: unknown }
+
+  - id: df-enc-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Welke encryptie / transportbeveiliging is actief op deze dataflow?"
+    bron: "ASVS V9.1.1"
+    opties:
+      - nr: 1
+        label: "TLS 1.3 met mTLS (Mutual Authentication) en PQC/sterke ciphers"
+        facts: { transit_encryption: tls13_mtls }
+      - nr: 2
+        label: "Standaard TLS 1.2/1.3 (alleen server-side certificaat)"
+        facts: { transit_encryption: tls_standard }
+      - nr: 3
+        label: "Onversleuteld plaintext (HTTP, clear TCP, plaintext RPC)"
+        facts: { transit_encryption: plaintext_none }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { transit_encryption: unknown }
+
+  - id: df-integrity-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Wordt payload integriteit cryptografisch gecontroleerd (payload signing / HMAC)?"
+    bron: "ASVS V8.3.4"
+    opties:
+      - nr: 1
+        label: "Ja, end-to-end digitale handtekening of HMAC per bericht/payload"
+        facts: { message_integrity: end_to_end_signed }
+      - nr: 2
+        label: "Alleen transport-level integriteit (TLS MAC)"
+        facts: { message_integrity: transport_only }
+      - nr: 3
+        label: "Geen integriteitscontrole"
+        facts: { message_integrity: none }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { message_integrity: unknown }

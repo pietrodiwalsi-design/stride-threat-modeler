@@ -1,0 +1,65 @@
+library_version: "1.0.0"
+component_type: external_entity
+questions:
+  - id: ee-auth-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Hoe authenticeert deze externe partij / gebruiker zich?"
+    bron: "ASVS V2.1.1"
+    opties:
+      - nr: 1
+        label: "Hardware security key (FIDO2/WebAuthn) of mTLS certificaat"
+        facts: { entity_auth: phishing_resistant_mfa_mtls }
+      - nr: 2
+        label: "Wachtwoord + TOTP / Push MFA"
+        facts: { entity_auth: password_mfa }
+      - nr: 3
+        label: "Statische API-key / Alleen wachtwoord zonder MFA"
+        facts: { entity_auth: static_key_single_factor }
+      - nr: 4
+        label: "Anoniem / Geen authenticatie"
+        facts: { entity_auth: anonymous_none }
+      - nr: 5
+        label: "Weet ik niet"
+        facts: { entity_auth: unknown }
+
+  - id: ee-trust-01
+    fase: elicitatie
+    depth_min: quick
+    steptype: relay
+    tekst: "Wat is het vertrouwensniveau en contractuele relatie van deze entiteit?"
+    bron: "DORA art. 28"
+    opties:
+      - nr: 1
+        label: "Intern geauditeerde medewerkers / Systemen onder direct beheer"
+        facts: { entity_trust_tier: internal_trusted }
+      - nr: 2
+        label: "Geverifieerde B2B-partner / SaaS met DORA/SOC2 assurance"
+        facts: { entity_trust_tier: verified_third_party }
+      - nr: 3
+        label: "Publieke eindgebruikers / Ongetoetste externe entiteiten"
+        facts: { entity_trust_tier: public_untrusted }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { entity_trust_tier: unknown }
+
+  - id: ee-session-01
+    fase: elicitatie
+    depth_min: standard
+    steptype: relay
+    tekst: "Hoe worden sessies en API-tokens beheerd na uitgifte?"
+    bron: "ASVS V3.1.1"
+    opties:
+      - nr: 1
+        label: "Kortlevende tokens (<15 min) met actieve revocatielijst / token introspection"
+        facts: { session_management: short_lived_revocable }
+      - nr: 2
+        label: "Langdurige JWT tokens (>24u) zonder server-side revocatiemogelijkheid"
+        facts: { session_management: long_lived_no_revocation }
+      - nr: 3
+        label: "Permanente tokens / Nooit verlopende API keys"
+        facts: { session_management: permanent_tokens }
+      - nr: 4
+        label: "Weet ik niet"
+        facts: { session_management: unknown }
